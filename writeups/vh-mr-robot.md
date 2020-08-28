@@ -21,6 +21,8 @@ _Authors Notes_
 > This VM has three keys hidden in different locations. Your goal is to find all three. Each key is progressively difficult to find. 
 > The VM isn't too difficult. There isn't any advanced exploitation or reverse engineering. The level is considered beginner-intermediate.
 
+![Mr Robot web site](\assets\images\vh_mr_robot\mr_robot_intro.gif)
+
 ## Initial recon
 
 __Target IP address: 192.168.56.134__
