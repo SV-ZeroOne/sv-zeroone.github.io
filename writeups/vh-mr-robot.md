@@ -271,7 +271,7 @@ The linpeas script highlights that the systems kernel version is a 99% Privilege
 
 It also highlights that nmap binary has its SUID bit set, this is another possible privilege escalation vector that is less intrusive than a kernel exploit which poses a risk of crashing the system! So we will try exploit this SUID bit to gain root access.
 
-![Linpeas SUID](\assets\images\vh_mr_robot\(mr_robot_priv_esc_linpeas_2.jpg)
+![Linpeas SUID](\assets\images\vh_mr_robot\mr_robot_priv_esc_linpeas_2.jpg)
 
 The following find command will find all files that have the SUID bit set.
 ```
