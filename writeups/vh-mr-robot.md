@@ -14,7 +14,7 @@ layout: default
 
 Hello Friend.
 
-Welcome to a write-up about hacking into the Mr. Robot vulnhub virtual machine (VM) image.
+Welcome to a write-up about hacking into the Mr. Robot themed vulnhub virtual machine (VM) image.
 
 _Authors Notes_
 > Based on the show, Mr. Robot. 
@@ -271,7 +271,7 @@ The linpeas script highlights that the systems kernel version is a 99% Privilege
 
 It also highlights that nmap binary has its SUID bit set, this is another possible privilege escalation vector that is less intrusive than a kernel exploit which poses a risk of crashing the system! So we will try exploit this SUID bit to gain root access.
 
-![Linpeas SUID]\assets\images\vh_mr_robot\(mr_robot_priv_esc_linpeas_2.jpg)
+![Linpeas SUID](\assets\images\vh_mr_robot\(mr_robot_priv_esc_linpeas_2.jpg)
 
 The following find command will find all files that have the SUID bit set.
 ```
@@ -280,7 +280,7 @@ find / -user root -perm -4000 -print 2>/dev/null
 
 Nmap has the ability to spawn an interactive shell so lets try that to get root access.
 
-*! Tip - [GTFOBins](http://gtfobins.github.io/gtfobins/nmap/) is a great resource of a curated list of Unix binaries that can be exploited by an attacker to bypass local security restrictions.
+* Tip - [GTFOBins](http://gtfobins.github.io/gtfobins/nmap/) is a great resource of a curated list of Unix binaries that can be exploited by an attacker to bypass local security restrictions.
 
 Execute the following commands to get root access!
 ```
@@ -307,8 +307,8 @@ We have gained root access and obtained the last flag/key thus completing the ha
 
 ## Summary
 
-This was a fun easy box that involved a bit of enumeration to find the pieces of information need to gain access and then escalate our privileges from daemon to robot to root.
-We could have simply used a Kernel exploit to jump from daemon to root but kernel exploits are considered inherently risky and should be considered as a last resort.
+This was a fun and easy box that involved a bit of enumeration to find the pieces of information needed to gain access and then escalate our privileges from daemon to robot to root.
+We could have simply used a kernel exploit to jump from daemon to root but kernel exploits are considered inherently risky and should be considered as a last resort.
 
 If you have not watched the show Mr Robot, I highly recommend it as it displays the most accurate depiction of hacking and the ideas explored in the show are revolutionary!
 
