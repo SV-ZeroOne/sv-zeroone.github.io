@@ -1,0 +1,13 @@
+# Generated output.
+_site
+.sass-cache
+.jekyll-cache/
+Gemfile.lock
+*.gem
+
+# Added when running `jekyll new PATH` or serving in incremental mode.
+.jekyll-metadata
+
+# Bundle's config.
+.bundle/
+vendor/
