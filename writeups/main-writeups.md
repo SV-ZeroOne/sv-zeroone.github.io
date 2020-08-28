@@ -9,6 +9,7 @@ This page contains links to write-ups I did about hacking various systems found 
 ## Vunlhub
 
 * [RickDiculouslyEasy](./vh_rickdiculouslyeasy.html)
+* [Mr. Robot](./vh-mr-robot.html)
 
 ## TryHackMe
 
