@@ -247,6 +247,8 @@ cat /home/robot/key-2-of-3.txt
 
 Now lets see if we can get the root access. Lets download the Linux local Privilege Escalation Awesome Script onto the machine and use that to find privilege escalation vectors.
 
+[LinPEAS github repo](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+
 Host the file on your attacking machine using a simple python http server and serve it to the victim via http and download with wget.
 ```bash
 # Start python web server where your linpeas.sh script is located.
