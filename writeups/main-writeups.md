@@ -8,7 +8,7 @@ This page contains links to write-ups I did about hacking various systems found 
 
 ## Vunlhub
 
-* [RickDiculouslyEasy](./writeups/vh_rickdiculouslyeasy.html)
+* [RickDiculouslyEasy](./vh_rickdiculouslyeasy.html)
 
 ## TryHackMe
 
