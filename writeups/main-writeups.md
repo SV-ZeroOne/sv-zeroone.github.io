@@ -13,5 +13,6 @@ This page contains links to write-ups I did about hacking various systems found 
 
 ## TryHackMe
 
+* [Steel Mountain](./thm-steel-mountain.html)
 
 ## HackTheBox
