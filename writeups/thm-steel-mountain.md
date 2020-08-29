@@ -362,4 +362,4 @@ For more information about the Privilege Escalation vector check these links out
 <iframe width="560" height="315" src="https://www.youtube.com/embed/67gYEK4FtzA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
-<img class="center_robot" alt="fsociety" src="/assets/images/vh_steel_mountain/f_society.png" width="50%" height="50%">
+<img alt="fsociety" src="/assets/images/vh_steel_mountain/f_society.png" width="50%" height="50%">
