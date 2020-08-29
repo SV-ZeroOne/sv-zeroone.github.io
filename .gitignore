@@ -11,3 +11,7 @@ Gemfile.lock
 # Bundle's config.
 .bundle/
 vendor/
+
+# Jekyll Tweet Cache
+
+.tweet-cache/

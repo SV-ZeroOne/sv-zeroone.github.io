@@ -3,3 +3,4 @@ description: Hacking and Penetration Testing Stuff
 show_downloads: false
 google_analytics:
 theme: jekyll-theme-hacker
+plugins: ['jekyll-twitter-plugin']
