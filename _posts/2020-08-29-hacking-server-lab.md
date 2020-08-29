@@ -1,7 +1,7 @@
 ---
 layout: post
 author: zero
-tags: hacking server hardware
+tags: hacking server hardware kali linux
 ---
 
 This guide entails a general overview of how to setup a hacking lab on a computer/server at home to practice hacking exercises using a software combination of Windows 10 Pro + Virtual Box + Kali Linux + VulnHub Virtual Machine Images.
@@ -136,6 +136,7 @@ Here are a few recommend things you do to setup and easy ideal environment.
 * Read the details of each VulnHub machine to get specific bits of setup information if needed.
 * Install Virtual Box Guest Additions for you Kali Linux instance to allow for extra features such as copy,past via OS systems and to enable dynamic screen re-sizing to name a few features.
 * Use the following command within Kali Linux to find the network address of the victim virtual machine - note to specify your network adapters correct name for the host-only adapter network.
+
 ```
 # check the names of your network interfaces within kali linux with
 ip addr
@@ -145,6 +146,7 @@ sudo ifconfig
 # eth1 is the name of the host-only network interface within kali linux and -l to list items.
 sudo apr-scan -I eth1 -l
 ```
+
 * Do your internet hacking research via a modern browser on Windows 10.
 * Microsoft OneNote is a great tool for taking detailed hacking notes.
 * Use CherryTree within Kali Linux to keep victim system specific notes.

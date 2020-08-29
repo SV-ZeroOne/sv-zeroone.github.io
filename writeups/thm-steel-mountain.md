@@ -16,6 +16,10 @@ Hello Friend, welcome to my writeup about hacking into the Steel Mountain system
 
 The are two flags we need to obtain on this machine, the `user.txt` and `root.txt` file contents.
 
+I guess this room is inspired by this great hack.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/XTN_-pRZjoU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 _Authors notes_
 > Hack into a Mr. Robot themed Windows machine. Use metasploit for initial access, utilise powershell for Windows privilege escalation enumeration and learn a new technique to get Administrator access. 
 
@@ -354,4 +358,4 @@ For more information about the Privilege Escalation vector check these links out
 * [Red Teaming Experiments](https://www.ired.team/offensive-security/privilege-escalation/unquoted-service-paths)
 
 
-![fsociety](/assets/images/vh_steel_mountain/f_society.png)
+<img class="center_robot" alt="fsociety" src="/assets/images/vh_steel_mountain/f_society.png" width="50%" height="50%">
