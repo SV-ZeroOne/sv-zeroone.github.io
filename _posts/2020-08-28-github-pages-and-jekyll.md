@@ -20,3 +20,11 @@ This blog post is dedicated to detailing the process of how to create a similar 
 
 * https://jekyllrb.com/docs/installation/windows/
 * https://rubyinstaller.org/downloads/
+
+# Github pages themes
+
+Github provides you with a variety of themes to start you pages with.
+
+[GitHub Pages themes](https://github.com/pages-themes)
+
+This site makes use of [The Hacker theme](https://github.com/pages-themes/hacker) as its base. Thank you to the contributors of that theme project for creating something beautiful and simple.

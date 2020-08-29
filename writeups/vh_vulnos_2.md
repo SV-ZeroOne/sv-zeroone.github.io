@@ -341,3 +341,4 @@ https://g0blin.co.uk/vulnos-2-vulnhub-writeup/
 
 https://en.wikipedia.org/wiki/Ghost_in_the_Shell
 
+![Major Motoko Kusanagi](/assets/images/major_1.jpg)
