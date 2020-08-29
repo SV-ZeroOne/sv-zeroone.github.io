@@ -16,7 +16,7 @@ Hello Friend.
 
 Welcome to a write-up about hacking into the Mr. Robot themed vulnhub virtual machine (VM) image.
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/67gYEK4FtzA" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/NLb6h_7NAW0" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 _Authors Notes_
 > Based on the show, Mr. Robot. 
@@ -322,4 +322,10 @@ Goodbye friend.
 
 [Mr Robot Wikipedia Page](https://en.wikipedia.org/wiki/Mr._Robot)
 
+## Bonus
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/4yKsIdr_PNU" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
 <img class="center_robot" alt="fsociety" src="/assets/images/vh_mr_robot/fsociety.png" width="50%" height="50%">
+
