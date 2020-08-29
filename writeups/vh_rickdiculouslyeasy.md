@@ -4,7 +4,7 @@ layout: default
 
 # VulnHub - RickdiculouslyEasy writeup 
 
-![RickdiculouslyEasy Header image](\assets\images\vh_rickdic\rickdiculouslyeasy_header.png)
+![RickdiculouslyEasy Header image](/assets/images/vh_rickdic/rickdiculouslyeasy_header.png)
 
 [VulnHub image link](https://www.vulnhub.com/entry/rickdiculouslyeasy-1,207/)
 
@@ -174,7 +174,7 @@ get FLAG.txt
 Looking around the ftp folder we find our second flag and a pub directory that is empty.
 > FLAG{Whoa this is unexpected} - 10 Points
 
-![Anonymous FTP enumeration](\assets\images\vh_rickdic\vh_rickdiculous_ftp.jpg)
+![Anonymous FTP enumeration](/assets/images/vh_rickdic/vh_rickdiculous_ftp.jpg)
 
 ### Port 22
 
@@ -195,7 +195,7 @@ Inspecting the **robots.txt** reveals a few interesting links.
 The root_shell.cgi link is a rabbit whole, however the tracertool.cgi link seems of interest as it executes the **traceroute** command on the system.
 With a bit of enumeration we try to see if we can get command injection on the machine. Which seems like its possible by providing the semi-colon ; character and followed by a command. I tried to execute a bash and python reverse shell via this cgi page functionality but it appears to be locked down.
 
-![Web Server Enumeration](\assets\images\vh_rickdic\vh_rickdiculous_web_1.jpg)
+![Web Server Enumeration](/assets/images/vh_rickdic/vh_rickdiculous_web_1.jpg)
 
 There appears to be also another troll feature with the **cat** command being replaced by output of an ascii art cat.
 We can however use the **head** command to view sensitive files like the **/etc/passwd** file to get the Usernames on the system. (The -n parameter on the head command will print the first n lines you specify of the file.)
@@ -203,7 +203,7 @@ We can however use the **head** command to view sensitive files like the **/etc/
 ;head -n 40 /etc/passwd
 ```
 
-![/etc/passwd](\assets\images\vh_rickdic\vh_rickdiculous_web_2.jpg)
+![/etc/passwd](/assets/images/vh_rickdic/vh_rickdiculous_web_2.jpg)
 
 #### Nikto Scan
 
@@ -212,7 +212,7 @@ Running a nikto scan on the web server reveals a **passwords** directory.
 nikto -a 192.168.56.133 | tee nikto_scan.txt
 ```
 
-![Web Enumeration](\assets\images\vh_rickdic\vh_rickdiculous_web_3.jpg)
+![Web Enumeration](/assets/images/vh_rickdic/vh_rickdiculous_web_3.jpg)
 
 We find a password **winter** hidden in the source code of the password.html page.
 Within firefox use the following link to view the source code.
@@ -228,7 +228,7 @@ We also find another flag in the passwords directory
 This is some custom shell script that doesn't allow for much, but there is a flag hidden in this blackhole that we can obtain.
 > FLAG{Flip the pickle Morty!} - 10 Point
 
-![Blackhole port](\assets\images\vh_rickdic\vh_rickdiculous_blackhole.jpg)
+![Blackhole port](/assets/images/vh_rickdic/vh_rickdiculous_blackhole.jpg)
 
 #### Cockpit Remote Server Monitor (Port 9090)
 
@@ -241,14 +241,14 @@ Inspecting this reveals that this application is not fully enabled and leads to 
 There is a another flag on the page however.
 > FLAG {There is no Zeus, in your face!} - 10 Points
 
-![Cockpit Resource Monitor](\assets\images\vh_rickdic\vh_rickdiculous_cockpit.jpg)
+![Cockpit Resource Monitor](/assets/images/vh_rickdic/vh_rickdiculous_cockpit.jpg)
 
 ### SSH (Port 22222)
 
 Let try the password of **winter** we found earlier in combination with the usernames from the **/etc/passwd** file to try login to the system via SSH.
 It appears the the password belongs to the user **Summer** and grants us with our initial access to the system.
 
-![Summer SSH login](\assets\images\vh_rickdic\vh_rickdiculous_summer_shh.jpg)
+![Summer SSH login](/assets/images/vh_rickdic/vh_rickdiculous_summer_shh.jpg)
 
 We find another flag in Summers home directory. cat is trolling again us :/ you can see but use the head command to read the flag.
 > FLAG{Get off the high road Summer!} - 10 Points
@@ -268,7 +268,7 @@ wget 192.168.56.133:8181/journal.txt.zip
 wget 192.168.56.133:8181/Safe_Password.jpg
 ```
 
-![Mortys stuff](\assets\images\vh_rickdic\vh_rickdiculous_morty_journal.jpg)
+![Mortys stuff](/assets/images/vh_rickdic/vh_rickdiculous_morty_journal.jpg)
 
 Inspecting the files reveals a password protected zip (journal.txt.zip) and an image called **Safe_Password.jpg** but no password appears in the image, so lets inspect the image file further with **exiftool** to see the metadata and **binwalk** to inspect the actual file headers.
 
@@ -277,12 +277,12 @@ Inspecting the files reveals a password protected zip (journal.txt.zip) and an i
 We use this password to unzip the file and we find another flag in the **journal.txt** file.
 > FLAG: {131333} - 20 Points 
 
-![Safe Password](\assets\images\vh_rickdic\vh_rickdiculous_safe_image.jpg)
+![Safe Password](/assets/images/vh_rickdic/vh_rickdiculous_safe_image.jpg)
 
 There is also a clue in the journal file to look for Rick's safe, so lets do that.
 We find a binary elf file in RickShachez home directory. You can download by spinning another python3 web server and downloading it with wget again to reverse engineer it with ghidra or simply run it on your attacking system to reveal its secrets.
 
-![Ricks Safe](\assets\images\vh_rickdic\vh_rickdiculous_ricks_safe.jpg)
+![Ricks Safe](/assets/images/vh_rickdic/vh_rickdiculous_ricks_safe.jpg)
 
 While we could reverse engineer the binary file with [ghidra](https://ghidra-sre.org/) to view the assembly and source code, this would take some time. Instead just run the binary safe file and supply the previous flag value of **131333**  as an argument to reveal another flag and a clue for Ricks password.
 > FLAG{And Awwwaaaaayyyy we Go!} - 20 Points
@@ -295,7 +295,7 @@ You can use hydra to brute force the SSH login for the user RickSanchez and supp
 sudo hydra -l RickSanchez -P /home/kali/Desktop/ricks_mutated_passwords.txt ssh://192.168.56.133 
 ```
 
-![Ricks band](\assets\images\vh_rickdic\vh_rickdiculous_ricks_band.jpg)
+![Ricks band](/assets/images/vh_rickdic/vh_rickdiculous_ricks_band.jpg)
 
 Running **sudo -l** as Rick reveals that he can run **ALL** commands as sudo, so we simply just **sudo su** to become the super user of root and find the final flag giving us all 130 points.
 > FLAG: {Ionic Defibrillator} - 30 points
@@ -309,7 +309,7 @@ ls
 head FLAG.txt
 ```
 
-![Root](\assets\images\vh_rickdic\vh_rickdiculous_root.jpg)
+![Root](/assets/images/vh_rickdic/vh_rickdiculous_root.jpg)
 
 You can run **netstat -plunt** to see all open TCP and UDP ports just to confirm out nmap scan open ports.
 
