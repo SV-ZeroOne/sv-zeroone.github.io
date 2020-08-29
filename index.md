@@ -16,8 +16,7 @@ Check out the blog for random blog posts.
 
 [Blog Posts](./blog/main-blog.html)
 
-
-![Mr Robot](/assets/images/mr_robot_0.png)
+<img class="center_robot" alt="Mr Robot" src="/assets/images/mr_robot_0.png" width="20%" height="20%">
 
 ```
 This site is still under construction.
