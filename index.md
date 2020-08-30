@@ -24,10 +24,7 @@ This site is still under construction.
 <img class="center_robot" alt="Mr Robot" src="/assets/images/mr_robot_0.png" width="20%" height="20%">
 
 <!--Had to copy the rendered html output from the _site folder to get the jekyll twitter plugin to work-->
-<!-- 
-{% twitter https://twitter.com/CVEnew maxwidth=400 limit=2 %}
-{% twitter https://twitter.com/ExploitDB maxwidth=400 limit=2 %}
--->
+
 <div class="center_twitter">
 <div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="400" data-tweet-limit="2" href="https://twitter.com/CVEnew?ref_src=twsrc%5Etfw">Tweets by CVEnew</a>
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
