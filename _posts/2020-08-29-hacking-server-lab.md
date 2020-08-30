@@ -112,7 +112,7 @@ Another specific requirement is that you should setup two network adapters on th
 * 1 Bridged Adapter - This allows you to connect to the internet via your local ethernet port
 * 1 Host-only Adapter - This will connect to the network where your victim machines should reside.
 
-[Virtual Box Network Menu](/assets/images/hacking_lab/vritual_box_1.jpg)
+![Virtual Box Network Menu](/assets/images/hacking_lab/vritual_box_1.jpg)
 
 
 ### Victim Virtual Machine Systems - VulnHub
@@ -128,6 +128,10 @@ This is were we will obtain the majority of our free victim virtual machine syst
 Here is a link to a even more detailed guide on setting up a hacking lab: [VulnHub - Setting up a local lab](https://www.vulnhub.com/lab/)
 
 Once you have aquatinted yourself with VulnHub download any virtual machine image that suits your level and needs.
+
+### Adding OVE or VMDK Virtual Image files to Virtual box
+
+Todo: detail how to add each type of VM files to virtual box.
 
 ### General Tips
 
