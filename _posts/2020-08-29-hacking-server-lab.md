@@ -159,6 +159,10 @@ sudo apr-scan -I eth1 -l
 
 Good luck and have fun, I hoped this helped a little.
 
+The end result should look similar to this.
+
+![Hacking Lab](/assets/images/hacking_lab/hacking_lab_1.jpg)
+
 ### Extra Resources
 
 * [Kali Linux Training](https://kali.training/)
