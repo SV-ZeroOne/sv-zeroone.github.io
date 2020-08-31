@@ -1,6 +1,6 @@
 title: Zero Security
 description: Hacking and Penetration Testing Stuff
 show_downloads: false
-google_analytics:
+google_analytics: UA-176910808-1
 theme: jekyll-theme-hacker
 plugins: ['jekyll-twitter-plugin']
