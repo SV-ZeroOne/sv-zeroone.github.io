@@ -27,3 +27,4 @@ This page contains links to write-ups I did about hacking various systems found 
 ## HackTheBox
 
 * [Active](./htb-active.html)
+* [Chatterbox](./htb-chatterbox.html)
