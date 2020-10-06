@@ -23,6 +23,7 @@ This page contains links to write-ups I did about hacking various systems found 
 * [DogCat](./thm_dogcat.html)
 * [Wonderland](./thm_wonderland.html)
 * [Ultra Tech](./thm_ultratech.html)
+* [Harder and git happens](./thm_harder_and_git_happens.md)
 
 ## HackTheBox
 
