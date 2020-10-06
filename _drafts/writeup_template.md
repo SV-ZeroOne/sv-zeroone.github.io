@@ -4,7 +4,7 @@ layout: default
 
 # TryHackMe or VulnHub - MachineName writeup 
 
-![Header image](/Images/someimage_header.png)
+![Header image](/assets/images/someimage_header.png)
 
 [Room or VulnHub image link](https://127.0.0.1)
 
