@@ -406,6 +406,8 @@ As a general rule of thumb for good software development practices the following
 This is the code responsible for enforcing the IP security check on index.php webpage on the url http://shell.harder.local/index.php on the harder system.
 
 > harder:/www/shell$ cat ip.php
+
+
 ```php
 <?php
 
@@ -420,6 +422,7 @@ if (strpos($x_header, "10.10.10.") === false) {
 }
 ?>
 ```
+
 
 ## References
 
