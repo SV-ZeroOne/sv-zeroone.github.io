@@ -7,7 +7,7 @@ layout: default
 Please note this is a very rough quick draft of all the key important points in my life. There are lots of things that I might have missed or excluded for certain reasons.
 
 ## 1997 - My first PC
-Intel Pentium 2 - Windows 3.0-3.1
+Intel Pentium 2 - Windows 3.1
 Did not have a CD drive installed, was so young and a noob we could not get someone to to install it for me.
 
 ## 1999 - The Matrix 
@@ -92,6 +92,9 @@ I attempted to gain my honours degree but was not successful due to various reas
 My supervisor was not invested in any of his students and all of them under his supervisory failed.
 My research into Wireless Mesh networks and protocols and how it could bridge the digital divide was to complicated for any one in my University as my network lecturer had left the year before.
 The scope was also very massive and I tried to do and achieve to much. 
+
+During this year I also founded my Universities first Information Technology Club called Monash IT Society (MITS). I create a customized WordPress website www.mitsociety.com , secure it and I also integrated a PHP based forum system.
+I organized LAN party events and even hosted a Hackthon event, but could not participate as it would be unfair to the competitors.
 
 ## 2017 / 2018 - A professional software engineer / developer / coder / programmer is born
 I had a choice to either join SensePost now part of Orange Cyber Defence as a junior ethical hacker or join the best software development company in South Africa.
