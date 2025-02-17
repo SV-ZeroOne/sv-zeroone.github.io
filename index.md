@@ -29,9 +29,9 @@ This site  is still under contruction...
 <div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="800" data-tweet-limit="2" limit=5 widget_type=grid href="https://twitter.com/Dinosn">Tweets by Dinosn</a>
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </div>
-<div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="800" data-tweet-limit="2" limit=5 href="https://twitter.com/CVEnew">Tweets by CVEnew</a>
+<!--<div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="800" data-tweet-limit="2" limit=5 href="https://twitter.com/CVEnew">Tweets by CVEnew</a>
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-</div>
+</div>-->
 <div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="800" data-tweet-limit="2" limit=5 href="https://twitter.com/ExploitDB">Tweets by ExploitDB</a>
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </div>
