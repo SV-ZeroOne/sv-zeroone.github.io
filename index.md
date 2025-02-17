@@ -2,7 +2,7 @@
 layout: default
 ---
 
-Welcome to Zero Security, a site dedicated so `Information Security`, `Hacking` and `Penetration Testing` stuff.
+Welcome to Zero Security, a site dedicated so `Cyber Security`, `Ethical Hacking`, `Red Teaming` and `Penetration Testing` stuff.
 
 # Hacking Write-ups
 
@@ -12,13 +12,13 @@ Check out the write-ups for details on hacking into various different computer s
 
 # Blog
 
-Check out the blog for random blog posts.
+Check out the blog for random blog posts about all sorts of IT related stuff.
 
 [Blog Posts](./blog/main-blog.html)
 
 
 ```
-This site is still under construction.
+This site  is still under contruction...
 ```
 
 <img class="center_robot" alt="Mr Robot" src="/assets/images/mr_robot_0.png" width="20%" height="20%">
@@ -26,10 +26,13 @@ This site is still under construction.
 <!--Had to copy the rendered html output from the _site folder to get the jekyll twitter plugin to work-->
 
 <div class="center_twitter">
-<div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="400" data-tweet-limit="2" href="https://twitter.com/CVEnew?ref_src=twsrc%5Etfw">Tweets by CVEnew</a>
+<div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="600" data-tweet-limit="2" href="https://twitter.com/SVelcev">Tweets by SVELCEV</a>
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </div>
-<div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="400" data-tweet-limit="2" href="https://twitter.com/ExploitDB?ref_src=twsrc%5Etfw">Tweets by ExploitDB</a>
+<div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="600" data-tweet-limit="2" href="https://twitter.com/CVEnew">Tweets by CVEnew</a>
+<script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+</div>
+<div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="600" data-tweet-limit="2" href="https://twitter.com/ExploitDB">Tweets by ExploitDB</a>
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </div>
 </div>
