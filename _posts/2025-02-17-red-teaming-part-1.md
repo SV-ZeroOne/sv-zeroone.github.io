@@ -4,7 +4,6 @@ author: zero
 tags: redteaming phishing initialaccess
 ---
 
-# **Comprehensive Research on Red Team Exercises**
 A Consolidated Analysis of Initial Access Techniques, Phishing, and Malicious Document Delivery
 
 ---
@@ -32,6 +31,7 @@ A Consolidated Analysis of Initial Access Techniques, Phishing, and Malicious Do
 
 ---
 
+# **Comprehensive Research on Red Team Exercises**
 ## **Introduction**
 Red Team exercises simulate real-world cyberattacks, enabling organizations to test, measure, and enhance their defenses against sophisticated adversaries. These exercises specifically focus on **Initial Access**—the phase in which attackers first gain a foothold in the target environment—because of its potential to open the door to lateral movement, privilege escalation, and ultimately data exfiltration or sabotage.
 
