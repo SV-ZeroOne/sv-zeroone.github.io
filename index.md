@@ -26,7 +26,7 @@ This site  is still under contruction...
 <!--Had to copy the rendered html output from the _site folder to get the jekyll twitter plugin to work-->
 
 <div class="center_twitter">
-<div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="800" data-tweet-limit="2" limit=5 widget_type=grid href="https://twitter.com/SVelcev">Tweets by SVELCEV</a>
+<div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="800" data-tweet-limit="2" limit=5 widget_type=grid href="https://twitter.com/Dinosn">Tweets by Dinosn</a>
 <script async="" src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 </div>
 <div class="jekyll-twitter-plugin"><a class="twitter-timeline" data-width="800" data-tweet-limit="2" limit=5 href="https://twitter.com/CVEnew">Tweets by CVEnew</a>
