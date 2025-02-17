@@ -115,6 +115,6 @@ Once a foothold is established, post-exploitation tools facilitate lateral movem
 
 This guide outlines 50 top red team tools across five phases—Reconnaissance, Initial Access, Phishing & Credential Harvesting, Password Spraying, and Post-Exploitation. By integrating these tools into your red team engagements, you can simulate sophisticated, real-world attacks and uncover vulnerabilities before adversaries do. Staying current with these popular tools from 2024/2025 empowers your organization to continuously refine defenses, improve threat detection, and enhance incident response.
 
-*References: Insights and rankings derived from industry sources including FireCompass :contentReference[oaicite:4]{index=4}, Bishop Fox :contentReference[oaicite:5]{index=5}, and additional web research from cybersecurity publications.*
+*References: Insights and rankings derived from industry sources and additional web research from cybersecurity publications.*
 
 Happy testing and stay secure!
