@@ -12,7 +12,7 @@ The top 10 tools in 2024/2025 for Red Teaming divided for each phase of the enga
 
 This document provides a comprehensive overview of the top 10 popular tools for each phase of a red team engagement in 2024/2025. Red team operations are divided into several phases—from initial reconnaissance to post-exploitation. The tables below list each tool’s primary purpose, a brief description, and the platform or language used where applicable.
 
-> **Note:** Some tools appear in multiple phases if their functionality overlaps (e.g. Evilginx2 is used for both initial access and phishing). This guide reflects current industry trends and insights from recent research :contentReference[oaicite:2]{index=2}, :contentReference[oaicite:3]{index=3}.
+> **Note:** Some tools appear in multiple phases if their functionality overlaps (e.g. Evilginx2 is used for both initial access and phishing). This guide reflects current industry trends and insights from recent research.
 
 ---
 
