@@ -4,12 +4,11 @@ author: zero
 tags: development ai llm python
 ---
 
-# Unveiling the Web Screenshot Analysis Tool: A Dive into AI-Powered Web Intelligence
-
 In today's digitally-driven world, the ability to quickly understand and analyze web content is invaluable. From security assessments to content summarization, the sheer volume of information on any given webpage can be overwhelming. That's why I'm excited to introduce a project I've been passionately working on: the **Web Screenshot Analysis Tool**, an open-source application designed to dissect and interpret websites using a suite of cutting-edge AI technologies.
 
 This tool isn't just about taking a picture; it's about extracting deep insights by combining web capture, Optical Character Recognition (OCR), advanced image captioning, and Large Language Model (LLM) powered security analysis.
 
+# Unveiling the Web Screenshot Analysis Tool: A Dive into AI-Powered Web Intelligence
 ## What Can It Do? Core Features at a Glance
 
 The Web Screenshot Analysis Tool offers a comprehensive pipeline for web content examination:
