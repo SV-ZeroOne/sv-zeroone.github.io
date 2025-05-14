@@ -1,3 +1,9 @@
+---
+layout: post
+author: zero
+tags: redteaming initialaccess tools
+---
+
 Top 10 Password Spraying Tools for Red Team Operations
 
 Password spraying is a widely used technique in cybersecurity, particularly in Red Team operations, where adversaries attempt to gain unauthorized access by testing a single password across multiple user accounts. This method is designed to bypass account lockout mechanisms that are triggered by multiple failed login attempts on a single account. With the increasing adoption of cloud services like Microsoft 365 (formerly Office 365) and Azure Active Directory (Azure AD), password spraying has become a critical focus for both attackers and defenders.
