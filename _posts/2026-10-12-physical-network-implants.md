@@ -31,7 +31,7 @@ Implants have come a long way:
 
 # The One implant you might not ever Find: The Keyboard Implant
 
-Can you spot a forth implant in the first image? Its there hiding in plain sight.
+Can you spot a 4th implant in the first image? Its there hiding in plain sight.
 
 It's an ordinary keyboard. It looks normal, types normally, feels normal. But tucked inside is a tiny implant that quietly records everything typed on it - passwords, messages, that "just this once" admin credential someone pastes in and forgets - and ships it back to us over its own cellular connection.
 
@@ -39,12 +39,12 @@ That last detail is what makes it nasty. It never touches the target network. No
 
 And that's exactly why it belongs in a conversation about the supply chain.
 
-# Why the GMKtec Is my faviourite Workhorse
+# Why the GMKtec Is my favourite Workhorse
 
 The NucBox G5 hits a sweet spot that's hard to beat for this job. It's an **Intel N97 (Alder Lake)** mini PC with **12GB DDR5**, an **M.2 SATA SSD**, **gigabit ethernet**, dual 4K HDMI, and **TPM 2.0** - all in a chassis that fits in your palm, at a budget price.
 
 ![GMKtec NucBox G5 implant alongside a Raspberry Pi 4 and cellular dongles](/assets/images/gmktec-implant.jpg)
-![Inside GMKTek NucBox G5](/assets/images/gmktec_internals.png)
+![Inside GMK Tech NucBox G5](/assets/images/gmktec_internals.png)
 
 For an implant that matters:
 
