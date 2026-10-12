@@ -24,9 +24,9 @@ Dropping one is a brilliant test of the controls most organisations *assume* are
 
 Implants have come a long way:
 
-- **Raspberry Pis** - where most people start. Cheap and flexible, but limited horsepower, and it *looks* like a Pi if someone finds it.
-- **Hak5 LAN Turtle** - tiny and convenient for a fast drop, but modest resources.
-- **Mini PCs like the GMKtec NucBox G5** - now my favourite primary implant and launching pad (more below).
+- **[Raspberry Pis](https://www.raspberrypi.com/)** - where most people start. Cheap and flexible, but limited horsepower, and it *looks* like a Pi if someone finds it.
+- **[Hak5 LAN Turtle](https://shop.hak5.org/collections/lan-turtle/products/lan-turtle)** - tiny and convenient for a fast drop, but modest resources.
+- **Mini PCs like the [GMKtec NucBox G5](https://www.gmktec.com/products/gmktec-nucbox-g5-mini-pc-intel%C2%AE-alder-lake-n97)** - now my favourite primary implant and launching pad (more below).
 - **A custom circuit board implant** - built in-house, small enough to hide *inside a keyboards*, that exfiltrates keystrokes over an IoT SIM. More on why that one matters shortly.
 
 # The One implant you might not ever Find: The Keyboard Implant
@@ -55,7 +55,9 @@ For an implant that matters:
 - **TPM 2.0 = an encrypted brick if seized.** We run full-disk encryption sealed to the TPM and the secure boot state. If someone finds the implant and pulls the drive, there's nothing to recover - and tampering with the boot chain breaks the unlock automatically. No client data, no tooling, no engagement notes walking out the door.
 - **Cheap enough to leave behind.** When a device costs this little, you can plan around not getting it back.
 
-![GMKtec NucBox G5 specifications](/assets/images/gmktec-implant-specs.jpg)
+![GMKtec NucBox G5 specifications](/assets/images/gmktec-implant-specs.png)
+
+Full Manual and Specs here - <https://manuals.plus/asin/B0CZRJL7JM>
 
 # The Supply Chain Angle - and Why You Should Care
 
