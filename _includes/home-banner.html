@@ -1,0 +1,114 @@
+<div class="zsb" id="zsb" aria-hidden="true">
+  <canvas class="zsb-c"></canvas>
+  <span class="zsb-cap">// zero security · live scan</span>
+  <span class="zsb-rt" id="zsb-rt">—</span>
+</div>
+<style>
+.zsb{position:relative;width:100%;height:clamp(170px,32vw,250px);margin:18px 0 22px;border:1px solid #123524;border-radius:3px;overflow:hidden;background:#020604}
+.zsb-c{position:absolute;inset:0;width:100%;height:100%;display:block}
+.zsb-cap,.zsb-rt{position:absolute;bottom:8px;font-family:Monaco,Consolas,"Courier New",monospace;font-size:10px;letter-spacing:.08em;color:#00ff66;text-shadow:0 0 6px rgba(0,255,102,.4);pointer-events:none}
+.zsb-cap{left:10px}
+.zsb-rt{right:10px;color:#6f9b84;text-shadow:none;font-variant-numeric:tabular-nums}
+@media (max-width:480px){.zsb-cap,.zsb-rt{font-size:9px}}
+</style>
+<script>
+(function(){
+  var host = document.getElementById('zsb'); if (!host || host.dataset.on) return; host.dataset.on = 1;
+  var cv = host.querySelector('.zsb-c'), ctx = cv.getContext('2d'), rtEl = document.getElementById('zsb-rt');
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var W = 0, H = 0, DPR = 1, raf = 0, visible = true, last = 0, rtAt = 0;
+
+  var clamp = function(v, a, b){ return Math.max(a, Math.min(b, v)); };
+  var lerp = function(a, b, t){ return a + (b - a) * t; };
+  function mulberry(seed){ var a = seed >>> 0; return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function cmap(v){ v = clamp(v, 0, 1); var s = [[0,[2,8,4]],[.4,[6,60,28]],[.65,[20,180,80]],[.85,[90,255,150]],[1,[210,255,225]]];
+    for (var i = 1; i < s.length; i++) if (v <= s[i][0]) { var a = s[i-1], b = s[i], k = (v - a[0]) / (b[0] - a[0]); return [lerp(a[1][0],b[1][0],k), lerp(a[1][1],b[1][1],k), lerp(a[1][2],b[1][2],k)]; }
+    return [210,255,225]; }
+
+  var rain, wf, wfx, wfRow, bins, nodes, edges, antennas, packets;
+
+  function build(){
+    var r = mulberry(7);
+    var fs = Math.max(10, Math.round(Math.min(W, H) / 14));
+    rain = { fs: fs, cols: Math.ceil(W / fs), drops: [], glyphs: '0123456789アイウエオカキ:=*+<>#%░▒▓█' };
+    for (var i = 0; i < rain.cols; i++) rain.drops.push({ y: Math.random() * H / fs, v: .3 + Math.random() });
+    bins = Math.max(80, Math.floor(W / 4));
+    wf = document.createElement('canvas'); wf.width = bins; wf.height = Math.max(40, Math.floor(H * .36)); wfx = wf.getContext('2d');
+    wfx.fillStyle = '#030a06'; wfx.fillRect(0, 0, bins, wf.height); wfRow = wfx.createImageData(bins, 1);
+    wf.sig = [{ f: .22, w: .018, a: .8 }, { f: .5, w: .013, a: .55 }, { f: .79, w: .022, a: .7 }];
+    wf.cur = new Float32Array(bins);
+    var N = W < 480 ? 6 : 9; nodes = [];
+    for (var i = 0; i < N; i++) nodes.push({ x: .08 + r() * .84, y: .12 + r() * .46, ph: r() * 6, sw: r() < .3 });
+    edges = [];
+    for (var i = 0; i < nodes.length; i++) { var best = -1, bd = 9;
+      for (var j = 0; j < nodes.length; j++) if (j !== i) { var dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = j; } }
+      if (best >= 0) edges.push([i, best]); if (r() < .35) edges.push([i, (i + 3) % nodes.length]); }
+    antennas = [{ x: .12 }, { x: .5 }, { x: .87 }]; packets = [];
+  }
+
+  function nx(n){ return n.x * W; }
+  function ny(n){ return n.y * H; }
+
+  function frame(now){
+    raf = 0; var dt = Math.min(.05, (now - last) / 1000) || .016; last = now; var t = now / 1000;
+    ctx.fillStyle = '#020604'; ctx.fillRect(0, 0, W, H);
+
+    // matrix rain, faint, behind everything
+    var fs = rain.fs; ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.font = fs + 'px Monaco, Consolas, monospace'; ctx.textBaseline = 'top';
+    for (var i = 0; i < rain.drops.length; i++) { var d = rain.drops[i], x = i * fs, y = d.y * fs;
+      ctx.fillStyle = 'rgba(120,255,170,.13)'; ctx.fillText(rain.glyphs[(Math.random() * rain.glyphs.length) | 0], x, y);
+      if (!reduced) { d.y += d.v; if (y > H && Math.random() > .975) d.y = 0; } }
+    ctx.restore();
+
+    // SDR waterfall band along the bottom
+    var cur = wf.cur;
+    for (var i = 0; i < bins; i++) { var u = i / bins, v = .07 + Math.random() * .08;
+      for (var k = 0; k < wf.sig.length; k++) { var s = wf.sig[k], cf = s.f + Math.sin(t * .5 * (k + 1) + k) * .03, dd = (u - cf) / s.w; v += s.a * Math.exp(-dd * dd); }
+      cur[i] = v; var c = cmap(v); var o = i * 4; wfRow.data[o] = c[0]; wfRow.data[o+1] = c[1]; wfRow.data[o+2] = c[2]; wfRow.data[o+3] = 255; }
+    if (!reduced) { wfx.drawImage(wf, 0, 1); wfx.putImageData(wfRow, 0, 0); }
+    var y0 = H - wf.height; ctx.save(); ctx.globalAlpha = .85; ctx.imageSmoothingEnabled = false; ctx.drawImage(wf, 0, y0, W, wf.height); ctx.restore();
+    // spectrum trace on the waterfall's top edge
+    ctx.strokeStyle = 'rgba(57,240,216,.7)'; ctx.lineWidth = 1; ctx.beginPath();
+    for (var i = 0; i < bins; i++) { var x = i / bins * W, yy = y0 - clamp(cur[i], 0, 1.3) / 1.3 * (H * .16); i ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy); }
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(0,255,102,.15)'; ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
+
+    // network edges
+    ctx.strokeStyle = 'rgba(47,208,195,.22)'; ctx.lineWidth = 1;
+    for (var e = 0; e < edges.length; e++) { var a = nodes[edges[e][0]], b = nodes[edges[e][1]]; ctx.beginPath(); ctx.moveTo(nx(a), ny(a)); ctx.lineTo(nx(b), ny(b)); ctx.stroke(); }
+    // packets along edges
+    if (!reduced && Math.random() < .08) { var e2 = edges[(Math.random() * edges.length) | 0]; if (e2) packets.push({ a: e2[0], b: e2[1], p: 0, v: .6 + Math.random() * .8 }); }
+    ctx.fillStyle = '#9effc4';
+    for (var i = packets.length - 1; i >= 0; i--) { var pk = packets[i]; pk.p += (reduced ? 0 : pk.v * dt); if (pk.p >= 1) { packets.splice(i, 1); continue; }
+      var a = nodes[pk.a], b = nodes[pk.b], x = lerp(nx(a), nx(b), pk.p), y = lerp(ny(a), ny(b), pk.p); ctx.fillRect(x - 1.5, y - 1.5, 3, 3); }
+    // nodes
+    for (var i = 0; i < nodes.length; i++) { var n = nodes[i], pr = .5 + .5 * Math.sin(t * 2 + n.ph), X = nx(n), Y = ny(n);
+      if (n.sw) { ctx.fillStyle = 'rgba(57,240,216,' + (.5 + pr * .4) + ')'; ctx.fillRect(X - 4, Y - 3, 8, 6); }
+      else { ctx.fillStyle = 'rgba(0,255,102,' + (.5 + pr * .4) + ')'; ctx.shadowColor = 'rgba(0,255,102,.6)'; ctx.shadowBlur = 6 * pr; ctx.beginPath(); ctx.arc(X, Y, 3, 0, 7); ctx.fill(); ctx.shadowBlur = 0; } }
+
+    // antennas along the bottom with pulse rings
+    for (var i = 0; i < antennas.length; i++) { var an = antennas[i], ax = an.x * W, ay = y0 - 2;
+      ctx.strokeStyle = 'rgba(0,255,102,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax, ay - 16); ctx.stroke();
+      ctx.fillStyle = '#00ff66'; ctx.beginPath(); ctx.arc(ax, ay - 18, 2, 0, 7); ctx.fill();
+      for (var k = 0; k < 3; k++) { var ph = ((t * .5 + i * .33 + k / 3) % 1); ctx.strokeStyle = 'rgba(0,255,102,' + ((1 - ph) * .3) + ')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(ax, ay - 18, 4 + ph * 46, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
+      // an antenna occasionally feeds the nearest node a packet
+      if (!reduced && Math.random() < .006 && nodes.length) { var bi = 0, bd = 9; for (var j = 0; j < nodes.length; j++) { var d = Math.abs(nodes[j].x - an.x); if (d < bd) { bd = d; bi = j; } } packets.push({ a: bi, b: (bi + 1) % nodes.length, p: 0, v: .8 }); } }
+
+    // scanline + edge vignette for the CRT feel
+    if (!reduced) { ctx.fillStyle = 'rgba(0,255,102,.04)'; ctx.fillRect(0, (t * 60) % H, W, 2); }
+    var vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .3, W / 2, H / 2, Math.max(W, H) * .7); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.5)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+
+    if (rtEl && now - rtAt > 500) { rtAt = now; var up = nodes.length, fq = (99 + Math.sin(t * .2) * 1.2).toFixed(3); rtEl.textContent = fq + ' MHz · ' + up + ' nodes · ' + (120 + ((t * 7) | 0) % 80) + ' pkts/s'; }
+
+    if (!reduced && visible) raf = requestAnimationFrame(frame);
+  }
+
+  function resize(){ var r = host.getBoundingClientRect(); DPR = Math.min(2, window.devicePixelRatio || 1); W = Math.max(1, Math.floor(r.width)); H = Math.max(1, Math.floor(r.height)); cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); build(); frame(performance.now()); }
+  function start(){ if (reduced || raf || !visible) return; last = performance.now(); raf = requestAnimationFrame(frame); }
+  function stop(){ if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+
+  window.addEventListener('resize', resize); resize();
+  document.addEventListener('visibilitychange', function(){ if (document.hidden) { visible = false; stop(); } else { visible = true; start(); } });
+  if ('IntersectionObserver' in window) { new IntersectionObserver(function(en){ visible = en[0].isIntersecting; visible ? start() : stop(); }, { threshold: .05 }).observe(host); } else start();
+})();
+</script>
