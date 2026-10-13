@@ -9,6 +9,8 @@ show_downloads: false
 
 # GA4 measurement ID (G-XXXXXXXXXX). Only emitted in production builds.
 google_analytics: G-3BRCD00GQ2
+# Cloudflare Web Analytics beacon token (cookie-free). Only emitted in production builds.
+cloudflare_analytics: f7960309d3304367bad72dc35b8b6c16
 
 plugins:
   - jekyll-seo-tag
