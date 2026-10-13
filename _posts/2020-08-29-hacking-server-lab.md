@@ -1,5 +1,4 @@
 ---
-layout: post
 author: zero
 tags: hacking server hardware kali linux
 ---
