@@ -1,17 +1,15 @@
-# Generated output.
-_site
-.sass-cache
+# Jekyll build output and caches
+_site/
+.sass-cache/
 .jekyll-cache/
-Gemfile.lock
-*.gem
-
-# Added when running `jekyll new PATH` or serving in incremental mode.
 .jekyll-metadata
 
-# Bundle's config.
+# Bundler (Gemfile.lock is committed on purpose so CI uses the same gem versions)
 .bundle/
 vendor/
 
-# Jekyll Tweet Cache
-
-.tweet-cache/
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
