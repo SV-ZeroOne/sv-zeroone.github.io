@@ -68,13 +68,13 @@
     if (!reduced) { wfx.drawImage(wf, 0, 1); wfx.putImageData(wfRow, 0, 0); }
     var y0 = H - wf.height; ctx.save(); ctx.globalAlpha = .85; ctx.imageSmoothingEnabled = false; ctx.drawImage(wf, 0, y0, W, wf.height); ctx.restore();
     // spectrum trace on the waterfall's top edge
-    ctx.strokeStyle = 'rgba(57,240,216,.7)'; ctx.lineWidth = 1; ctx.beginPath();
+    ctx.strokeStyle = 'rgba(99,192,245,.7)'; ctx.lineWidth = 1; ctx.beginPath();
     for (var i = 0; i < bins; i++) { var x = i / bins * W, yy = y0 - clamp(cur[i], 0, 1.3) / 1.3 * (H * .16); i ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy); }
     ctx.stroke();
     ctx.strokeStyle = 'rgba(181,232,83,.15)'; ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
 
     // network edges
-    ctx.strokeStyle = 'rgba(47,208,195,.22)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(99,192,245,.22)'; ctx.lineWidth = 1;
     for (var e = 0; e < edges.length; e++) { var a = nodes[edges[e][0]], b = nodes[edges[e][1]]; ctx.beginPath(); ctx.moveTo(nx(a), ny(a)); ctx.lineTo(nx(b), ny(b)); ctx.stroke(); }
     // packets along edges
     if (!reduced && Math.random() < .08) { var e2 = edges[(Math.random() * edges.length) | 0]; if (e2) packets.push({ a: e2[0], b: e2[1], p: 0, v: .6 + Math.random() * .8 }); }
@@ -83,7 +83,7 @@
       var a = nodes[pk.a], b = nodes[pk.b], x = lerp(nx(a), nx(b), pk.p), y = lerp(ny(a), ny(b), pk.p); ctx.fillRect(x - 1.5, y - 1.5, 3, 3); }
     // nodes
     for (var i = 0; i < nodes.length; i++) { var n = nodes[i], pr = .5 + .5 * Math.sin(t * 2 + n.ph), X = nx(n), Y = ny(n);
-      if (n.sw) { ctx.fillStyle = 'rgba(57,240,216,' + (.5 + pr * .4) + ')'; ctx.fillRect(X - 4, Y - 3, 8, 6); }
+      if (n.sw) { ctx.fillStyle = 'rgba(99,192,245,' + (.5 + pr * .4) + ')'; ctx.fillRect(X - 4, Y - 3, 8, 6); }
       else { ctx.fillStyle = 'rgba(181,232,83,' + (.5 + pr * .4) + ')'; ctx.shadowColor = 'rgba(181,232,83,.6)'; ctx.shadowBlur = 6 * pr; ctx.beginPath(); ctx.arc(X, Y, 3, 0, 7); ctx.fill(); ctx.shadowBlur = 0; } }
 
     // antennas along the bottom with pulse rings
