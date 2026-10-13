@@ -43,7 +43,7 @@ And that's exactly why it belongs in a conversation about the supply chain.
 The NucBox G5 hits a sweet spot that's hard to beat for this job. It's an **Intel N97 (Alder Lake)** mini PC with **12GB DDR5**, an **M.2 SATA SSD**, **gigabit ethernet**, dual 4K HDMI, and **TPM 2.0** - all in a chassis that fits in your palm, at a budget price.
 
 ![GMKtec NucBox G5 implant alongside a Raspberry Pi 4 and cellular dongles](/assets/images/gmktec-implant.jpg)
-![Inside GMK Tech NucBox G5](/assets/images/gmktec_internals.png)
+![Inside GMK Tech NucBox G5](/assets/images/gmktec_internals.jpg)
 
 For an implant that matters:
 
