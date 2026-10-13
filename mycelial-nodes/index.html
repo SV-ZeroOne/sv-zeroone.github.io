@@ -346,28 +346,39 @@ function playStep(s, t){
   const q16 = 60 / audio.bpm / 4;
   const inten = clamp((t - (audio.startT || t)) / 70, 0, 1);  // whole-reel build over ~70 s
   audio.inten = inten; const full = .35 + inten * .65;
-  const roll = (bar === 7), firstOfPhrase = (s === 0);
-  // kick — four on the floor, with a one-beat gap just before the drop
-  if (inBar % 4 === 0 && !(roll && inBar === 12)) vKick(t, firstOfPhrase ? 1.05 : .95);
+  const roll = (bar === 7), firstOfPhrase = (s === 0), deep = audio.style === 'deephouse';
+  // kick — four on the floor, with a one-beat gap just before the drop; softer in deep house
+  if (inBar % 4 === 0 && !(roll && inBar === 12)) vKick(t, (firstOfPhrase ? 1.05 : .95) * (deep ? .88 : 1));
   // hats
-  if (inBar % 4 === 2) vHat(t, 7200, .10 + .06 * full, .12);            // offbeat open hat
-  if (inBar % 2 === 1) vHat(t, 9000, .035 + .03 * full, .035);          // 16th tick
-  if (full > .7 && inBar % 2 === 0 && inBar % 4 !== 0) vHat(t, 9500, .02, .03);
-  // clap backbeat
-  if (inBar === 4 || inBar === 12) vClap(t, .13 + .05 * full);
+  if (deep) {
+    if (inBar % 4 === 2) vHat(t, 6400, .14 + .05 * full, .24);          // fat offbeat open hat, the house signature
+    if (inBar === 5 || inBar === 13) vHat(t, 9200, .02, .03);          // a sparse ghost tick
+  } else {
+    if (inBar % 4 === 2) vHat(t, 7200, .10 + .06 * full, .12);          // offbeat open hat
+    if (inBar % 2 === 1) vHat(t, 9000, .035 + .03 * full, .035);        // 16th tick
+    if (full > .7 && inBar % 2 === 0 && inBar % 4 !== 0) vHat(t, 9500, .02, .03);
+  }
+  // clap backbeat, softer in deep house
+  if (inBar === 4 || inBar === 12) vClap(t, (.13 + .05 * full) * (deep ? .8 : 1));
   // bass — downbeat anchor + rolling offbeat
-  if (inBar === 0) vBass(t, root, q16 * 1.2, .40 + .12 * full);
-  if (inBar % 4 === 2) vBass(t, root + 12 + (inBar === 10 ? 7 : 0), q16 * 1.6, .34 + .14 * full);
-  // pad — one chord per bar, filter opening with intensity
-  if (inBar === 0) { const len = (60 / audio.bpm) * 4;
-    const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(600, t); f.frequency.linearRampToValueAtTime(1400 + 2000 * full, t + len * .5); f.frequency.linearRampToValueAtTime(700, t + len); f.Q.value = 3;
+  if (deep) {
+    if (inBar === 0) vBass(t, root, q16 * 1.1, .44 + .1 * full);
+    if (inBar === 3 || inBar === 6 || inBar === 11 || inBar === 14) vBass(t, root + 12, q16 * 1.5, .36 + .12 * full);
+  } else {
+    if (inBar === 0) vBass(t, root, q16 * 1.2, .40 + .12 * full);
+    if (inBar % 4 === 2) vBass(t, root + 12 + (inBar === 10 ? 7 : 0), q16 * 1.6, .34 + .14 * full);
+  }
+  // pad — one chord per bar, filter opening with intensity; kept dark and dubby in deep house
+  if (inBar === 0) { const len = (60 / audio.bpm) * 4, peak = deep ? 1000 : 1400 + 2000 * full;
+    const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(600, t); f.frequency.linearRampToValueAtTime(peak, t + len * .5); f.frequency.linearRampToValueAtTime(700, t + len); f.Q.value = 3;
     const g = ac.createGain(), pv = .05 + .04 * full; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(pv, t + .5); g.gain.setValueAtTime(pv, t + len - .5); g.gain.linearRampToValueAtTime(0, t + len + .05); f.connect(g).connect(audio.bus);
     chord.forEach(m => [-7, 7].forEach(det => { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det; o.connect(f); o.start(t); o.stop(t + len + .1); }));
   }
-  if (audio.style === 'deephouse') {
-    // deep house — soft Rhodes-ish chord stabs on the offbeat, no gated supersaw
-    if (inBar === 2 || inBar === 6 || inBar === 10 || inBar === 14) vRhodes(t, chord.map(m => m + 12), q16 * 2.4, .05 + .04 * full);
-    if (inBar === 7 || inBar === 15) vRhodes(t, chord.map(m => m + 12), q16 * 1.4, .03 + .02 * full);
+  if (deep) {
+    // deep house — warm Rhodes chord stabs on the offbeat plus a sustained dub chord, no gated supersaw
+    if (inBar === 2 || inBar === 6 || inBar === 10 || inBar === 14) vRhodes(t, chord.map(m => m + 12), q16 * 2.6, .11 + .05 * full);
+    if (inBar === 7 || inBar === 15) vRhodes(t, chord.map(m => m + 12), q16 * 1.4, .06 + .03 * full);
+    if (inBar === 0) vRhodes(t, chord, (60 / audio.bpm) * 2.6, .05 + .03 * full);
   } else if (inten > .33 && bar >= 2 && [0,2,3,5,6,7,9,10,11,13,14,15].includes(inBar)) {
     // trance lead — 16th gated supersaw, arrives with energy, biggest after the drop
     const idx = [0,1,2,1,0,2,1,2][inBar % 8], oct = inBar % 4 === 0 ? 12 : 0;
@@ -384,7 +395,7 @@ function playStep(s, t){
 function blip(freq, len){ if (!audio.ready || audio.muted) return; const ac = audio.ctx, t = ac.currentTime; const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = freq; g.gain.setValueAtTime(.08, t); g.gain.exponentialRampToValueAtTime(.001, t + len); o.connect(g).connect(audio.comp); o.start(t); o.stop(t + len); }
 function setMusic(level, filterHz, secs){ if (!audio.ready) return; const t = audio.ctx.currentTime; audio.music.gain.cancelScheduledValues(t); audio.music.gain.setTargetAtTime(level, t, secs / 3); audio.radio.frequency.cancelScheduledValues(t); audio.radio.frequency.setTargetAtTime(filterHz, t, secs / 3); }
 function setStatic(level, secs){ if (!audio.ready) return; audio.staticG.gain.setTargetAtTime(level, audio.ctx.currentTime, secs / 3); }
-function setStyle(style){ audio.style = style; audio.bpm = style === 'deephouse' ? 123 : 128; } // deep-house turn drops the tempo and swaps the lead
+function setStyle(style){ audio.style = style; audio.bpm = style === 'deephouse' ? 122 : 128; } // deep-house turn drops the tempo and swaps the lead
 function setMuted(m){ audio.muted = m; if (audio.ready) audio.master.gain.setTargetAtTime(m ? 0 : .9, audio.ctx.currentTime, .05); $('#mute').textContent = m ? 'Muted' : 'Sound on'; $('#mute').setAttribute('aria-pressed', String(m)); }
 
 // ---------- scenes ----------
