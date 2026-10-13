@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: HackTheBox
+machine: "Chatterbox"
+order: 15
 tags: windows active_directory
 ---
 # HackTheBox - Chatterbox writeup 

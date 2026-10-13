@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: VulnHub
+machine: "Mr. Robot"
+order: 2
 ---
 
 # VulnHub - Mr. Robot writeup 

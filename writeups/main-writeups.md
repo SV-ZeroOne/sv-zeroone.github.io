@@ -6,26 +6,16 @@ layout: default
 
 This page contains links to write-ups I did about hacking various systems found on [TryHackMe](https://tryhackme.com/), [VulnHub](https://www.vulnhub.com/) and [HackTheBox](https://www.hackthebox.eu/)
 
-## Vunlhub
+{% comment %}Generated from the _writeups collection, grouped by `platform` and sorted by `order`.{% endcomment %}
+{%- assign platforms = "VulnHub,TryHackMe,HackTheBox" | split: "," -%}
+{%- for platform in platforms -%}
+{%- assign writeups = site.writeups | where: "platform", platform -%}
+{%- if writeups.size > 0 %}
 
-* [RickDiculouslyEasy](./vh_rickdiculouslyeasy.html)
-* [Mr. Robot](./vh-mr-robot.html)
-* [SickOS](./vh_sickos.html)
-* [VulnOS 2](./vh_vulnos_2.html)
-* [Kioptrix 1](./vh_kioptrix1.html)
-* [Kioptrix 2](./vh_kioptrix2.html)
-* [Kioptrix 3](./vh_kioptrix3.html)
-* [Kioptrix 4](./vh_kioptrix4.html)
+## {{ platform }}
 
-## TryHackMe
-
-* [Steel Mountain](./thm-steel-mountain.html)
-* [DogCat](./thm_dogcat.html)
-* [Wonderland](./thm_wonderland.html)
-* [Ultra Tech](./thm_ultratech.html)
-* [Harder and git happens](./thm_harder_and_git_happens.html)
-
-## HackTheBox
-
-* [Active](./htb-active.html)
-* [Chatterbox](./htb-chatterbox.html)
+{% for writeup in writeups -%}
+* [{{ writeup.machine }}]({{ writeup.url | relative_url }})
+{% endfor -%}
+{%- endif -%}
+{%- endfor %}

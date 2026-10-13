@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: TryHackMe
+machine: "Steel Mountain"
+order: 9
 ---
 
 # TryHackMe - Steel Mountain writeup 

@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: VulnHub
+machine: "VulnOS 2"
+order: 4
 ---
 
 # VulnHub - VulnOS 2 writeup 

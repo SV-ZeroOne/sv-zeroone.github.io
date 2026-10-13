@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: TryHackMe
+machine: "Harder and git happens"
+order: 13
 tags: git web
 ---
 

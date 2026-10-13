@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: HackTheBox
+machine: "Active"
+order: 14
 tags: windows smb active_directory
 ---
 # HackTheBox - Active writeup 
