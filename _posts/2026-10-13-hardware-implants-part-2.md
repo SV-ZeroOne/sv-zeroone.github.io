@@ -55,6 +55,7 @@ This is where it stops being a gadget you could spot and gets genuinely unsettli
 **OMG Cable X-Ray of chip inside.**
 ![OMG Cable X-Ray](/assets/images/omg_cable_xray.png)
 
+Image source: <https://hak5.org/products/omg-cable>
 
 ## The invisible one
 
