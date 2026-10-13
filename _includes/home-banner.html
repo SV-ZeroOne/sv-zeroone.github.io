@@ -6,7 +6,7 @@
 <style>
 .zsb{position:relative;width:100%;height:clamp(170px,32vw,250px);margin:18px 0 22px;border:1px solid #123524;border-radius:3px;overflow:hidden;background:#020604}
 .zsb-c{position:absolute;inset:0;width:100%;height:100%;display:block}
-.zsb-cap,.zsb-rt{position:absolute;bottom:8px;font-family:Monaco,Consolas,"Courier New",monospace;font-size:10px;letter-spacing:.08em;color:#00ff66;text-shadow:0 0 6px rgba(0,255,102,.4);pointer-events:none}
+.zsb-cap,.zsb-rt{position:absolute;bottom:8px;font-family:Monaco,Consolas,"Courier New",monospace;font-size:10px;letter-spacing:.08em;color:#b5e853;text-shadow:0 0 6px rgba(181,232,83,.4);pointer-events:none}
 .zsb-cap{left:10px}
 .zsb-rt{right:10px;color:#6f9b84;text-shadow:none;font-variant-numeric:tabular-nums}
 @media (max-width:480px){.zsb-cap,.zsb-rt{font-size:9px}}
@@ -21,7 +21,7 @@
   var clamp = function(v, a, b){ return Math.max(a, Math.min(b, v)); };
   var lerp = function(a, b, t){ return a + (b - a) * t; };
   function mulberry(seed){ var a = seed >>> 0; return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
-  function cmap(v){ v = clamp(v, 0, 1); var s = [[0,[2,8,4]],[.4,[6,60,28]],[.65,[20,180,80]],[.85,[90,255,150]],[1,[210,255,225]]];
+  function cmap(v){ v = clamp(v, 0, 1); var s = [[0,[2,8,4]],[.4,[28,46,14]],[.65,[96,140,44]],[.85,[181,232,83]],[1,[225,245,180]]];
     for (var i = 1; i < s.length; i++) if (v <= s[i][0]) { var a = s[i-1], b = s[i], k = (v - a[0]) / (b[0] - a[0]); return [lerp(a[1][0],b[1][0],k), lerp(a[1][1],b[1][1],k), lerp(a[1][2],b[1][2],k)]; }
     return [210,255,225]; }
 
@@ -56,7 +56,7 @@
     // matrix rain, faint, behind everything
     var fs = rain.fs; ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.font = fs + 'px Monaco, Consolas, monospace'; ctx.textBaseline = 'top';
     for (var i = 0; i < rain.drops.length; i++) { var d = rain.drops[i], x = i * fs, y = d.y * fs;
-      ctx.fillStyle = 'rgba(120,255,170,.13)'; ctx.fillText(rain.glyphs[(Math.random() * rain.glyphs.length) | 0], x, y);
+      ctx.fillStyle = 'rgba(200,235,140,.13)'; ctx.fillText(rain.glyphs[(Math.random() * rain.glyphs.length) | 0], x, y);
       if (!reduced) { d.y += d.v; if (y > H && Math.random() > .975) d.y = 0; } }
     ctx.restore();
 
@@ -71,31 +71,31 @@
     ctx.strokeStyle = 'rgba(57,240,216,.7)'; ctx.lineWidth = 1; ctx.beginPath();
     for (var i = 0; i < bins; i++) { var x = i / bins * W, yy = y0 - clamp(cur[i], 0, 1.3) / 1.3 * (H * .16); i ? ctx.lineTo(x, yy) : ctx.moveTo(x, yy); }
     ctx.stroke();
-    ctx.strokeStyle = 'rgba(0,255,102,.15)'; ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
+    ctx.strokeStyle = 'rgba(181,232,83,.15)'; ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
 
     // network edges
     ctx.strokeStyle = 'rgba(47,208,195,.22)'; ctx.lineWidth = 1;
     for (var e = 0; e < edges.length; e++) { var a = nodes[edges[e][0]], b = nodes[edges[e][1]]; ctx.beginPath(); ctx.moveTo(nx(a), ny(a)); ctx.lineTo(nx(b), ny(b)); ctx.stroke(); }
     // packets along edges
     if (!reduced && Math.random() < .08) { var e2 = edges[(Math.random() * edges.length) | 0]; if (e2) packets.push({ a: e2[0], b: e2[1], p: 0, v: .6 + Math.random() * .8 }); }
-    ctx.fillStyle = '#9effc4';
+    ctx.fillStyle = '#d4ef90';
     for (var i = packets.length - 1; i >= 0; i--) { var pk = packets[i]; pk.p += (reduced ? 0 : pk.v * dt); if (pk.p >= 1) { packets.splice(i, 1); continue; }
       var a = nodes[pk.a], b = nodes[pk.b], x = lerp(nx(a), nx(b), pk.p), y = lerp(ny(a), ny(b), pk.p); ctx.fillRect(x - 1.5, y - 1.5, 3, 3); }
     // nodes
     for (var i = 0; i < nodes.length; i++) { var n = nodes[i], pr = .5 + .5 * Math.sin(t * 2 + n.ph), X = nx(n), Y = ny(n);
       if (n.sw) { ctx.fillStyle = 'rgba(57,240,216,' + (.5 + pr * .4) + ')'; ctx.fillRect(X - 4, Y - 3, 8, 6); }
-      else { ctx.fillStyle = 'rgba(0,255,102,' + (.5 + pr * .4) + ')'; ctx.shadowColor = 'rgba(0,255,102,.6)'; ctx.shadowBlur = 6 * pr; ctx.beginPath(); ctx.arc(X, Y, 3, 0, 7); ctx.fill(); ctx.shadowBlur = 0; } }
+      else { ctx.fillStyle = 'rgba(181,232,83,' + (.5 + pr * .4) + ')'; ctx.shadowColor = 'rgba(181,232,83,.6)'; ctx.shadowBlur = 6 * pr; ctx.beginPath(); ctx.arc(X, Y, 3, 0, 7); ctx.fill(); ctx.shadowBlur = 0; } }
 
     // antennas along the bottom with pulse rings
     for (var i = 0; i < antennas.length; i++) { var an = antennas[i], ax = an.x * W, ay = y0 - 2;
-      ctx.strokeStyle = 'rgba(0,255,102,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax, ay - 16); ctx.stroke();
-      ctx.fillStyle = '#00ff66'; ctx.beginPath(); ctx.arc(ax, ay - 18, 2, 0, 7); ctx.fill();
-      for (var k = 0; k < 3; k++) { var ph = ((t * .5 + i * .33 + k / 3) % 1); ctx.strokeStyle = 'rgba(0,255,102,' + ((1 - ph) * .3) + ')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(ax, ay - 18, 4 + ph * 46, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
+      ctx.strokeStyle = 'rgba(181,232,83,.5)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ax, ay - 16); ctx.stroke();
+      ctx.fillStyle = '#b5e853'; ctx.beginPath(); ctx.arc(ax, ay - 18, 2, 0, 7); ctx.fill();
+      for (var k = 0; k < 3; k++) { var ph = ((t * .5 + i * .33 + k / 3) % 1); ctx.strokeStyle = 'rgba(181,232,83,' + ((1 - ph) * .3) + ')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(ax, ay - 18, 4 + ph * 46, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); }
       // an antenna occasionally feeds the nearest node a packet
       if (!reduced && Math.random() < .006 && nodes.length) { var bi = 0, bd = 9; for (var j = 0; j < nodes.length; j++) { var d = Math.abs(nodes[j].x - an.x); if (d < bd) { bd = d; bi = j; } } packets.push({ a: bi, b: (bi + 1) % nodes.length, p: 0, v: .8 }); } }
 
     // scanline + edge vignette for the CRT feel
-    if (!reduced) { ctx.fillStyle = 'rgba(0,255,102,.04)'; ctx.fillRect(0, (t * 60) % H, W, 2); }
+    if (!reduced) { ctx.fillStyle = 'rgba(181,232,83,.04)'; ctx.fillRect(0, (t * 60) % H, W, 2); }
     var vg = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .3, W / 2, H / 2, Math.max(W, H) * .7); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(0,0,0,.5)'); ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
 
     if (rtEl && now - rtAt > 500) { rtAt = now; var up = nodes.length, fq = (99 + Math.sin(t * .2) * 1.2).toFixed(3); rtEl.textContent = fq + ' MHz · ' + up + ' nodes · ' + (120 + ((t * 7) | 0) % 80) + ' pkts/s'; }
