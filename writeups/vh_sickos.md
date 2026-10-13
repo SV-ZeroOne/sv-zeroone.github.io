@@ -8,7 +8,7 @@ layout: default
 
 [Room or VulnHub image link](https://www.vulnhub.com/entry/sickos-12,144/)
 
-:sick: :computer:
+:nauseated_face: :computer:
 
 ## Introduction 
 

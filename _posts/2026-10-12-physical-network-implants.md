@@ -1,5 +1,4 @@
 ---
-layout: post
 author: zero
 title: "Physical Network Implants: The Rogue Device Problem"
 tags: redteam physical-security network-implants hardware supply-chain kali

@@ -2,12 +2,26 @@ title: Zero Security
 description: Hacking and Penetration Testing Stuff
 url: https://sv-zeroone.github.io
 repository_url: https://github.com/SV-ZeroOne/sv-zeroone.github.io
+lang: en-GB
+timezone: Europe/London
+author: zero
 show_downloads: false
-google_analytics: UA-176910808-1
+
+# GA4 measurement ID (G-XXXXXXXXXX). Only emitted in production builds.
+google_analytics: G-3BRCD00GQ2
 
 plugins:
   - jekyll-seo-tag
   - jekyll-titles-from-headings
+  - jekyll-feed
+  - jekyll-sitemap
+  - jemoji
+
+defaults:
+  - scope:
+      type: posts
+    values:
+      layout: post
 
 exclude:
   - README.md
