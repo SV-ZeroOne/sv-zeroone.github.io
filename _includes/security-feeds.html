@@ -1,0 +1,34 @@
+{% assign feeds = site.data.security_feeds %}
+<section class="security-feeds">
+  <div class="feed">
+    <h2>Latest exploits</h2>
+    {% if feeds.exploitdb.size > 0 %}
+    <ul>
+      {% for item in feeds.exploitdb %}
+      <li><span class="feed-date">{{ item.date }}</span> <a href="{{ item.url }}">{{ item.title | escape }}</a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>Feed unavailable right now.</p>
+    {% endif %}
+    <p class="feed-source">Source: <a href="https://www.exploit-db.com/">Exploit Database</a></p>
+  </div>
+
+  <div class="feed">
+    <h2>Known exploited vulnerabilities</h2>
+    {% if feeds.kev.size > 0 %}
+    <ul>
+      {% for item in feeds.kev %}
+      <li><span class="feed-date">{{ item.date }}</span> <a href="{{ item.url }}">{{ item.title | escape }}</a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>Feed unavailable right now.</p>
+    {% endif %}
+    <p class="feed-source">Source: <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">CISA KEV catalog</a></p>
+  </div>
+
+  {% if feeds.fetched_at %}
+  <p class="feed-updated">Updated {{ feeds.fetched_at | date: "%-d %B %Y, %H:%M UTC" }}</p>
+  {% endif %}
+</section>
