@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: VulnHub
+machine: "SickOS"
+order: 3
 ---
 
 # VulnHub - SickOS 1.2 writeup 

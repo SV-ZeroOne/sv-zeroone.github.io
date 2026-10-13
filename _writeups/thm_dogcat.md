@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: TryHackMe
+machine: "DogCat"
+order: 10
 ---
 
 # TryHackMe - dogcat writeup 

@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: VulnHub
+machine: "RickDiculouslyEasy"
+order: 1
 ---
 
 # VulnHub - RickdiculouslyEasy writeup 

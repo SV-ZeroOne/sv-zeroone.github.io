@@ -17,11 +17,26 @@ plugins:
   - jekyll-sitemap
   - jemoji
 
+# CTF/lab writeups live in _writeups/ and keep their original /writeups/<file>.html URLs.
+collections:
+  writeups:
+    output: true
+    permalink: /writeups/:path:output_ext
+    sort_by: order
+
+# Writeups have no title: front matter; take it from the first heading.
+titles_from_headings:
+  collections: true
+
 defaults:
   - scope:
       type: posts
     values:
       layout: post
+  - scope:
+      type: writeups
+    values:
+      layout: default
 
 exclude:
   - README.md

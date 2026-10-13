@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: TryHackMe
+machine: "Ultra Tech"
+order: 12
 ---
 
 # TryHackMe - UltraTech writeup 

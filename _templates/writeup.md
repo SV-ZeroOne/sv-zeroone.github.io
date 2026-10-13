@@ -1,5 +1,10 @@
 ---
-layout: default
+# Copy to _writeups/<slug>.md; it is published at /writeups/<slug>.html.
+# platform: VulnHub, TryHackMe or HackTheBox (an index section on writeups/main-writeups.md)
+# machine: link text in the index; order: position in the index (next unused number)
+platform: TryHackMe
+machine: "MachineName"
+order: 16
 ---
 
 # TryHackMe or VulnHub - MachineName writeup 

@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: TryHackMe
+machine: "Wonderland"
+order: 11
 ---
 
 # TryHackMe - Wonderland writeup 

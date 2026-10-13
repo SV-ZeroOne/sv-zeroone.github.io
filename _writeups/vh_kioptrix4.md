@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: VulnHub
+machine: "Kioptrix 4"
+order: 8
 ---
 
 # Vulhub - Kioptrix 4 writeup 

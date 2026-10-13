@@ -1,5 +1,7 @@
 ---
-layout: default
+platform: VulnHub
+machine: "Kioptrix 2"
+order: 6
 ---
 
 # VulnHub - Kioptrix level 2 writeup 
