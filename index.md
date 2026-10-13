@@ -2,6 +2,8 @@
 layout: default
 ---
 
+{% include home-banner.html %}
+
 Welcome to Zero Security, a site dedicated so `Cyber Security`, `Ethical Hacking`, `Red Teaming` and `Penetration Testing` stuff.
 
 # Hacking Write-ups
@@ -10,16 +12,19 @@ Check out the write-ups for details on hacking into various different computer s
 
 [Hacking Write-ups](./writeups/main-writeups.html)
 
-# Blog
+# Latest Blog Posts
 
-Check out the blog for random blog posts about all sorts of IT related stuff.
+<ul class="home-posts">
+{% for post in site.posts limit:3 %}
+  <li>
+    <h3><a href="{{ post.url | relative_url }}">{{ post.title }}</a></h3>
+    <small class="home-post-date">{{ post.date | date: "%-d %B %Y" }}</small>
+    <p>{{ post.excerpt | strip_html | truncatewords: 40 }}</p>
+  </li>
+{% endfor %}
+</ul>
 
-[Blog Posts](./blog/main-blog.html)
-
-
-```
-This site  is still under contruction...
-```
+[All blog posts &rarr;](./blog/main-blog.html)
 
 <img class="center_robot" alt="Mr Robot" src="/assets/images/mr_robot_0.png" width="20%" height="20%">
 
