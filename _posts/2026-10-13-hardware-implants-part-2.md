@@ -34,9 +34,16 @@ The classic. It looks like a flash drive; it isn't.
 
 > *(I've got a fun clip of a Flipper BadUSB script popping open PowerShell and making a machine announce "Wake up, Neo…" harmless, but it lands the point in about three seconds. I'll drop the video in here.)*
 
-![Flipper Zero - MouseJack Attack - Injecting Keystroke Wirelessly PowerShell Matrix Code to Wake Up N](https://youtube.com/shorts/Xp-ei2_T4zU?feature=share)
-<iframe width="315" height="560" src="https://youtube.com/shorts/Xp-ei2_T4zU?feature=share" frameborder="0" allowfullscreen></iframe>
+[Flipper Zero - MouseJack Attack - Injecting Keystroke Wirelessly PowerShell Matrix Code to Wake Up N](https://youtube.com/shorts/Xp-ei2_T4zU?feature=share)
 
+<div style="text-align:center; margin:1.5em 0;">
+  <iframe width="315" height="560"
+    src="https://www.youtube.com/embed/Xp-ei2_T4zU"
+    title="Flipper Zero BadUSB demo"
+    frameborder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    allowfullscreen></iframe>
+</div>
 
 ## The everyday object
 
