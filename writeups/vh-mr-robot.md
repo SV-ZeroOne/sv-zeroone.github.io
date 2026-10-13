@@ -282,7 +282,7 @@ find / -user root -perm -4000 -print 2>/dev/null
 
 Nmap has the ability to spawn an interactive shell so lets try that to get root access.
 
-* Tip - [GTFOBins](http://gtfobins.github.io/gtfobins/nmap/) is a great resource of a curated list of Unix binaries that can be exploited by an attacker to bypass local security restrictions.
+* Tip - [GTFOBins](https://gtfobins.github.io/gtfobins/nmap/) is a great resource of a curated list of Unix binaries that can be exploited by an attacker to bypass local security restrictions.
 
 Execute the following commands to get root access!
 ```
