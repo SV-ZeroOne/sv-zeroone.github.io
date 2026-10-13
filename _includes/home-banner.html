@@ -38,7 +38,7 @@
     wf.sig = [{ f: .22, w: .018, a: .8 }, { f: .5, w: .013, a: .55 }, { f: .79, w: .022, a: .7 }];
     wf.cur = new Float32Array(bins);
     var N = W < 480 ? 6 : 9; nodes = [];
-    for (var i = 0; i < N; i++) nodes.push({ x: .08 + r() * .84, y: .12 + r() * .46, ph: r() * 6, sw: r() < .3 });
+    for (var i = 0; i < N; i++) nodes.push({ x: .08 + r() * .84, y: .1 + r() * .32, ph: r() * 6, sw: r() < .3 });
     edges = [];
     for (var i = 0; i < nodes.length; i++) { var best = -1, bd = 9;
       for (var j = 0; j < nodes.length; j++) if (j !== i) { var dx = nodes[i].x - nodes[j].x, dy = nodes[i].y - nodes[j].y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = j; } }
