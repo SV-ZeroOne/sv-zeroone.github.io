@@ -1,4 +1,5 @@
 ---
+title: "Top 10 Red Team Tools for Each Engagement Phase"
 author: zero
 tags: redteaming phishing initialaccess tools
 ---

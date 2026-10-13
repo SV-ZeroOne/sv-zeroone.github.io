@@ -87,7 +87,7 @@ Run the python buffer overflow exploit and get your reverse shell.
 
 The shell we obtained above is for the user `alfred`, lets see if we can get an Administrator shell.
 
-First lets start up a simple python HTTP server to serve our [Windows Privilege Escalation Awesome Suite Script (WinPEAS)](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe/winPEAS/bin/Obfuscated%20Releases)
+First lets start up a simple python HTTP server to serve our [Windows Privilege Escalation Awesome Suite Script (WinPEAS)](https://github.com/peass-ng/PEASS-ng/releases)
 ```
 sudo python3 -m http.server 80
 ```

@@ -1,4 +1,5 @@
 ---
+title: "GitHub Pages and Jekyll"
 author: zero
 tags: development jekyll
 ---

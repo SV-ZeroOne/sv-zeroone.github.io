@@ -268,7 +268,7 @@ Lets download and use another privilege escalation script called Windows Privile
 
 You can download the WinPEAS .exe from the repo link below 32bit (x86) or 64bit (x64)
 
-[WinPEAS github repo](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS/winPEASexe/winPEAS/bin)
+[WinPEAS github repo](https://github.com/peass-ng/PEASS-ng/releases)
 
 Start up a simple python3 http server where you download the WinPEAS file so that we can download it to our victim system using a powershell command.
 ```
@@ -354,7 +354,7 @@ For more information about Mr Robot check this out. I highly recommend this show
 
 For more information about the Privilege Escalation vector check these links out.
 
-* [Hacking Articles - Windows Privilege Escalation (Unquoted Path Service)](https://www.hackingarticles.in/windows-privilege-escalation-unquoted-path-service/)
+* [Hacking Articles - Windows Privilege Escalation (Unquoted Path Service)](https://www.hackingarticles.in/windows-privilege-escalation-unquoted-service-path/)
 * [Red Teaming Experiments](https://www.ired.team/offensive-security/privilege-escalation/unquoted-service-paths)
 
 ## Bonus

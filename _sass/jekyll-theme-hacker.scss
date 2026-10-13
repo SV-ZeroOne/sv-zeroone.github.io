@@ -272,8 +272,19 @@ a {
     margin: 0 auto;
 }
 
-.center_twitter {
-  text-align: center;
+.security-feeds {
+  margin: 30px 0;
+
+  .feed-date {
+    color: $blockquote-color;
+    margin-right: 6px;
+  }
+
+  .feed-source,
+  .feed-updated {
+    color: $blockquote-color;
+    font-size: 0.85em;
+  }
 }
 .footer {
   left: 0;

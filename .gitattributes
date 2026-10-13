@@ -1,0 +1,8 @@
+# Keep text files LF everywhere (Jekyll, Ruby and the CI runners expect it).
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

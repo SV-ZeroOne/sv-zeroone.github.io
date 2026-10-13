@@ -5,6 +5,9 @@ on:
     branches: [master]
   pull_request:
   workflow_dispatch:
+  # Daily rebuild to refresh the homepage security feeds (_plugins/security_feeds.rb).
+  schedule:
+    - cron: '23 5 * * *'
 
 permissions:
   contents: read

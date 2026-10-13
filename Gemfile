@@ -3,6 +3,7 @@
 source 'https://rubygems.org'
 
 gem 'jekyll', '~> 4.4'
+gem 'rss', '~> 0.3' # used by _plugins/security_feeds.rb
 
 group :jekyll_plugins do
   gem 'jekyll-seo-tag', '~> 2.9'

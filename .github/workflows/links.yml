@@ -1,0 +1,56 @@
+name: Check external links
+
+on:
+  schedule:
+    - cron: '41 6 * * 1' # Mondays
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Ruby
+        # v1.329.0, version taken from .ruby-version
+        uses: ruby/setup-ruby@651ff0d62c5c79bed6d53ec518387aae20e72c1a
+        with:
+          bundler-cache: true
+
+      - name: Build with Jekyll
+        run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+          SECURITY_FEEDS: 'off'
+
+      - name: Check external links
+        id: check
+        run: |
+          set -o pipefail
+          bundle exec ruby script/check_external_links.rb 2>&1 | tee report.txt
+
+      - name: Open or update issue on failure
+        if: failure() && steps.check.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "The weekly external link check found broken links."
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            echo '```'
+            sed -n '/failures were found/,$p' report.txt
+            echo '```'
+          } > body.md
+          existing=$(gh issue list --state open --label broken-links --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file body.md
+          else
+            gh label create broken-links --color d93f0b --force
+            gh issue create --title "Broken external links" --label broken-links --body-file body.md
+          fi

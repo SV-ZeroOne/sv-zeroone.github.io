@@ -1,4 +1,5 @@
 ---
+title: "Red Teaming, Part 2: Initial Access, Phishing and Password Spraying"
 author: zero
 tags: redteaming phishing initialaccess tools
 ---
