@@ -4,7 +4,7 @@ author: zero
 tags: development ai llm python
 ---
 
-In today's digitally-driven world, the ability to quickly understand and analyze web content is invaluable. From security assessments to content summarization, the sheer volume of information on any given webpage can be overwhelming. That's why I'm excited to introduce a project I've been passionately working on: the **Web Screenshot Analysis Tool**, an open-source application designed to dissect and interpret websites using a suite of cutting-edge AI technologies.
+In today's digitally-driven world, the ability to quickly understand and analyze web content is invaluable. From security assessments to content summarization, the sheer volume of information on any given webpage can be overwhelming. That's why I'm excited to introduce a project I've been passionately working on: the **Web Screenshot Analysis Tool**, an application designed to dissect and interpret websites using a suite of cutting-edge AI technologies.
 
 This tool isn't just about taking a picture; it's about extracting deep insights by combining web capture, Optical Character Recognition (OCR), advanced image captioning, and Large Language Model (LLM) powered security analysis.
 
@@ -49,10 +49,10 @@ The backend is built with [FastAPI](https://fastapi.tiangolo.com/), chosen for i
 
 The system is broadly divided into:
 
-*   **Frontend:** A simple HTML, CSS, and JavaScript interface ([`frontend/templates/index.html`](frontend/templates/index.html:1), [`frontend/static/css/matrix-theme.css`](frontend/static/css/matrix-theme.css), [`frontend/static/js/main.js`](frontend/static/js/main.js:1)) allowing users to submit URLs and view results.
-*   **Backend API ([`backend/api/routes.py`](backend/api/routes.py:1)):** FastAPI endpoints to handle analysis requests (`/api/analyze`) and provide status updates (`/api/status/latest`), plus a WebSocket endpoint (`/api/ws`).
-*   **Core Pipeline ([`backend/core/pipeline.py`](backend/core/pipeline.py:1)):** Manages the sequence of analysis tasks, orchestrating the different processing components.
-*   **Analysis Components ([`web_screenshot_pipeline.py`](web_screenshot_pipeline.py:1)):** Contains the individual classes responsible for Playwright interaction, OCR processing (Tesseract), BLIP captioning, MITRE ATT&CK prompt generation, and LLM interaction (OpenAI).
+*   **Frontend:** A simple HTML, CSS, and JavaScript interface (`frontend/templates/index.html`, `frontend/static/css/matrix-theme.css`, `frontend/static/js/main.js`) allowing users to submit URLs and view results.
+*   **Backend API (`backend/api/routes.py`):** FastAPI endpoints to handle analysis requests (`/api/analyze`) and provide status updates (`/api/status/latest`), plus a WebSocket endpoint (`/api/ws`).
+*   **Core Pipeline (`backend/core/pipeline.py`):** Manages the sequence of analysis tasks, orchestrating the different processing components.
+*   **Analysis Components (`web_screenshot_pipeline.py`):** Contains the individual classes responsible for Playwright interaction, OCR processing (Tesseract), BLIP captioning, MITRE ATT&CK prompt generation, and LLM interaction (OpenAI).
 *   **Configuration ([`config.py`](config.py:1)):** Centralized settings management using `pydantic-settings`.
 
 ```mermaid
@@ -85,11 +85,9 @@ flowchart TD
 
 ## Try It Out!
 
-This project was a fantastic learning experience, blending web automation with various AI disciplines to create a tool that can offer quick, multi-faceted insights into web pages. It's now open source, and I encourage you to explore the code, try it out, and perhaps even contribute!
+This project was a fantastic learning experience, blending web automation with various AI disciplines to create a tool that can offer quick, multi-faceted insights into web pages. The code isn't public yet, but I plan to open source it, and I'll update this post with a link to the repository when it is.
 
-You can find the project repository here: [Link to your Git Repository Here]
-
-The [`README.md`](README.md:1) contains detailed setup and usage instructions. Whether you're interested in web security, AI applications, or just curious about how these technologies can be combined, I hope you find this project as intriguing as I do.
+Whether you're interested in web security, AI applications, or just curious about how these technologies can be combined, I hope you find this project as intriguing as I do.
 
 ---
 

