@@ -116,7 +116,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);ov
     <div id="fade"></div>
     <div id="hud" aria-live="off">
       <span>Reel 01 · Mycelial Nodes // matrix cut</span>
-      <span class="mid" id="counter">Scene 1 / 12</span>
+      <span class="mid" id="counter">Scene 1 / 19</span>
       <span id="readout">—</span>
     </div>
     <div id="plate">
@@ -295,7 +295,7 @@ function stepRain(speed){
 function drawRainOverlay(alpha, speed){ stepRain(speed); ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = alpha; ctx.drawImage(rain.c, 0, 0, W, H); ctx.restore(); }
 
 // ---------- audio: a generated trance/house score that builds, a rain bed, radio static ----------
-const audio = { ctx:null, ready:false, muted:false, music:null, radio:null, staticG:null, analyser:null, freq:null, bpm:128, step:0, nextT:0, timer:0, startT:0, inten:0 };
+const audio = { ctx:null, ready:false, muted:false, music:null, radio:null, staticG:null, analyser:null, freq:null, bpm:128, style:'trance', step:0, nextT:0, timer:0, startT:0, inten:0 };
 function noiseBuffer(ac, secs){ const b = ac.createBuffer(1, ac.sampleRate * secs, ac.sampleRate), d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; return b; }
 function initAudio(){
   if (audio.ready) return;
@@ -337,31 +337,50 @@ function vPluck(t, midi, len, amp){ // detuned supersaw pluck — the trance lea
 function vRiser(t, dur){ const ac = audio.ctx, n = ac.createBufferSource(); n.buffer = audio.noise; n.loop = true; const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 1.1; f.frequency.setValueAtTime(400, t); f.frequency.exponentialRampToValueAtTime(7000, t + dur); const g = ac.createGain(); g.gain.setValueAtTime(.001, t); g.gain.exponentialRampToValueAtTime(.11, t + dur * .82); g.gain.linearRampToValueAtTime(0, t + dur + .05); n.connect(f).connect(g).connect(audio.bus); n.start(t); n.stop(t + dur + .1);
   const o = ac.createOscillator(), og = ac.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(mtof(45), t); o.frequency.exponentialRampToValueAtTime(mtof(69), t + dur); og.gain.setValueAtTime(0, t); og.gain.linearRampToValueAtTime(.045, t + dur * .6); og.gain.linearRampToValueAtTime(0, t + dur + .05); o.connect(og).connect(audio.bus); o.start(t); o.stop(t + dur + .1); }
 function vCrash(t, amp){ const ac = audio.ctx, n = ac.createBufferSource(); n.buffer = audio.noise; const f = ac.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 5000; const g = ac.createGain(); g.gain.setValueAtTime(amp, t); g.gain.exponentialRampToValueAtTime(.001, t + 1.1); n.connect(f).connect(g).connect(audio.bus); n.start(t); n.stop(t + 1.2); }
+function vRhodes(t, midis, len, amp){ // warm electric-piano chord stab for the deep-house turn
+  const ac = audio.ctx, f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(2600, t); f.frequency.exponentialRampToValueAtTime(760, t + len); f.Q.value = 1.4;
+  const g = ac.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(amp, t + .02); g.gain.exponentialRampToValueAtTime(.001, t + len); f.connect(g).connect(audio.bus);
+  for (const m of midis) { const o = ac.createOscillator(), o2 = ac.createOscillator(); o.type = 'sine'; o2.type = 'triangle'; o.frequency.value = mtof(m); o2.frequency.value = mtof(m + 12); o2.detune.value = 4; const h = ac.createGain(); h.gain.value = .3; o.connect(f); o2.connect(h).connect(f); o.start(t); o2.start(t); o.stop(t + len + .05); o2.stop(t + len + .05); } }
 function playStep(s, t){
   const ac = audio.ctx, bar = Math.floor(s / 16), inBar = s % 16, chord = CHORDS[bar % 4], root = ROOTS[bar % 4];
   const q16 = 60 / audio.bpm / 4;
   const inten = clamp((t - (audio.startT || t)) / 70, 0, 1);  // whole-reel build over ~70 s
   audio.inten = inten; const full = .35 + inten * .65;
-  const roll = (bar === 7), firstOfPhrase = (s === 0);
-  // kick — four on the floor, with a one-beat gap just before the drop
-  if (inBar % 4 === 0 && !(roll && inBar === 12)) vKick(t, firstOfPhrase ? 1.05 : .95);
+  const roll = (bar === 7), firstOfPhrase = (s === 0), deep = audio.style === 'deephouse';
+  // kick — four on the floor, with a one-beat gap just before the drop; softer in deep house
+  if (inBar % 4 === 0 && !(roll && inBar === 12)) vKick(t, (firstOfPhrase ? 1.05 : .95) * (deep ? .88 : 1));
   // hats
-  if (inBar % 4 === 2) vHat(t, 7200, .10 + .06 * full, .12);            // offbeat open hat
-  if (inBar % 2 === 1) vHat(t, 9000, .035 + .03 * full, .035);          // 16th tick
-  if (full > .7 && inBar % 2 === 0 && inBar % 4 !== 0) vHat(t, 9500, .02, .03);
-  // clap backbeat
-  if (inBar === 4 || inBar === 12) vClap(t, .13 + .05 * full);
+  if (deep) {
+    if (inBar % 4 === 2) vHat(t, 6400, .14 + .05 * full, .24);          // fat offbeat open hat, the house signature
+    if (inBar === 5 || inBar === 13) vHat(t, 9200, .02, .03);          // a sparse ghost tick
+  } else {
+    if (inBar % 4 === 2) vHat(t, 7200, .10 + .06 * full, .12);          // offbeat open hat
+    if (inBar % 2 === 1) vHat(t, 9000, .035 + .03 * full, .035);        // 16th tick
+    if (full > .7 && inBar % 2 === 0 && inBar % 4 !== 0) vHat(t, 9500, .02, .03);
+  }
+  // clap backbeat, softer in deep house
+  if (inBar === 4 || inBar === 12) vClap(t, (.13 + .05 * full) * (deep ? .8 : 1));
   // bass — downbeat anchor + rolling offbeat
-  if (inBar === 0) vBass(t, root, q16 * 1.2, .40 + .12 * full);
-  if (inBar % 4 === 2) vBass(t, root + 12 + (inBar === 10 ? 7 : 0), q16 * 1.6, .34 + .14 * full);
-  // pad — one chord per bar, filter opening with intensity
-  if (inBar === 0) { const len = (60 / audio.bpm) * 4;
-    const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(600, t); f.frequency.linearRampToValueAtTime(1400 + 2000 * full, t + len * .5); f.frequency.linearRampToValueAtTime(700, t + len); f.Q.value = 3;
+  if (deep) {
+    if (inBar === 0) vBass(t, root, q16 * 1.1, .44 + .1 * full);
+    if (inBar === 3 || inBar === 6 || inBar === 11 || inBar === 14) vBass(t, root + 12, q16 * 1.5, .36 + .12 * full);
+  } else {
+    if (inBar === 0) vBass(t, root, q16 * 1.2, .40 + .12 * full);
+    if (inBar % 4 === 2) vBass(t, root + 12 + (inBar === 10 ? 7 : 0), q16 * 1.6, .34 + .14 * full);
+  }
+  // pad — one chord per bar, filter opening with intensity; kept dark and dubby in deep house
+  if (inBar === 0) { const len = (60 / audio.bpm) * 4, peak = deep ? 1000 : 1400 + 2000 * full;
+    const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(600, t); f.frequency.linearRampToValueAtTime(peak, t + len * .5); f.frequency.linearRampToValueAtTime(700, t + len); f.Q.value = 3;
     const g = ac.createGain(), pv = .05 + .04 * full; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(pv, t + .5); g.gain.setValueAtTime(pv, t + len - .5); g.gain.linearRampToValueAtTime(0, t + len + .05); f.connect(g).connect(audio.bus);
     chord.forEach(m => [-7, 7].forEach(det => { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det; o.connect(f); o.start(t); o.stop(t + len + .1); }));
   }
-  // trance lead — 16th gated supersaw, arrives with energy, biggest after the drop
-  if (inten > .33 && bar >= 2 && [0,2,3,5,6,7,9,10,11,13,14,15].includes(inBar)) {
+  if (deep) {
+    // deep house — warm Rhodes chord stabs on the offbeat plus a sustained dub chord, no gated supersaw
+    if (inBar === 2 || inBar === 6 || inBar === 10 || inBar === 14) vRhodes(t, chord.map(m => m + 12), q16 * 2.6, .11 + .05 * full);
+    if (inBar === 7 || inBar === 15) vRhodes(t, chord.map(m => m + 12), q16 * 1.4, .06 + .03 * full);
+    if (inBar === 0) vRhodes(t, chord, (60 / audio.bpm) * 2.6, .05 + .03 * full);
+  } else if (inten > .33 && bar >= 2 && [0,2,3,5,6,7,9,10,11,13,14,15].includes(inBar)) {
+    // trance lead — 16th gated supersaw, arrives with energy, biggest after the drop
     const idx = [0,1,2,1,0,2,1,2][inBar % 8], oct = inBar % 4 === 0 ? 12 : 0;
     vPluck(t, chord[idx % chord.length] + 12 + oct, q16 * 1.1, .06 + .05 * full);
   }
@@ -376,6 +395,7 @@ function playStep(s, t){
 function blip(freq, len){ if (!audio.ready || audio.muted) return; const ac = audio.ctx, t = ac.currentTime; const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = freq; g.gain.setValueAtTime(.08, t); g.gain.exponentialRampToValueAtTime(.001, t + len); o.connect(g).connect(audio.comp); o.start(t); o.stop(t + len); }
 function setMusic(level, filterHz, secs){ if (!audio.ready) return; const t = audio.ctx.currentTime; audio.music.gain.cancelScheduledValues(t); audio.music.gain.setTargetAtTime(level, t, secs / 3); audio.radio.frequency.cancelScheduledValues(t); audio.radio.frequency.setTargetAtTime(filterHz, t, secs / 3); }
 function setStatic(level, secs){ if (!audio.ready) return; audio.staticG.gain.setTargetAtTime(level, audio.ctx.currentTime, secs / 3); }
+function setStyle(style){ audio.style = style; audio.bpm = style === 'deephouse' ? 122 : 128; } // deep-house turn drops the tempo and swaps the lead
 function setMuted(m){ audio.muted = m; if (audio.ready) audio.master.gain.setTargetAtTime(m ? 0 : .9, audio.ctx.currentTime, .05); $('#mute').textContent = m ? 'Muted' : 'Sound on'; $('#mute').setAttribute('aria-pressed', String(m)); }
 
 // ---------- scenes ----------
@@ -391,7 +411,7 @@ scenes.push({
     this.drops = Array.from({ length: Math.floor(W / 2.5) }, () => ({ x: Math.random() * W, y: Math.random() * H, l: 10 + Math.random() * 16, v: 700 + Math.random() * 600 }));
     this.mast = { x: W * .68, top: H * .22 };
   },
-  enter(){ setMusic(0, 700, 1); setStatic(0, 1); },
+  enter(){ setStyle('trance'); setMusic(0, 700, 1); setStatic(0, 1); },
   readout(t){ const s = Math.floor(t) + 11 * 60 + 30; return `02:${String(Math.floor(s / 60) % 60).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}  ·  4°C  ·  rain`; },
   draw(t, dt){
     const hor = H * .62;
@@ -791,10 +811,203 @@ scenes.push({
   }
 });
 
-// 12 · end of reel
+// ======== Chapter Three · With Great Power ========
+
+// 12 · morning calls — planning the walk-through on paper
+scenes.push({
+  eyebrow: 'Day 2 · 09:40 · client bridge · red team planning', title: 'Drawing the doors', hold: 11000,
+  text: 'Morning, and the first calls are about buildings that are not yours. A tower with a marble lobby and a turnstile that trusts a plastic card; a loading bay somebody props open for the smokers; a server room whose door is only as strong as the reader beside it. You sit on a bridge with the client and sketch it out loud — where you would walk in, which badge you would clone, where a small quiet box would sit on their network and never be noticed. It is all hypothetical, all authorised, all written down. That is the strange luxury of the job: they ask you to plan the heist, and then they thank you for the map.',
+  resize(){ const r = mulberry(31); this.rooms = []; const cols = 4, rows = 3, pad = Math.min(W, H) * .06;
+    const gw = (W * .66 - pad) / cols, gh = (H * .64 - pad) / rows, ox = W * .17, oy = H * .16;
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) { if (r() < .12) continue; this.rooms.push({ x: ox + x * gw + 4, y: oy + y * gh + 4, w: gw - 8, h: gh - 8, crit: r() < .24 }); }
+    this.readers = []; for (const rm of this.rooms) { const side = Math.floor(r() * 4); const p = side === 0 ? [rm.x + rm.w / 2, rm.y] : side === 1 ? [rm.x + rm.w, rm.y + rm.h / 2] : side === 2 ? [rm.x + rm.w / 2, rm.y + rm.h] : [rm.x, rm.y + rm.h / 2]; this.readers.push({ x: p[0], y: p[1], crit: rm.crit, ph: r() * 6 }); }
+    this.route = this.readers.filter(rd => rd.crit).slice(0, 3); },
+  enter(){ setStyle('deephouse'); setMusic(.6, 4200, 4); setStatic(0, 1); this.t0 = -1; },
+  readout(){ return `targets 3  ·  entry points ${this.readers ? this.readers.length : 0}  ·  scope: physical + network`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0;
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#060a08'); g.addColorStop(1, '#0a1410'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(0,255,102,.05)'; ctx.lineWidth = 1; for (let x = 0; x < W; x += 36) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); } for (let y = 0; y < H; y += 36) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    for (const rm of this.rooms) { ctx.strokeStyle = rm.crit ? 'rgba(255,170,90,.6)' : 'rgba(47,208,195,.4)'; ctx.lineWidth = 1.4; ctx.strokeRect(rm.x, rm.y, rm.w, rm.h); if (rm.crit) { ctx.fillStyle = 'rgba(255,170,90,.06)'; ctx.fillRect(rm.x, rm.y, rm.w, rm.h); } }
+    for (const rd of this.readers) { const pr = .5 + .5 * Math.sin(t * 3 + rd.ph); ctx.fillStyle = rd.crit ? `rgba(255,170,90,${.5 + pr * .5})` : `rgba(0,255,102,${.4 + pr * .4})`; ctx.beginPath(); ctx.arc(rd.x, rd.y, 3.5, 0, 7); ctx.fill();
+      if (rd.crit) { ctx.strokeStyle = `rgba(255,170,90,${(1 - (t * .6 + rd.ph) % 1) * .4})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(rd.x, rd.y, 4 + ((t * .6 + rd.ph) % 1) * 20, 0, 7); ctx.stroke(); } }
+    if (this.route.length > 1) { const prog = clamp(el / 4, 0, 1); ctx.strokeStyle = '#00ff66'; ctx.lineWidth = 2; ctx.setLineDash([6, 5]); ctx.lineDashOffset = -el * 20; ctx.beginPath();
+      const pts = [[W * .09, H * .9], ...this.route.map(r => [r.x, r.y])], total = pts.length - 1; ctx.moveTo(pts[0][0], pts[0][1]);
+      for (let i = 1; i < pts.length; i++) { const seg = clamp(prog * total - (i - 1), 0, 1); ctx.lineTo(lerp(pts[i-1][0], pts[i][0], seg), lerp(pts[i-1][1], pts[i][1], seg)); if (seg < 1) break; }
+      ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = '#00ff66'; ctx.font = '9px JetBrains Mono, monospace'; ctx.fillText('▲ entry', W * .09 - 6, H * .9 + 16); }
+    vignette(); drawGrain(.07);
+  }
+});
+
+// 13 · nmap — the subnet lights up
+scenes.push({
+  eyebrow: 'nmap -sS -sV 10.20.0.0/22 · mapping the internal estate', title: 'Knocking on every door', hold: 12000,
+  text: 'Inside their network now — on paper, under contract, with their blessing — you let the scanner off its lead. A quiet knock at every address in the range, and a map draws itself as the replies come back: here a print server that should not still exist, there a database nobody owns any more, a jump host, a dozen desktops, a handful of little appliances humming to themselves in a cupboard. Every open port is a lit window in a building at night. You are not breaking anything. You are just making a map so honest it is almost rude.',
+  resize(){ const r = mulberry(55); this.cols = W < 640 ? 10 : 16; this.rows = W < 640 ? 10 : 12; this.hosts = [];
+    const gw = W * .6 / this.cols, gh = H * .62 / this.rows, ox = W * .32, oy = H * .16;
+    for (let y = 0; y < this.rows; y++) for (let x = 0; x < this.cols; x++) { const up = r() < .34; this.hosts.push({ x: ox + x * gw + gw / 2, y: oy + y * gh + gh / 2, up, oct: y * this.cols + x + 1, ports: up ? [22, 80, 443, 445, 3389, 8080].filter(() => r() < .4) : [], ph: r() * 6, found: -1 }); } },
+  enter(){ setMusic(.62, 5200, 2.5); setStatic(.01, 1.5); this.t0 = -1; this.sweep = 0; this.log = []; },
+  readout(){ const up = this.hosts ? this.hosts.filter(h => h.up && h.found >= 0).length : 0; return `${up} hosts up  ·  ${this.hosts ? this.hosts.length : 0} addrs probed  ·  ${this.sweep < 1 ? 'scanning' : 'complete'}`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0; this.sweep = clamp(el / 6, 0, 1);
+    ctx.fillStyle = '#04070a'; ctx.fillRect(0, 0, W, H);
+    const ox = W * .32, sweepX = ox + this.sweep * (W * .6);
+    const up = this.hosts.filter(h => h.up && h.found >= 0);
+    ctx.strokeStyle = 'rgba(47,208,195,.12)'; ctx.lineWidth = 1;
+    for (let i = 0; i < up.length; i++) { const a = up[i], b = up[(i + 3) % up.length]; if (b && b !== a) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); } }
+    for (const h of this.hosts) { const hit = h.x < sweepX; if (hit && h.found < 0) { h.found = el; if (h.up) { blip(600 + h.oct * 6, .04); this.log.unshift(`10.20.${(h.oct / 254 | 0)}.${h.oct % 254} up · ${h.ports.length} open`); if (this.log.length > 14) this.log.pop(); } }
+      if (!hit) { ctx.fillStyle = 'rgba(80,90,100,.22)'; ctx.fillRect(h.x - 2, h.y - 2, 4, 4); continue; }
+      if (h.up) { const pr = .6 + .4 * Math.sin(t * 2 + h.ph), age = clamp((el - h.found) * 2, 0, 1); ctx.fillStyle = `rgba(0,255,102,${pr * age})`; ctx.shadowColor = 'rgba(0,255,102,.6)'; ctx.shadowBlur = 8 * age; ctx.beginPath(); ctx.arc(h.x, h.y, 3.2, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+        for (let p = 0; p < h.ports.length; p++) { ctx.fillStyle = 'rgba(57,240,216,.8)'; ctx.fillRect(h.x - 6 + p * 2.6, h.y + 6, 1.6, 1.6); } }
+      else { ctx.fillStyle = 'rgba(120,130,140,.32)'; ctx.fillRect(h.x - 1.5, h.y - 1.5, 3, 3); } }
+    if (this.sweep < 1) { ctx.strokeStyle = 'rgba(0,255,102,.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sweepX, H * .14); ctx.lineTo(sweepX, H * .8); ctx.stroke();
+      const sg = ctx.createLinearGradient(sweepX - 40, 0, sweepX, 0); sg.addColorStop(0, 'rgba(0,255,102,0)'); sg.addColorStop(1, 'rgba(0,255,102,.12)'); ctx.fillStyle = sg; ctx.fillRect(sweepX - 40, H * .14, 40, H * .66); }
+    const narrow = W < 640, pw = narrow ? W * .27 : W * .24, px = narrow ? 8 : 24, py = H * .16;
+    ctx.fillStyle = 'rgba(8,12,18,.8)'; ctx.fillRect(px, py, pw, H * .6); ctx.strokeStyle = '#1f2536'; ctx.strokeRect(px + .5, py + .5, pw, H * .6);
+    ctx.fillStyle = '#00ff66'; ctx.font = '600 10px JetBrains Mono, monospace'; ctx.textAlign = 'left'; ctx.fillText('NMAP ▸ host discovery', px + 10, py + 16);
+    ctx.font = '9px JetBrains Mono, monospace'; this.log.forEach((L, i) => { ctx.fillStyle = `rgba(57,240,216,${1 - i / 16})`; ctx.fillText(L, px + 10, py + 34 + i * 12); });
+    vignette(); drawGrain(.06);
+  }
+});
+
+// 14 · the analyst — an LLM reads the banners back to you
+scenes.push({
+  eyebrow: 'results.gnmap ▸ qwen-analyst · version triage', title: 'Asking the machine what it sees', hold: 11000,
+  text: 'Too many results to read by hand, so you pour them into the model and ask it to be your tired second pair of eyes. It reads the version banners the way a mechanic listens to an engine: this SSH is a decade old, that web server still admits to a build with a name and a number, this appliance is running firmware with a bad reputation. It does not touch anything. It just points, politely and relentlessly, at the soft spots — and sorts them by how much trouble they would be in the wrong hands. One line near the bottom makes you sit up.',
+  lines: ['$ qwen-analyst triage results.gnmap --rank', '  parsing 41 hosts · 112 open services', '← OpenSSH 6.6.1p1        host .17   age: high · legacy', '← Apache httpd 2.4.29    host .33   banner leaks build', '← ProFTPD 1.3.5          host .44   known-bad version', '← nginx 1.14.0           host .51   outdated', '← "PowerLogic" mgmt UI   host .9    ⚠ operational tech', '← suggest: review .9 first — exposed control interface', '$ _'],
+  enter(){ setMusic(.66, 6000, 2.5); setStatic(0, 1); this.t0 = -1; this.n = 0; this.next = .5; },
+  readout(){ return `41 hosts  ·  112 services  ·  ${this.n >= this.lines.length ? '1 critical flagged' : 'analysing'}`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0;
+    if (this.n < this.lines.length && el > this.next) { this.n++; this.next = el + .6 + Math.random() * .4; blip(700 + this.n * 25, .05); }
+    const g = ctx.createRadialGradient(W * .35, H * .5, 0, W * .35, H * .5, Math.max(W, H) * .7); g.addColorStop(0, '#0a0f0c'); g.addColorStop(1, '#05080a'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const narrow = W < 680, ex = narrow ? 14 : 40, ew = narrow ? W - 28 : Math.min(760, W * .64), ey = H * .16;
+    ctx.fillStyle = 'rgba(8,10,14,.9)'; ctx.fillRect(ex, ey, ew, this.lines.length * 22 + 36); ctx.strokeStyle = '#1f2536'; ctx.strokeRect(ex + .5, ey + .5, ew, this.lines.length * 22 + 36);
+    ctx.fillStyle = '#00ff66'; ctx.font = '600 10px JetBrains Mono, monospace'; ctx.textAlign = 'left'; ctx.fillText('AGENT ▸ version triage', ex + 12, ey + 16);
+    let y = ey + 40;
+    for (let i = 0; i < this.n; i++) { const L = this.lines[i], last = i === this.n - 1, crit = L.includes('⚠') || L.includes('PowerLogic') || L.includes('.9 first');
+      ctx.font = '11px JetBrains Mono, monospace'; ctx.fillStyle = L.startsWith('$') ? '#00ff66' : crit ? '#ffaa5a' : L.startsWith('←') ? '#2fd0c3' : 'rgba(236,229,212,.75)';
+      let s = L, mw = ew - 24; while (ctx.measureText(s).width > mw && s.length > 6) s = s.slice(0, -1); ctx.fillText(s, ex + 12, y);
+      if (last && L.endsWith('_') && Math.floor(t * 2) % 2) { ctx.fillStyle = '#00ff66'; ctx.fillRect(ex + 12 + ctx.measureText('$ ').width, y - 9, 6, 11); }
+      y += 22; }
+    vignette(); drawGrain(.07);
+  }
+});
+
+// 15 · the finding — a hand on the building's light switch
+scenes.push({
+  eyebrow: 'host 10.20.1.9 · PowerLogic ▸ breaker control · read/write', title: 'With great power', hold: 12000,
+  text: 'And then one of the soft spots turns out to be the mains. A power management interface, wide open on the inside, the kind of panel that decides whether a floor of the building keeps its lights. You do not throw a single switch — of course you do not — but you screenshot the plain fact that you could, and you write the careful email: I have control of one of your critical power systems, here is exactly how I got here, here is how to shut that door tonight. What to do with all this power, you think, grinning at the ceiling — and then you think the only correct thought, the one every good one of us learns early: with great power comes responsibility. You hand it straight back. That is the whole job.',
+  resize(){ const r = mulberry(77); this.breakers = Array.from({ length: 8 }, () => ({ on: true, ph: r() * 6 })); },
+  enter(){ setMusic(.72, 7000, 3); setStatic(0, 1); this.t0 = -1; },
+  readout(t){ const kw = 418 + Math.round(Math.sin((t || 0) * .8) * 22); return `load ${kw} kW  ·  3-phase nominal  ·  access: READ/WRITE`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0;
+    ctx.fillStyle = '#070603'; ctx.fillRect(0, 0, W, H);
+    const cx = W / 2, cy = H * .4, R = Math.min(W, H) * .17;
+    ctx.strokeStyle = 'rgba(255,170,90,.15)'; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(cx, cy, R, Math.PI * .75, Math.PI * 2.25); ctx.stroke();
+    const load = .62 + .12 * Math.sin(t * .8); ctx.strokeStyle = '#ffaa5a'; ctx.shadowColor = 'rgba(255,170,90,.6)'; ctx.shadowBlur = 16; ctx.beginPath(); ctx.arc(cx, cy, R, Math.PI * .75, Math.PI * .75 + load * Math.PI * 1.5); ctx.stroke(); ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffce8a'; ctx.font = `800 ${R * .5}px Syne, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText((load * 680 | 0) + '', cx, cy - R * .06); ctx.font = '11px JetBrains Mono, monospace'; ctx.fillStyle = 'rgba(255,206,138,.7)'; ctx.fillText('kW LOAD', cx, cy + R * .42);
+    ctx.textBaseline = 'alphabetic';
+    const n = this.breakers.length, bw = Math.min(46, (W * .72) / n), bx0 = cx - (n * (bw + 10) - 10) / 2, by = cy + R + 50;
+    this.breakers.forEach((b, i) => { const x = bx0 + i * (bw + 10); ctx.fillStyle = 'rgba(20,16,10,.9)'; ctx.fillRect(x, by, bw, 60); ctx.strokeStyle = '#3a2f1a'; ctx.strokeRect(x + .5, by + .5, bw, 60);
+      const lit = b.on; ctx.fillStyle = lit ? '#00ff66' : '#5a2a2a'; ctx.shadowColor = lit ? 'rgba(0,255,102,.7)' : 'transparent'; ctx.shadowBlur = lit ? 8 : 0; ctx.beginPath(); ctx.arc(x + bw / 2, by + 16, 5, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
+      ctx.fillStyle = 'rgba(236,229,212,.5)'; ctx.font = '8px JetBrains Mono, monospace'; ctx.textAlign = 'center'; ctx.fillText('B' + (i + 1), x + bw / 2, by + 40); ctx.fillStyle = '#00ff66'; ctx.fillText('ON', x + bw / 2, by + 52); });
+    ctx.textAlign = 'left';
+    if (el > 2) { const a = clamp((el - 2) / 1.5, 0, 1); ctx.fillStyle = `rgba(255,170,90,${a})`; ctx.font = '600 12px JetBrains Mono, monospace'; ctx.textAlign = 'center'; ctx.fillText('◉ WRITE ACCESS CONFIRMED — NOT ACTUATED', cx, H * .12); ctx.textAlign = 'left'; }
+    drawCat(ctx, W * .88, H * .22, Math.min(W, H) * .07, t, .5);
+    vignette(); drawGrain(.08);
+  }
+});
+
+// 16 · Canary Wharf — the hour the towers empty
+scenes.push({
+  eyebrow: 'E14 · 18:20 · the towers let out · headphones in', title: 'Watching the hustle go home', hold: 11000,
+  text: 'You close the laptop while there is still colour in the sky and walk east to where the glass towers stand with their feet in the old docks. It is going-home time, and the lobbies breathe out: thousands of people in good coats spilling onto the plaza, checking phones, peeling off toward the trains, each one a small certain purpose in a hurry. You are not in a hurry. You stand by the water with the same loop still playing and watch the hustle drain away floor by floor, lights going dark in the towers like a slow exhale, and for a little while you are simply one more quiet signal in a city full of them.',
+  resize(){ const r = mulberry(140); this.towers = []; let x = W * .06; while (x < W * .94) { const w = 30 + r() * 60, h = H * (.3 + r() * .42); this.towers.push({ x, w, h, lit: Array.from({ length: Math.floor(h / 16) }, () => r() < .7) }); x += w + 8 + r() * 18; }
+    this.people = Array.from({ length: Math.floor(W / 22) }, () => ({ x: r() * W, s: (r() < .5 ? 1 : -1) * (14 + r() * 16), ph: r() * 6 })); },
+  enter(){ setMusic(.8, 9000, 3); setStatic(0, 1); this.t0 = -1; },
+  readout(t){ return `12.1°C  ·  tide rising  ·  trains every 3 min  ·  ${Math.floor(((t || 0) * 24) % 1e6).toString().padStart(6, '0')} f`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0; const hor = H * .78;
+    const sky = ctx.createLinearGradient(0, 0, 0, hor); sky.addColorStop(0, '#0b1830'); sky.addColorStop(.6, '#2a2748'); sky.addColorStop(1, '#5b4a3a'); ctx.fillStyle = sky; ctx.fillRect(0, 0, W, hor);
+    for (const tw of this.towers) { ctx.fillStyle = '#0c1118'; ctx.fillRect(tw.x, hor - tw.h, tw.w, tw.h);
+      const cols = Math.max(2, Math.floor(tw.w / 12)); tw.lit.forEach((on, row) => { if (!on) return; const fade = clamp(1 - (el - row * .25) * .05, .12, 1); for (let c = 0; c < cols; c++) if ((row + c) % 2 === 0) { ctx.fillStyle = `rgba(255,200,120,${.5 * fade})`; ctx.fillRect(tw.x + 5 + c * 11, hor - tw.h + 8 + row * 16, 5, 7); } }); }
+    const rg = ctx.createLinearGradient(0, hor, 0, H); rg.addColorStop(0, '#15202c'); rg.addColorStop(1, '#070b10'); ctx.fillStyle = rg; ctx.fillRect(0, hor, W, H - hor);
+    for (const tw of this.towers) { ctx.fillStyle = 'rgba(255,200,120,.05)'; ctx.fillRect(tw.x, hor, tw.w, (H - hor) * .5); }
+    ctx.fillStyle = 'rgba(10,12,18,.82)';
+    for (const p of this.people) { p.x += p.s * dt; if (p.x > W + 10) p.x = -10; if (p.x < -10) p.x = W + 10; const y = hor - 6 + Math.sin(t * 6 + p.ph) * 1.5; ctx.fillRect(p.x, y - 7, 2.5, 7); }
+    ctx.fillStyle = 'rgba(255,230,200,.5)'; ctx.font = '14px JetBrains Mono, monospace'; ctx.fillText('♪', W * .07 + Math.sin(t * 2) * 3, H * .2);
+    vignette(); drawGrain(.06);
+  }
+});
+
+// 17 · the second post — because the first one landed
+scenes.push({
+  eyebrow: 'sv-zeroone.github.io ▸ _posts ▸ hardware implants, part 2', title: 'Pressing publish again', hold: 12000,
+  text: 'Home, kettle on, the cat back on the shelf. The first post about the little rogue boxes did better than anything you have written — people shared it, argued with it, thanked you for making them paranoid — so tonight you finish the sequel: the implant zoo, from a USB stick that is not a USB stick all the way down to a chip baked into a motherboard, and the quiet trick they all share. Outbound to get inbound, phoning home through a channel nobody is watching. You tidy the last paragraph, you check the images one more time, and you push. Part two goes live next to part one. The flare goes up again.',
+  lines: ['---', 'title: "Hardware Implants, Part 2: Hiding in Plain Sight"', 'tags: [red-team, hardware, badusb, supply-chain]', '---', '', 'The scariest implants aren’t the ones that look like hacking tools.', 'They look like a cable. A charger. A USB stick that isn’t.', '', 'Outbound to get inbound, in effect — the box phones home', 'through a channel the defender never thought to watch.', '', '$ git add _posts/2026-10-13-hardware-implants-part-2.md', '$ git commit -m "part 2: hiding in plain sight"', '$ git push origin master', '→ published ✓  ·  /2026/10/13/hardware-implants-part-2.html'],
+  enter(){ setMusic(.8, 9000, 2.5); setStatic(0, 1); this.t0 = -1; this.n = 0; this.next = .4; this.pulse = -1; },
+  readout(){ return `markdown  ·  jekyll  ·  ${this.pulse >= 0 ? 'PUBLISHED · part 2' : 'drafting'}  ·  utf-8`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0;
+    if (this.n < this.lines.length && el > this.next) { this.n++; this.next = el + .4 + Math.random() * .3; if (this.n === this.lines.length) { this.pulse = el; blip(1320, .3); } }
+    const g = ctx.createRadialGradient(W * .3, H * .5, 0, W * .3, H * .5, Math.max(W, H) * .8); g.addColorStop(0, '#0c130d'); g.addColorStop(1, '#050806'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const narrow = W < 640, ew = narrow ? W - 28 : Math.min(700, W * .62), ex = narrow ? 14 : 40, ey = H * .1, eh = Math.min(H * .74, this.lines.length * 18 + 40);
+    ctx.fillStyle = 'rgba(8,10,10,.9)'; ctx.fillRect(ex, ey, ew, eh); ctx.strokeStyle = '#1f2536'; ctx.strokeRect(ex + .5, ey + .5, ew, eh);
+    ctx.fillStyle = '#00ff66'; ctx.font = '600 10px JetBrains Mono, monospace'; ctx.textAlign = 'left'; ctx.fillText('2026-10-13-hardware-implants-part-2.md', ex + 12, ey + 16);
+    let y = ey + 36;
+    for (let i = 0; i < this.n; i++) { const L = this.lines[i], last = i === this.n - 1; ctx.font = '11px JetBrains Mono, monospace';
+      ctx.fillStyle = L.startsWith('$') ? '#00ff66' : L.startsWith('→') ? '#2fd0c3' : (L.startsWith('---') || L.startsWith('title') || L.startsWith('tags')) ? 'rgba(120,200,255,.75)' : 'rgba(236,229,212,.82)';
+      let s = L, mw = ew - 24; while (ctx.measureText(s).width > mw && s.length > 6) s = s.slice(0, -1); ctx.fillText(s, ex + 12, y);
+      if (last && Math.floor(t * 2) % 2) { ctx.fillStyle = '#00ff66'; ctx.fillRect(ex + 12 + ctx.measureText(s).width + 2, y - 9, 6, 11); }
+      y += 18; if (y > ey + eh - 10) break; }
+    if (this.pulse >= 0) { const pe = el - this.pulse, bx = narrow ? W * .5 : W * .8, by = H * .86;
+      ctx.strokeStyle = '#2a2f40'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx, by - H * .3); ctx.stroke();
+      ctx.fillStyle = '#00ff66'; ctx.beginPath(); ctx.arc(bx, by - H * .3, 3, 0, 7); ctx.fill();
+      for (let i = 0; i < 4; i++) { const p = ((pe * .5 + i / 4) % 1); ctx.strokeStyle = `rgba(0,255,102,${(1 - p) * .5})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(bx, by - H * .3, 6 + p * Math.max(W, H) * .5, 0, 7); ctx.stroke(); } }
+    drawCat(ctx, narrow ? W * .82 : W * .9, H * .32, Math.min(W, H) * .08, t, .7);
+    vignette(); drawGrain(.08);
+  }
+});
+
+// 18 · the implant — a quiet box that phones home
+scenes.push({
+  eyebrow: 'rogue node ▸ dropped on the LAN ▸ out-of-band beacon', title: 'Outbound to get inbound', hold: 13000,
+  text: 'This is the picture the whole post is really about. A small box, the size of a paperback, that someone plugs into a network jack nobody watches. It wakes up looking like it belongs. It joins the switch, it listens — quietly pulling copies of the traffic that drifts past — and then it does the clever, patient thing: it never waits to be called. It reaches outward, over a channel the defenders are not looking at, and dribbles what it has learned home, a few bytes at a time, for as long as it likes. Outbound to get inbound. A map drawn from the inside by a device that looks like nothing at all — which is exactly why you teach them to go looking for it.',
+  resize(){ const r = mulberry(202); const cx = W * .42, cy = H * .46, R = Math.min(W, H) * .3;
+    this.sw = { x: cx, y: cy }; this.nodes = []; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; this.nodes.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, ph: r() * 6 }); }
+    this.im = { x: cx + R * .5, y: cy + R * 1.05 }; this.home = { x: W * .9, y: H * .16 }; this.cap = []; this.beacon = []; },
+  enter(){ setMusic(.78, 8000, 3); setStatic(.02, 2); this.t0 = -1; },
+  readout(){ return `link up  ·  captured ${(this.cap ? this.cap.length : 0) + 128} frames  ·  beacon active`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0; const sw = this.sw, im = this.im, hm = this.home;
+    ctx.fillStyle = '#04060a'; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = 'rgba(47,208,195,.25)'; ctx.lineWidth = 1;
+    for (const n of this.nodes) { ctx.beginPath(); ctx.moveTo(sw.x, sw.y); ctx.lineTo(n.x, n.y); ctx.stroke(); }
+    for (const n of this.nodes) { const pr = .5 + .5 * Math.sin(t * 2 + n.ph); ctx.fillStyle = `rgba(47,208,195,${.5 + pr * .3})`; ctx.beginPath(); ctx.arc(n.x, n.y, 4, 0, 7); ctx.fill(); }
+    ctx.fillStyle = '#0d1a16'; ctx.strokeStyle = '#2fd0c3'; ctx.lineWidth = 1.5; ctx.fillRect(sw.x - 16, sw.y - 10, 32, 20); ctx.strokeRect(sw.x - 16, sw.y - 10, 32, 20);
+    ctx.fillStyle = '#2fd0c3'; ctx.font = '8px JetBrains Mono, monospace'; ctx.textAlign = 'center'; ctx.fillText('SW', sw.x, sw.y + 3);
+    const joined = el > 1.5; ctx.strokeStyle = joined ? '#00ff66' : 'rgba(0,255,102,.3)'; ctx.lineWidth = 2; ctx.setLineDash(joined ? [] : [4, 4]); ctx.beginPath(); ctx.moveTo(sw.x, sw.y); ctx.lineTo(im.x, im.y); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = '#071008'; ctx.strokeStyle = '#00ff66'; ctx.lineWidth = 1.5; ctx.fillRect(im.x - 14, im.y - 9, 28, 18); ctx.shadowColor = 'rgba(0,255,102,.6)'; ctx.shadowBlur = joined ? 10 : 0; ctx.strokeRect(im.x - 14, im.y - 9, 28, 18); ctx.shadowBlur = 0;
+    ctx.fillStyle = '#00ff66'; ctx.fillText('◼', im.x, im.y + 3); ctx.textAlign = 'left'; ctx.font = '9px JetBrains Mono, monospace'; ctx.fillText('rogue', im.x + 18, im.y + 3);
+    const mx = (im.x + hm.x) / 2, my = Math.min(im.y, hm.y) - H * .2;
+    if (joined && Math.random() < .5) { const src = this.nodes[(Math.random() * this.nodes.length) | 0]; this.cap.push({ x: src.x, y: src.y, p: 0 }); }
+    this.cap = this.cap.filter(c => (c.p += dt * .8) < 1); ctx.fillStyle = 'rgba(57,240,216,.9)';
+    for (const c of this.cap) { const x = lerp(c.x, im.x, ease(c.p)), y = lerp(c.y, im.y, ease(c.p)); ctx.fillRect(x - 1.5, y - 1.5, 3, 3); }
+    if (joined) { ctx.strokeStyle = 'rgba(0,255,102,.2)'; ctx.lineWidth = 1; ctx.setLineDash([3, 6]); ctx.beginPath(); ctx.moveTo(im.x, im.y); ctx.quadraticCurveTo(mx, my, hm.x, hm.y); ctx.stroke(); ctx.setLineDash([]);
+      if (Math.random() < .3) this.beacon.push({ p: 0 });
+      this.beacon = this.beacon.filter(b => (b.p += dt * .4) < 1); ctx.fillStyle = '#00ff66';
+      for (const b of this.beacon) { const u = b.p, x = (1 - u) * (1 - u) * im.x + 2 * (1 - u) * u * mx + u * u * hm.x, y = (1 - u) * (1 - u) * im.y + 2 * (1 - u) * u * my + u * u * hm.y; ctx.shadowColor = 'rgba(0,255,102,.8)'; ctx.shadowBlur = 6; ctx.fillRect(x - 2, y - 2, 4, 4); ctx.shadowBlur = 0; }
+      ctx.fillStyle = '#071008'; ctx.strokeStyle = '#00ff66'; ctx.lineWidth = 1.5; ctx.strokeRect(hm.x - 14, hm.y - 10, 28, 20); ctx.fillStyle = '#00ff66'; ctx.font = '8px JetBrains Mono, monospace'; ctx.textAlign = 'center'; ctx.fillText('HOME', hm.x, hm.y + 3); ctx.textAlign = 'left'; }
+    vignette(); drawGrain(.07);
+  }
+});
+
+// 19 · end of reel
 scenes.push({
   eyebrow: 'End of reel 01', title: 'The reel keeps running', hold: 1e9,
-  text: 'The song is still going. Somewhere in the rack a clip is rendering that nobody has seen yet; out past the aurora the fat cat waits in his galaxy glasses; and in a quiet corner of the internet a new post sits with its hand up, hoping the right people are reading. Two chapters in, and the real work has barely started. Press ◀ to run the reel again, or open the real soundtrack and let it carry you out.',
+  text: 'The song is still going. Somewhere in the rack a clip is rendering that nobody has seen yet; out past the aurora the fat cat waits in his galaxy glasses; and in a quiet corner of the internet a new post sits with its hand up, hoping the right people are reading. Three chapters in, and the real work has barely started. Press ◀ to run the reel again, or open the real soundtrack and let it carry you out.',
   enter(){ setMusic(.75, 9000, 3); setStatic(0, 1); this.t0 = -1; },
   readout(t){ return `reel 01 · ${Math.floor((t * 24) % 1e6).toString().padStart(6, '0')} f · to be continued`; },
   draw(t, dt){
