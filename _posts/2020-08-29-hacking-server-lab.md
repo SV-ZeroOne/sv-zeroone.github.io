@@ -1,4 +1,5 @@
 ---
+title: "Setting Up a Hacking Server Lab"
 author: zero
 tags: hacking server hardware kali linux
 ---
@@ -165,4 +166,4 @@ The end result should look similar to this.
 ### Extra Resources
 
 * [Kali Linux Training](https://kali.training/)
-* [Kali Linux & VirtualBox Guest Addition](https://www.kali.org/docs/virtualization/install-virtualbox-guest-additions-kali/)
+* [Kali Linux & VirtualBox Guest Addition](https://www.kali.org/docs/virtualization/install-virtualbox-guest-additions/)

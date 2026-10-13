@@ -1,4 +1,5 @@
 ---
+title: "Red Teaming, Part 1: Initial Access and Phishing"
 author: zero
 tags: redteaming phishing initialaccess
 ---
@@ -178,7 +179,7 @@ Red Team exercises focusing on **Initial Access** techniques—particularly phis
 - [Modlishka (GitHub)](https://github.com/drk1wi/Modlishka)
 - [MacroPack (GitHub)](https://github.com/sevagas/macro_pack)
 - [Havoc (GitHub)](https://github.com/HavocFramework/Havoc)
-- [Nimbo-C2](https://github.com/mavproxy/Nimbo-C2)
+- [Nimbo-C2](https://github.com/itaymigdal/Nimbo-C2)
 - [Limelighter](https://bolster.ai/blog/browser-in-the-browser-bitb-phishing-attacks)
 - [ScareCrow](https://github.com/optiv/ScareCrow)
 - [mr.d0x Browser-in-Browser Templates](https://mrd0x.com/browser-in-the-browser-phishing-attack/)

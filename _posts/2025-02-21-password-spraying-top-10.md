@@ -1,4 +1,5 @@
 ---
+title: "Top 10 Password Spraying Tools for Red Team Operations"
 author: zero
 tags: redteaming initialaccess tools
 ---
@@ -20,7 +21,7 @@ The tools listed here are open-source and widely recognized in the cybersecurity
 3. **[Spray365](https://github.com/MarkoH17/Spray365)**  
    A Go-based tool that introduces a customizable two-step password spraying approach. It includes features to bypass Azure Smart Lockout and insecure conditional access policies, making it highly effective for Microsoft accounts.
 
-4. **[TREVORspray](https://github.com/Flangvik/TREVORspray)**  
+4. **[TREVORspray](https://github.com/blacklanternsecurity/TREVORspray)**  
    A modular password sprayer written in Python, featuring threading, SSH proxying, and loot modules. It is one of the most feature-rich tools available for password spraying.
 
 5. **[SharpSpray](https://github.com/iomoath/SharpSpray)**  
@@ -32,7 +33,7 @@ The tools listed here are open-source and widely recognized in the cybersecurity
 7. **[CredMaster](https://github.com/knavesec/CredMaster)**  
    A refactored and enhanced version of the CredKing tool, leveraging FireProx APIs for IP rotation. This ensures anonymity and bypasses throttling during password spraying attacks.
 
-8. **[Omnispray](https://github.com/Flangvik/Omnispray)**  
+8. **[Omnispray](https://github.com/0xZDH/Omnispray)**  
    A Python-based modular framework designed to replace older tools like o365spray. It supports enumeration and spraying across multiple targets and applications, offering extensive flexibility.
 
 9. **[TeamFiltration](https://github.com/Flangvik/TeamFiltration)**  
@@ -57,7 +58,7 @@ These tools are instrumental in identifying weaknesses in authentication systems
         - 6. <a href="https://github.com/knavesec/CredMaster">CredMaster</a>
         - 7. <a href="https://github.com/dafthack/MSOLSpray">MSOLSpray</a>
         - 8. <a href="https://github.com/jnqpblc/SharpSpray">SharpSpray</a>
-        - 9. <a href="https://github.com/fireeye/TeamFiltration">TeamFiltration</a>
+        - 9. <a href="https://github.com/Flangvik/TeamFiltration">TeamFiltration</a>
         - 10. <a href="https://github.com/blacklanternsecurity/TREVORspray">TREVORspray</a>
     - Ethical Considerations and Best Practices
 - Advanced Features in Password Spraying Tools for Microsoft Authentication Endpoints
@@ -248,7 +249,7 @@ The following is a curated list of the most popular password spraying tools on G
   - Provides integration with Cobalt Strike for advanced red teaming scenarios.
 - **Stars**: Not available (referenced for functionality).
 
-#### 9. [TeamFiltration](https://github.com/fireeye/TeamFiltration)
+#### 9. [TeamFiltration](https://github.com/Flangvik/TeamFiltration)
 
 - **Description**: A cross-platform framework for enumerating, spraying, and exfiltrating data from Office 365 accounts.
 - **Features**:
@@ -325,7 +326,7 @@ Detailed logging and reporting are essential for assessing the success of passwo
 
 - **Comprehensive Logs**: [MSOLSpray](https://github.com/dafthack/MSOLSpray) provides verbose logs that include information about valid credentials, MFA status, and account lockouts. This level of detail is invaluable for post-engagement analysis.
 - **Webhook Notifications**: [SprayCannon](https://github.com/CausticKirbyZ/SprayCannon) and [SprayCharles](https://github.com/Tw1sm/spraycharles) support webhook notifications to platforms like Slack and Microsoft Teams, alerting operators to successful logins in real-time.
-- **Integration with SIEMs**: Some tools, such as [TeamFiltration](https://github.com/fireeye/TeamFiltration), offer integration with Security Information and Event Management (SIEM) systems, enabling automated analysis and reporting.
+- **Integration with SIEMs**: Some tools, such as [TeamFiltration](https://github.com/Flangvik/TeamFiltration), offer integration with Security Information and Event Management (SIEM) systems, enabling automated analysis and reporting.
 
 This section complements earlier discussions on logging by emphasizing advanced features like webhook notifications and SIEM integration.
 
@@ -350,7 +351,7 @@ Password spraying tools have evolved to include sophisticated features for manag
 
 #### Credential Execution Plans
 
-Tools like [Spray365](https://github.com/baph0m3th/Spray365) introduce the concept of execution plans, which allow users to predefine the parameters of a password spraying operation. These plans include details such as target domains, username lists, password lists, and delay configurations. Execution plans provide several advantages:
+Tools like [Spray365](https://github.com/MarkoH17/Spray365) introduce the concept of execution plans, which allow users to predefine the parameters of a password spraying operation. These plans include details such as target domains, username lists, password lists, and delay configurations. Execution plans provide several advantages:
 
 - **Resumable Operations**: Spray365 supports resuming interrupted sprays using the `-R` option, which allows users to pick up from the last attempted credential pair.
 - **Optimization**: The `--shuffle_auth_order` argument randomizes the order of credential attempts, making detection by intelligent lockout mechanisms like Azure Smart Lockout more difficult.
@@ -395,7 +396,7 @@ Most tools, including [SprayCannon](https://github.com/CausticKirbyZ/SprayCannon
 
 #### Intelligent Lockout Avoidance
 
-Tools like [Spray365](https://github.com/baph0m3th/Spray365) and [MSOLSpray](https://github.com/dafthack/MSOLSpray) include features to avoid account lockouts:
+Tools like [Spray365](https://github.com/MarkoH17/Spray365) and [MSOLSpray](https://github.com/dafthack/MSOLSpray) include features to avoid account lockouts:
 
 - **Lockout Thresholds**: Users can define the maximum number of incorrect attempts before pausing operations (`--lockout`).
 - **Cooldown Periods**: Lockout cooldown periods (`--lockoutDelay`) ensure that tools wait long enough before retrying credentials.
@@ -781,13 +782,13 @@ This research highlights the top 10 most starred password spraying tools on GitH
 
 The findings underscore the growing complexity of password spraying tools, which now incorporate advanced features like dynamic credential rotation, adaptive workflows, and integration with reconnaissance tools. These advancements not only improve operational efficiency but also challenge traditional detection mechanisms. However, the ethical use of these tools remains paramount. Organizations must ensure proper authorization, adherence to scope, and secure handling of sensitive data during engagements. The research also highlights the importance of collaboration between Red and Blue Teams, leveraging insights from password spraying simulations to strengthen defenses and improve detection capabilities.
 
-Looking ahead, the implications of emerging trends such as AI-driven password prediction, hybrid authentication protocol attacks, and cloud-native optimizations are significant. These developments demand continuous updates to defensive strategies, including enhanced monitoring, behavioral analytics, and proactive mitigation measures like enforcing [multi-factor authentication (MFA)](https://learn.microsoft.com/en-us/azure/active-directory/authentication/concept-mfa) and implementing smart lockout policies. As password spraying tools evolve, organizations must adopt a proactive, layered security approach to mitigate risks and stay ahead of adversaries.
+Looking ahead, the implications of emerging trends such as AI-driven password prediction, hybrid authentication protocol attacks, and cloud-native optimizations are significant. These developments demand continuous updates to defensive strategies, including enhanced monitoring, behavioral analytics, and proactive mitigation measures like enforcing [multi-factor authentication (MFA)](https://learn.microsoft.com/en-us/entra/identity/authentication/concept-mfa-howitworks) and implementing smart lockout policies. As password spraying tools evolve, organizations must adopt a proactive, layered security approach to mitigate risks and stay ahead of adversaries.
 
 
 ## References
 
 - [https://github.com/Ixve/Red-Team-Tools](https://github.com/Ixve/Red-Team-Tools)
-- [https://www.blackhillsinfosec.com/tag/password-spraying/](https://www.blackhillsinfosec.com/tag/password-spraying/)
+- [https://www.blackhillsinfosec.com/?s=password+spraying](https://www.blackhillsinfosec.com/?s=password+spraying)
 - [https://github.com/topics/password-list](https://github.com/topics/password-list)
 - [https://github.com/dafthack/DomainPasswordSpray/blob/master/README.md](https://github.com/dafthack/DomainPasswordSpray/blob/master/README.md)
 - [https://github.com/dafthack/MSOLSpray/blob/master/MSOLSpray.ps1](https://github.com/dafthack/MSOLSpray/blob/master/MSOLSpray.ps1)
