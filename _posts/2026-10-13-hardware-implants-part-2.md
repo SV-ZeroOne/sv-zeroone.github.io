@@ -1,5 +1,4 @@
 ---
-layout: post
 author: zero
 title: "Hardware Implants, Part 2: Hiding in Plain Sight"
 tags: redteam physical-security hardware-implants badusb supply-chain awareness omg-cable flipper-zero bash-bunny mousejack

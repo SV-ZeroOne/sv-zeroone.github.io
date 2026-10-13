@@ -10,7 +10,7 @@ tags: git web
 [harder room link](https://tryhackme.com/room/harder)
 [git happens room link](https://tryhackme.com/room/harder)
 
-:git: :computer:
+:octopus: :computer:
 
 ## Introduction 
 
