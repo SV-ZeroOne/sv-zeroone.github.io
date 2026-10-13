@@ -53,7 +53,7 @@ This is where it stops being a gadget you could spot and gets genuinely unsettli
 - **[O.MG Cable](https://hak5.org/products/omg-cable)** the one to really sit with. It's a normal-looking USB cable (USB-C, Lightning, micro your choice of colour and material) that behaves *exactly* like an ordinary cable until it's triggered: it charges, it transfers data, it logs nothing. Then, on command, it becomes a **Wi-Fi access point** you drive from a browser, a **keystroke injector** firing at ~890 keys/second, a **hardware keylogger** storing hundreds of thousands of keystrokes, with **geo-fencing** (only fire in-scope) and **self-destruct** (go inert if carried off-site). Here's the recalibrating part: a cable like this used to be nation-state kit the NSA's COTTONMOUTH USB implant was reportedly budgeted around **$20,000 a unit**. The O.MG Cable does the modern equivalent for about **$150**. The capability didn't just improve; it got *cheap*. FYI this is why some institutions tell you not to plug your phones into strange sockets and cables in Airports...
 
 **OMG Cable X-Ray of chip inside.**
-![OMG Cable X-Ray](/assets/images/hacking-device-implants.jpg)
+![OMG Cable X-Ray](/assets/images/omg_cable_xray.png)
 
 
 ## The invisible one
