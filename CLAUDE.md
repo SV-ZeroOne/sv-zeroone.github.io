@@ -34,13 +34,15 @@ There are no tests. A build followed by html-proofer is the check that a change 
 
 There are two kinds of content, and they get onto the site differently:
 
-- **Blog posts**: `_posts/YYYY-MM-DD-slug.md` with front matter `layout: post`, `author: zero`, `title: "..."` and space-separated `tags:`. Older posts have no `title`, so Jekyll derives it from the filename. `blog/main-blog.md` lists them automatically, showing `post.excerpt` (the first paragraph), so the opening paragraph serves as the post's summary. Post URLs use Jekyll's default permalink, `/YYYY/MM/DD/slug.html`, which is how posts link to each other.
+- **Blog posts**: `_posts/YYYY-MM-DD-slug.md` with front matter `author: zero`, `title: "..."` and space-separated `tags:`. `layout: post` comes from `defaults` in `_config.yml`. Posts also feed `/feed.xml` (jekyll-feed). Older posts have no `title`, so Jekyll derives it from the filename. `blog/main-blog.md` lists them automatically, showing `post.excerpt` (the first paragraph), so the opening paragraph serves as the post's summary. Post URLs use Jekyll's default permalink, `/YYYY/MM/DD/slug.html`, which is how posts link to each other.
 - **CTF/lab writeups**: `writeups/*.md` with `layout: default`. They are not a collection, so each new writeup must be linked by hand in `writeups/main-writeups.md` under the right platform heading (VulnHub / TryHackMe / HackTheBox). Link with the `.html` extension. `_drafts/writeup_template.md` shows the expected section outline (recon/nmap, enumeration, privesc, summary, references).
 
 Images go in `assets/images/`. Writeups use a per-machine subfolder (e.g. `assets/images/thm_ultratech/`), and recent posts put files directly in the folder. Pages reference them with root-absolute paths (`/assets/images/...`).
 
 ## Site-level details
 
-- `_config.yml` sets the title/description, `url`, `repository_url`, Google Analytics ID, plugins and `exclude`. Repo-only files (README, CLAUDE.md, LICENSE) must be listed in `exclude`, or Jekyll copies them into the published site. The header nav buttons (Write-ups, Blog Posts) are hard-coded in `_layouts/default.html`, and the footer comes from `_includes/footer.html`.
+- `_config.yml` sets the title/description, `url`, `repository_url`, `lang` (en-GB), `timezone` (Europe/London), plugins, `defaults` and `exclude`.
+- `google_analytics` takes a GA4 `G-…` ID. `_includes/google-analytics.html` emits the gtag snippet only when it is set and `JEKYLL_ENV=production` (CI sets this), so local previews aren't tracked.
+- Plugins in use: jekyll-seo-tag, jekyll-titles-from-headings, jekyll-feed, jekyll-sitemap (also writes `robots.txt`), jemoji. Emoji codes must be valid gemoji names (e.g. `:hole: :computer:` on the writeup intro lines). Unknown codes render as literal text, and codes inside code blocks are left alone. Repo-only files (README, CLAUDE.md, LICENSE) must be listed in `exclude`, or Jekyll copies them into the published site. The header nav buttons (Write-ups, Blog Posts) are hard-coded in `_layouts/default.html`, and the footer comes from `_includes/footer.html`.
 - The Sass uses `@use` (not the deprecated `@import`). Partials that need the color variables do `@use "default_colors" as *;`. Custom CSS classes (e.g. `.center_robot`, `.center_twitter`) are appended to `_sass/jekyll-theme-hacker.scss`.
 - `index.md` contains pre-rendered twitter-timeline HTML that was copied from a build that ran `jekyll-twitter-plugin`. The plugin is no longer installed.

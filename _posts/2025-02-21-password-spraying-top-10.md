@@ -1,5 +1,4 @@
 ---
-layout: post
 author: zero
 tags: redteaming initialaccess tools
 ---

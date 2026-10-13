@@ -7,6 +7,9 @@ gem 'jekyll', '~> 4.4'
 group :jekyll_plugins do
   gem 'jekyll-seo-tag', '~> 2.9'
   gem 'jekyll-titles-from-headings', '~> 0.5'
+  gem 'jekyll-feed', '~> 0.18'
+  gem 'jekyll-sitemap', '~> 1.4'
+  gem 'jemoji', '~> 0.13'
 end
 
 group :test do
