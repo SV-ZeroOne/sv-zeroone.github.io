@@ -1,6 +1,6 @@
 <canvas id="zsky" aria-hidden="true"></canvas>
 <style>
-#zsky{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block;background:#05080a}
+#zsky{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block;background:#151515}
 </style>
 <script>
 (function(){
@@ -27,7 +27,7 @@
   function build(){
     sky = document.createElement('canvas'); sky.width = W * DPR; sky.height = H * DPR;
     var c = sky.getContext('2d'); c.setTransform(DPR, 0, 0, DPR, 0, 0);
-    var g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#05080a'); g.addColorStop(.7, '#060d08'); g.addColorStop(1, '#081109'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    var g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#151515'); g.addColorStop(.7, '#141613'); g.addColorStop(1, '#11140f'); c.fillStyle = g; c.fillRect(0, 0, W, H);
     var r = mulberry(42), baseY = Math.min(H * .92, H - 24);
     buildRow(c, r, baseY - H * .02, H * .26, 'rgba(120,170,70,.16)', .05, false); // distant row, no antennas
     antennas = buildRow(c, r, baseY, H * .46, 'rgba(181,232,83,.3)', .12, true);   // near row with antennas
