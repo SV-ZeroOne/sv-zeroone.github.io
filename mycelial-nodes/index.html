@@ -116,7 +116,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);ov
     <div id="fade"></div>
     <div id="hud" aria-live="off">
       <span>Reel 01 · Mycelial Nodes // matrix cut</span>
-      <span class="mid" id="counter">Scene 1 / 19</span>
+      <span class="mid" id="counter">Scene 1 / 22</span>
       <span id="readout">—</span>
     </div>
     <div id="plate">
@@ -129,6 +129,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);ov
       <button id="prev" type="button" title="Previous scene (←)">◀ Prev</button>
       <button id="next" type="button" title="Next scene (→ or space)">Next ▶</button>
       <button id="auto" type="button" aria-pressed="true" title="Advance scenes automatically">Auto</button>
+      <button id="hold" type="button" aria-pressed="false" title="Pause on this scene (P)">⏸ Pause</button>
       <button id="mute" type="button" aria-pressed="false" title="Mute (M)">Sound on</button>
       <div id="dots" aria-hidden="true"></div>
       <a href="https://youtu.be/fVH8uiFI0Zs" target="_blank" rel="noopener">Super 8 · Coccolino Deep ↗</a>
@@ -264,6 +265,42 @@ function drawCat(c, cx, cy, s, t, alpha){
       c.fillStyle = '#3a3330'; c.beginPath(); c.arc(x + (x < 0 ? -lr : lr), eyeY, s * .02, 0, 7); c.fill();
     }
   }
+  c.restore();
+}
+// ---------- Chapter Four props: laptop guts, a DMA board and a power drill ----------
+function roundRect(c, x, y, w, h, r){ r = Math.min(r, w / 2, h / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+function drawOpenChassis(c, x, y, w, h, t){
+  c.save();
+  roundRect(c, x, y, w, h, 10); c.fillStyle = '#1a1e22'; c.fill(); c.strokeStyle = '#3a4048'; c.lineWidth = 2; c.stroke();
+  c.fillStyle = '#0c0f12'; c.fillRect(x + 8, y - 10, w - 16, 12); // hinge/lid edge
+  const bx = x + w * .12, by = y + h * .16, bw = w * .76, bh = h * .6;
+  c.fillStyle = '#0a1410'; c.fillRect(bx, by, bw, bh); c.strokeStyle = '#24303a'; c.strokeRect(bx + .5, by + .5, bw, bh);
+  c.strokeStyle = 'rgba(181,232,83,.1)'; c.lineWidth = 1; for (let i = 0; i < 8; i++) { const yy = by + 8 + i * (bh - 16) / 7; c.beginPath(); c.moveTo(bx + 6, yy); c.lineTo(bx + bw - 6, yy); c.stroke(); }
+  c.fillStyle = '#12161a'; c.fillRect(x + 10, y + h * .78, w - 20, h * .15); c.strokeStyle = '#2a333c'; c.strokeRect(x + 10.5, y + h * .78, w - 20, h * .15); // battery
+  const fx = bx + bw * .82, fy = by + bh * .3, fr = Math.min(bw, bh) * .14; c.fillStyle = '#0e1216'; c.beginPath(); c.arc(fx, fy, fr, 0, 7); c.fill(); c.strokeStyle = '#2a333c'; c.stroke();
+  c.save(); c.translate(fx, fy); c.rotate(t * 3); c.strokeStyle = 'rgba(120,140,160,.5)'; for (let k = 0; k < 5; k++) { c.rotate(Math.PI * 2 / 5); c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -fr * .85); c.stroke(); } c.restore();
+  const nvme = { x: bx + bw * .08, y: by + bh * .5, w: bw * .5, h: 10 }, wifi = { x: bx + bw * .08, y: by + bh * .74, w: bw * .24, h: 8 };
+  c.fillStyle = '#05080a'; c.fillRect(nvme.x, nvme.y, nvme.w, nvme.h); c.fillRect(wifi.x, wifi.y, wifi.w, wifi.h);
+  c.strokeStyle = '#39526a'; c.strokeRect(nvme.x + .5, nvme.y + .5, nvme.w, nvme.h); c.strokeRect(wifi.x + .5, wifi.y + .5, wifi.w, wifi.h);
+  c.restore();
+  return { bx: bx, by: by, bw: bw, bh: bh, nvme: nvme, wifi: wifi, screw: { x: nvme.x + nvme.w + 6, y: nvme.y + nvme.h / 2 } };
+}
+function drawFpga(c, x, y, s, t){
+  c.save();
+  roundRect(c, x, y, s * 1.4, s, s * .08); c.fillStyle = '#0c3a1e'; c.fill(); c.strokeStyle = '#145c2e'; c.lineWidth = 1.5; c.stroke();
+  c.fillStyle = '#0a0d10'; c.fillRect(x + s * .4, y + s * .28, s * .5, s * .45); c.strokeStyle = '#2a333c'; c.strokeRect(x + s * .4, y + s * .28, s * .5, s * .45);
+  c.fillStyle = 'rgba(181,232,83,.85)'; c.font = Math.max(6, s * .13) + 'px Monaco, monospace'; c.textAlign = 'center'; c.fillText('FPGA', x + s * .65, y + s * .55);
+  c.fillStyle = '#b9972e'; for (let i = 0; i < 6; i++) c.fillRect(x - 4, y + s * .2 + i * s * .1, 4, s * .05); // header pins
+  const on = (t * 2 | 0) % 2; c.fillStyle = on ? '#b5e853' : '#204018'; c.shadowColor = on ? 'rgba(181,232,83,.8)' : 'transparent'; c.shadowBlur = on ? 8 : 0; c.beginPath(); c.arc(x + s * 1.22, y + s * .2, 3, 0, 7); c.fill(); c.shadowBlur = 0;
+  c.textAlign = 'left'; c.restore();
+}
+function drawDrill(c, tipX, tipY, s, ang){
+  c.save(); c.translate(tipX, tipY); c.rotate(ang);
+  c.strokeStyle = '#cfd6dc'; c.lineWidth = Math.max(2, s * .05); c.beginPath(); c.moveTo(0, 0); c.lineTo(s * .5, 0); c.stroke(); // bit
+  c.fillStyle = '#3a4048'; c.fillRect(s * .5, -s * .12, s * .22, s * .24); // chuck
+  roundRect(c, s * .72, -s * .2, s * .7, s * .4, s * .08); c.fillStyle = '#17304a'; c.fill(); c.strokeStyle = '#244a6e'; c.lineWidth = 1.5; c.stroke(); // body
+  roundRect(c, s * 1.0, s * .15, s * .3, s * .62, s * .06); c.fillStyle = '#12161a'; c.fill(); // grip
+  c.fillStyle = '#0f1418'; c.fillRect(s * .98, s * .72, s * .34, s * .16); // battery
   c.restore();
 }
 function vignette(){ const g = ctx.createRadialGradient(W/2, H/2, Math.min(W,H)*.35, W/2, H/2, Math.max(W,H)*.75); g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,.62)'); ctx.fillStyle = g; ctx.fillRect(0,0,W,H); }
@@ -1004,10 +1041,93 @@ scenes.push({
   }
 });
 
-// 19 · end of reel
+// ======== Chapter Four · Stolen Laptop ========
+
+// 19 · the brief — a client's laptop, "assume it was stolen"
+scenes.push({
+  eyebrow: 'Day 3 · 09:00 · leadership sync → engagement brief', title: 'Assume it was stolen', hold: 12000,
+  text: 'Not much sleep, and the morning opens with the grown-up part of the job: a leadership call about where the company goes next, which doors to knock on, how to turn a reputation into a roadmap. Then the real toy lands on the bench — a laptop one of our clients handed us with a simple, chilling instruction: pretend a thief has it now. No login, no mercy, no network to lean on. Just the machine, its secrets, and however long it takes. You pour a coffee you do not need and look at it the way you look at a locked door that has personally insulted you.',
+  resize(){ this.cat = Math.min(W, H) * .1; },
+  enter(){ setMusic(.6, 4000, 3); setStatic(0, 1); this.t0 = -1; },
+  readout(){ return 'BitLocker: protected · TPM+PIN · domain: not joined · objective: assess'; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t;
+    ctx.fillStyle = '#05070a'; ctx.fillRect(0, 0, W, H);
+    const lx = W * .5, g = ctx.createRadialGradient(lx, H * .2, 0, lx, H * .7, Math.min(W, H) * .7); g.addColorStop(0, 'rgba(181,232,83,.1)'); g.addColorStop(.5, 'rgba(120,160,200,.05)'); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(lx - 30, 0); ctx.lineTo(lx + 30, 0); ctx.lineTo(W * .78, H); ctx.lineTo(W * .22, H); ctx.closePath(); ctx.fill();
+    const lw = Math.min(W * .4, 360), lh = lw * .66, cx = W * .5 - lw / 2, cy = H * .46;
+    ctx.save(); roundRect(ctx, cx, cy, lw, lh, 10); ctx.fillStyle = '#1a1e22'; ctx.fill(); ctx.strokeStyle = '#3a4048'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.05)'; ctx.beginPath(); ctx.moveTo(cx, cy + lh - 6); ctx.lineTo(cx + lw, cy + lh - 6); ctx.stroke();
+    const pr = .5 + .5 * Math.sin(t * 1.5); ctx.fillStyle = 'rgba(181,232,83,' + (.3 + pr * .3) + ')'; ctx.shadowColor = 'rgba(181,232,83,.6)'; ctx.shadowBlur = 12; ctx.beginPath(); ctx.arc(cx + lw / 2, cy + lh / 2, 5, 0, 7); ctx.fill(); ctx.shadowBlur = 0; ctx.restore();
+    ctx.save(); ctx.translate(cx + lw * .82, cy - 14); ctx.rotate(-.1); ctx.fillStyle = '#d8d0c0'; ctx.fillRect(-38, -11, 76, 22); ctx.strokeStyle = '#8c8378'; ctx.strokeRect(-38, -11, 76, 22); ctx.fillStyle = '#111'; ctx.font = '7px Monaco, monospace'; ctx.textAlign = 'center'; ctx.fillText('CLIENT ASSET', 0, -2); ctx.fillText('STOLEN-LAPTOP', 0, 8); ctx.restore(); ctx.textAlign = 'left';
+    drawCat(ctx, W * .5 + lw * .5 + this.cat * 1.3, cy - this.cat * .1, this.cat, t, .85);
+    vignette(); drawGrain(.07);
+  }
+});
+
+// 20 · the screw — today I took a drill to a laptop
+scenes.push({
+  eyebrow: 'HP chassis · M.2 retention screw · thread-locked', title: 'Taking a drill to it', hold: 13000,
+  text: 'The creds we lifted from a keyboard implant are useless: the machine was never joined to the domain, so there is nobody for them to be. The BIOS is open, which feels like luck until you nudge VT-d and BitLocker recovery slams down like a portcullis — you back out fast and leave the firmware exactly as you found it. To do the clever attack you need the drive out, and that is where today turns ridiculous: the little screw holding the NVMe down will not move. Thread-locked at the factory, maybe glued, and three well-fitted bits later its head is a smooth stripped crater. So you do the unthinkable to a working laptop: you take a drill to it, slowly, breathing, and lift the ruined screw out in a curl of metal. Not normal. Necessary.',
+  resize(){ this.shav = []; },
+  enter(){ setMusic(.66, 5200, 2.5); setStatic(.03, 2); this.t0 = -1; },
+  readout(){ return 'retention screw · head stripped · drilling out · steady hands'; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0;
+    ctx.fillStyle = '#070808'; ctx.fillRect(0, 0, W, H);
+    const lw = Math.min(W * .6, 520), lh = lw * .6, x = W * .5 - lw / 2, y = H * .16;
+    const ch = drawOpenChassis(ctx, x, y, lw, lh, t);
+    const sx = ch.screw.x, sy = ch.screw.y, spin = el > .5;
+    drawDrill(ctx, sx, sy, Math.min(W, H) * .2, -2.3);
+    ctx.fillStyle = '#4a4f55'; ctx.beginPath(); ctx.arc(sx, sy, 6, 0, 7); ctx.fill(); ctx.strokeStyle = '#6a7078'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = '#2a2e33'; ctx.beginPath(); ctx.arc(sx, sy, 2.5, 0, 7); ctx.fill();
+    if (spin && !reduced) for (let k = 0; k < 2; k++) this.shav.push({ x: sx, y: sy, vx: (Math.random() - .5) * 60, vy: -20 - Math.random() * 50, life: .4 + Math.random() * .4, spark: Math.random() < .4 });
+    this.shav = this.shav.filter(p => (p.life -= dt) > 0);
+    for (const p of this.shav) { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 120 * dt; ctx.fillStyle = p.spark ? 'rgba(255,220,140,' + (p.life * 2) + ')' : 'rgba(180,190,200,' + p.life + ')'; ctx.fillRect(p.x, p.y, p.spark ? 2 : 1.5, p.spark ? 2 : 1.5); }
+    drawCat(ctx, sx + Math.min(W, H) * .22, sy - Math.min(W, H) * .26, Math.min(W, H) * .12, t, .9);
+    ctx.fillStyle = 'rgba(181,232,83,.7)'; ctx.font = '10px Monaco, monospace'; ctx.fillText('NVMe retention · stripped', ch.nvme.x, ch.nvme.y - 8);
+    vignette(); drawGrain(.08);
+  }
+});
+
+// 21 · the DMA attack — reading the machine's mind over PCIe
+scenes.push({
+  eyebrow: 'Screamer FPGA · M.2 PCIe DMA · MemProcFS + Volatility 3', title: 'Reading its mind', hold: 14000,
+  text: 'With the drive finally free, the real trick: a field-programmable chip on a little board that speaks PCIe fluently, slid into the slot the SSD used to own. The first try — the FPGA in the spare Wi-Fi M.2 — just hangs the boot, so you improvise: move the NVMe onto the Wi-Fi slot with a keyed adapter, drop the DMA board into the full-fat slot instead, and this time Windows comes up none the wiser while you quietly read its kernel memory straight off the bus. The full-disk encryption is no help to anyone here: memory in a running machine is already decrypted, plain as day, so the locked logon screen is just a picture of a door. You cannot write a byte — VT-d and HVCI see to that — but you do not need to. Reading is plenty. You pour sixteen gigabytes of its mind into a dump, carve out the SAM, SYSTEM and SECURITY hives, and let Volatility walk the rest for anything that glitters.',
+  resize(){ this.wf = []; },
+  enter(){ setMusic(.74, 7000, 3); setStatic(.02, 2); this.t0 = -1; this.n = 0; this.next = 1.2;
+    this.loot = ['NT hash · local admin', 'DCC2 · 3 domain users', 'machine NTLM', 'machine certificate (priv key)', 'LSA secrets · DPAPI keys', 'cached Wi-Fi + VPN creds']; },
+  readout(){ return 'DMA read: kernel OK · write: DENIED (VT-d · HVCI) · dump 16 GB'; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0; const narrow = W < 680;
+    ctx.fillStyle = '#05080a'; ctx.fillRect(0, 0, W, H);
+    const lw = Math.min(W * (narrow ? .9 : .52), 460), lh = lw * .6, x = narrow ? W * .5 - lw / 2 : W * .06, y = narrow ? H * .08 : H * .12;
+    const ch = drawOpenChassis(ctx, x, y, lw, lh, t);
+    ctx.fillStyle = '#14303a'; ctx.fillRect(ch.wifi.x, ch.wifi.y - 4, ch.wifi.w, ch.wifi.h + 8); ctx.strokeStyle = '#63c0f5'; ctx.lineWidth = 1; ctx.strokeRect(ch.wifi.x + .5, ch.wifi.y - 4, ch.wifi.w, ch.wifi.h + 8);
+    ctx.fillStyle = 'rgba(99,192,245,.85)'; ctx.font = '8px Monaco, monospace'; ctx.fillText('NVMe→wifi', ch.wifi.x, ch.wifi.y - 8);
+    const fx = x + lw + (narrow ? -lw * .12 : 24), fy = y + lh * .28, fs = Math.min(W, H) * .14;
+    ctx.strokeStyle = 'rgba(181,232,83,.5)'; ctx.lineWidth = 1.5;
+    for (let i = 0; i < 4; i++) { const sy = ch.nvme.y + ch.nvme.h / 2 + (i - 1.5) * 3; ctx.beginPath(); ctx.moveTo(ch.nvme.x + ch.nvme.w, sy); ctx.bezierCurveTo(fx - 30, sy, fx - 20, fy + fs * .2 + i * fs * .1, fx - 4, fy + fs * .2 + i * fs * .1); ctx.stroke(); }
+    drawFpga(ctx, fx, fy, fs, t);
+    ctx.fillStyle = 'rgba(181,232,83,.8)'; ctx.font = '9px Monaco, monospace'; ctx.fillText('Screamer PCIe DMA', fx - 10, fy - 8);
+    if (!reduced && Math.random() < .5) this.wf.push({ p: 0 });
+    this.wf = this.wf.filter(w => (w.p += dt * .8) < 1);
+    ctx.fillStyle = '#b5e853'; for (const w of this.wf) { const sy = ch.nvme.y + ch.nvme.h / 2, xx = lerp(ch.nvme.x + ch.nvme.w, fx - 4, w.p); ctx.fillRect(xx - 1.5, sy - 1.5, 3, 3); }
+    if (el > this.next && this.n < this.loot.length) { this.n++; this.next = el + .8; blip(700 + this.n * 40, .05); }
+    const pw = narrow ? W - 28 : W * .33, px = narrow ? 14 : W * .63, py = narrow ? H * .66 : H * .14, ph = narrow ? H * .3 : H * .5;
+    ctx.fillStyle = 'rgba(8,12,14,.85)'; ctx.fillRect(px, py, pw, ph); ctx.strokeStyle = '#1f2536'; ctx.lineWidth = 1; ctx.strokeRect(px + .5, py + .5, pw, ph);
+    ctx.fillStyle = '#b5e853'; ctx.font = '600 10px Monaco, monospace'; ctx.fillText('EXTRACTED ▸ from RAM dump', px + 10, py + 16);
+    ctx.font = '10px Monaco, monospace';
+    for (let i = 0; i < this.n; i++) { ctx.fillStyle = 'rgba(236,229,212,.82)'; ctx.fillText('✓ ' + this.loot[i], px + 10, py + 34 + i * 15); }
+    if (this.n >= this.loot.length) { ctx.fillStyle = '#63c0f5'; ctx.fillText('→ hashcat · dictionary · cloud GPUs', px + 10, py + 40 + this.loot.length * 15); }
+    if (!narrow) drawCat(ctx, W * .52, H * .62, Math.min(W, H) * .085, t, .6);
+    vignette(); drawGrain(.07);
+  }
+});
+
+// 22 · end of reel
 scenes.push({
   eyebrow: 'End of reel 01', title: 'The reel keeps running', hold: 1e9,
-  text: 'The song is still going. Somewhere in the rack a clip is rendering that nobody has seen yet; out past the aurora the fat cat waits in his galaxy glasses; and in a quiet corner of the internet a new post sits with its hand up, hoping the right people are reading. Three chapters in, and the real work has barely started. Press ◀ to run the reel again, or open the real soundtrack and let it carry you out.',
+  text: 'The song is still going. Somewhere in the rack a clip is rendering that nobody has seen yet; out past the aurora the fat cat waits in his galaxy glasses; a drilled-open laptop on the bench has given up its secrets; and in a quiet corner of the internet a new post sits with its hand up, hoping the right people are reading. Four chapters in, and the real work has barely started. Press ◀ to run the reel again, or open the real soundtrack and let it carry you out.',
   enter(){ setMusic(.75, 9000, 3); setStatic(0, 1); this.t0 = -1; },
   readout(t){ return `reel 01 · ${Math.floor((t * 24) % 1e6).toString().padStart(6, '0')} f · to be continued`; },
   draw(t, dt){
@@ -1026,7 +1146,7 @@ scenes.push({
 });
 
 // ---------- player ----------
-const P = { i: -1, t0: 0, typing: 0, done: false, auto: !reduced, holdAt: 0, started: false };
+const P = { i: -1, t0: 0, typing: 0, done: false, auto: !reduced, paused: false, holdAt: 0, started: false };
 const plate = $('#plate'), ptext = $('#ptext'), dots = $('#dots');
 scenes.forEach(() => { const d = document.createElement('i'); dots.appendChild(d); });
 function resize(){ DPR = Math.min(2, devicePixelRatio || 1); const r = stage.getBoundingClientRect(); W = Math.max(1, Math.floor(r.width)); H = Math.max(1, Math.floor(r.height)); viz.width = W * DPR; viz.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); scenes.forEach(s => s.resize && s.resize()); if (P.i >= 0 && scenes[P.i].enter && scenes[P.i].resize) scenes[P.i].enter(); initRain(); }
@@ -1055,7 +1175,7 @@ function frame(){
     drawRainOverlay(.12 + .08 * (audio.inten || 0), .7); scanlines(.05);
     $('#readout').textContent = s.readout ? s.readout(t) : '';
     if (!P.done) { typeAcc += dt; const cps = 38; while (typeAcc > 1 / cps && P.typing < s.text.length) { typeAcc -= 1 / cps; P.typing++; const ch = s.text[P.typing - 1]; if ('.,;:!?'.includes(ch)) typeAcc -= .12; } ptext.innerHTML = ''; ptext.append(document.createTextNode(s.text.slice(0, P.typing))); const c = document.createElement('span'); c.className = 'cur'; ptext.appendChild(c); if (P.typing >= s.text.length) finishText(); }
-    else if (P.auto && P.i < scenes.length - 1 && now - P.holdAt > s.hold / 1000) go(P.i + 1);
+    else if (P.auto && !P.paused && P.i < scenes.length - 1 && now - P.holdAt > s.hold * 2 / 1000) go(P.i + 1);
   }
   requestAnimationFrame(frame);
 }
@@ -1066,6 +1186,7 @@ $('#start').addEventListener('click', () => { initAudio(); if (audio.ctx && audi
 $('#next').addEventListener('click', e => { e.stopPropagation(); advance(); });
 $('#prev').addEventListener('click', e => { e.stopPropagation(); go(P.i - 1); });
 $('#auto').addEventListener('click', e => { e.stopPropagation(); P.auto = !P.auto; $('#auto').setAttribute('aria-pressed', String(P.auto)); P.holdAt = performance.now() / 1000; });
+$('#hold').addEventListener('click', e => { e.stopPropagation(); P.paused = !P.paused; $('#hold').setAttribute('aria-pressed', String(P.paused)); $('#hold').textContent = P.paused ? '▶ Resume' : '⏸ Pause'; P.holdAt = performance.now() / 1000; });
 $('#mute').addEventListener('click', e => { e.stopPropagation(); setMuted(!audio.muted); });
 $('#bar').addEventListener('click', e => e.stopPropagation());
 viz.addEventListener('click', () => { if (P.started) advance(); });
@@ -1076,6 +1197,7 @@ addEventListener('keydown', e => {
   else if (e.key === 'ArrowLeft') { e.preventDefault(); go(P.i - 1); }
   else if (e.key.toLowerCase() === 'm') setMuted(!audio.muted);
   else if (e.key.toLowerCase() === 'a') $('#auto').click();
+  else if (e.key.toLowerCase() === 'p') $('#hold').click();
 });
 document.addEventListener('visibilitychange', () => { if (!audio.ctx) return; if (document.hidden) audio.ctx.suspend(); else if (!audio.muted) audio.ctx.resume(); });
 })();
