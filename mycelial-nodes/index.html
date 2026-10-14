@@ -129,6 +129,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);ov
       <button id="prev" type="button" title="Previous scene (←)">◀ Prev</button>
       <button id="next" type="button" title="Next scene (→ or space)">Next ▶</button>
       <button id="auto" type="button" aria-pressed="true" title="Advance scenes automatically">Auto</button>
+      <button id="hold" type="button" aria-pressed="false" title="Pause on this scene (P)">⏸ Pause</button>
       <button id="mute" type="button" aria-pressed="false" title="Mute (M)">Sound on</button>
       <div id="dots" aria-hidden="true"></div>
       <a href="https://youtu.be/fVH8uiFI0Zs" target="_blank" rel="noopener">Super 8 · Coccolino Deep ↗</a>
@@ -1073,7 +1074,7 @@ scenes.push({
   draw(t, dt){
     if (this.t0 < 0) this.t0 = t; const el = t - this.t0;
     ctx.fillStyle = '#070808'; ctx.fillRect(0, 0, W, H);
-    const lw = Math.min(W * .6, 520), lh = lw * .6, x = W * .5 - lw / 2, y = H * .52 - lh / 2;
+    const lw = Math.min(W * .6, 520), lh = lw * .6, x = W * .5 - lw / 2, y = H * .16;
     const ch = drawOpenChassis(ctx, x, y, lw, lh, t);
     const sx = ch.screw.x, sy = ch.screw.y, spin = el > .5;
     drawDrill(ctx, sx, sy, Math.min(W, H) * .2, -2.3);
@@ -1099,7 +1100,7 @@ scenes.push({
   draw(t, dt){
     if (this.t0 < 0) this.t0 = t; const el = t - this.t0; const narrow = W < 680;
     ctx.fillStyle = '#05080a'; ctx.fillRect(0, 0, W, H);
-    const lw = Math.min(W * (narrow ? .9 : .52), 460), lh = lw * .6, x = narrow ? W * .5 - lw / 2 : W * .06, y = H * .5 - lh / 2;
+    const lw = Math.min(W * (narrow ? .9 : .52), 460), lh = lw * .6, x = narrow ? W * .5 - lw / 2 : W * .06, y = narrow ? H * .08 : H * .12;
     const ch = drawOpenChassis(ctx, x, y, lw, lh, t);
     ctx.fillStyle = '#14303a'; ctx.fillRect(ch.wifi.x, ch.wifi.y - 4, ch.wifi.w, ch.wifi.h + 8); ctx.strokeStyle = '#63c0f5'; ctx.lineWidth = 1; ctx.strokeRect(ch.wifi.x + .5, ch.wifi.y - 4, ch.wifi.w, ch.wifi.h + 8);
     ctx.fillStyle = 'rgba(99,192,245,.85)'; ctx.font = '8px Monaco, monospace'; ctx.fillText('NVMe→wifi', ch.wifi.x, ch.wifi.y - 8);
@@ -1118,7 +1119,7 @@ scenes.push({
     ctx.font = '10px Monaco, monospace';
     for (let i = 0; i < this.n; i++) { ctx.fillStyle = 'rgba(236,229,212,.82)'; ctx.fillText('✓ ' + this.loot[i], px + 10, py + 34 + i * 15); }
     if (this.n >= this.loot.length) { ctx.fillStyle = '#63c0f5'; ctx.fillText('→ hashcat · dictionary · cloud GPUs', px + 10, py + 40 + this.loot.length * 15); }
-    if (!narrow) drawCat(ctx, W * .5, H * .76, Math.min(W, H) * .085, t, .55);
+    if (!narrow) drawCat(ctx, W * .52, H * .62, Math.min(W, H) * .085, t, .6);
     vignette(); drawGrain(.07);
   }
 });
@@ -1145,7 +1146,7 @@ scenes.push({
 });
 
 // ---------- player ----------
-const P = { i: -1, t0: 0, typing: 0, done: false, auto: !reduced, holdAt: 0, started: false };
+const P = { i: -1, t0: 0, typing: 0, done: false, auto: !reduced, paused: false, holdAt: 0, started: false };
 const plate = $('#plate'), ptext = $('#ptext'), dots = $('#dots');
 scenes.forEach(() => { const d = document.createElement('i'); dots.appendChild(d); });
 function resize(){ DPR = Math.min(2, devicePixelRatio || 1); const r = stage.getBoundingClientRect(); W = Math.max(1, Math.floor(r.width)); H = Math.max(1, Math.floor(r.height)); viz.width = W * DPR; viz.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); scenes.forEach(s => s.resize && s.resize()); if (P.i >= 0 && scenes[P.i].enter && scenes[P.i].resize) scenes[P.i].enter(); initRain(); }
@@ -1174,7 +1175,7 @@ function frame(){
     drawRainOverlay(.12 + .08 * (audio.inten || 0), .7); scanlines(.05);
     $('#readout').textContent = s.readout ? s.readout(t) : '';
     if (!P.done) { typeAcc += dt; const cps = 38; while (typeAcc > 1 / cps && P.typing < s.text.length) { typeAcc -= 1 / cps; P.typing++; const ch = s.text[P.typing - 1]; if ('.,;:!?'.includes(ch)) typeAcc -= .12; } ptext.innerHTML = ''; ptext.append(document.createTextNode(s.text.slice(0, P.typing))); const c = document.createElement('span'); c.className = 'cur'; ptext.appendChild(c); if (P.typing >= s.text.length) finishText(); }
-    else if (P.auto && P.i < scenes.length - 1 && now - P.holdAt > s.hold / 1000) go(P.i + 1);
+    else if (P.auto && !P.paused && P.i < scenes.length - 1 && now - P.holdAt > s.hold * 2 / 1000) go(P.i + 1);
   }
   requestAnimationFrame(frame);
 }
@@ -1185,6 +1186,7 @@ $('#start').addEventListener('click', () => { initAudio(); if (audio.ctx && audi
 $('#next').addEventListener('click', e => { e.stopPropagation(); advance(); });
 $('#prev').addEventListener('click', e => { e.stopPropagation(); go(P.i - 1); });
 $('#auto').addEventListener('click', e => { e.stopPropagation(); P.auto = !P.auto; $('#auto').setAttribute('aria-pressed', String(P.auto)); P.holdAt = performance.now() / 1000; });
+$('#hold').addEventListener('click', e => { e.stopPropagation(); P.paused = !P.paused; $('#hold').setAttribute('aria-pressed', String(P.paused)); $('#hold').textContent = P.paused ? '▶ Resume' : '⏸ Pause'; P.holdAt = performance.now() / 1000; });
 $('#mute').addEventListener('click', e => { e.stopPropagation(); setMuted(!audio.muted); });
 $('#bar').addEventListener('click', e => e.stopPropagation());
 viz.addEventListener('click', () => { if (P.started) advance(); });
@@ -1195,6 +1197,7 @@ addEventListener('keydown', e => {
   else if (e.key === 'ArrowLeft') { e.preventDefault(); go(P.i - 1); }
   else if (e.key.toLowerCase() === 'm') setMuted(!audio.muted);
   else if (e.key.toLowerCase() === 'a') $('#auto').click();
+  else if (e.key.toLowerCase() === 'p') $('#hold').click();
 });
 document.addEventListener('visibilitychange', () => { if (!audio.ctx) return; if (document.hidden) audio.ctx.suspend(); else if (!audio.muted) audio.ctx.resume(); });
 })();
