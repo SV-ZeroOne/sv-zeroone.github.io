@@ -1,0 +1,51 @@
+<canvas id="zsky" aria-hidden="true"></canvas>
+<style>
+#zsky{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;display:block;background:#151515}
+</style>
+<script>
+(function(){
+  var cv = document.getElementById('zsky'); if (!cv || cv.dataset.on) return; cv.dataset.on = 1;
+  var ctx = cv.getContext('2d'), reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var W = 0, H = 0, DPR = 1, raf = 0, sky, antennas = [];
+  function mulberry(s){ var a = s >>> 0; return function(){ a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  function buildRow(c, r, baseY, maxH, stroke, winAlpha, lit){
+    var x = -20, tips = [];
+    while (x < W + 20) {
+      var w = 30 + r() * 70, h = maxH * (.35 + r() * .65), top = baseY - h;
+      c.strokeStyle = stroke; c.lineWidth = 1; c.strokeRect(x + .5, top + .5, w, h);
+      var floors = Math.max(1, Math.floor(h / 14));
+      c.strokeStyle = 'rgba(181,232,83,' + (winAlpha * .5) + ')';
+      for (var f = 1; f < floors; f++) { var yy = top + f * 14; c.beginPath(); c.moveTo(x + 3, yy); c.lineTo(x + w - 3, yy); c.stroke(); }
+      if (lit) { c.fillStyle = 'rgba(181,232,83,' + winAlpha + ')'; for (var k = 0; k < floors; k++) for (var cc = 0; cc < Math.floor(w / 12); cc++) if (r() < .13) c.fillRect(x + 5 + cc * 12, top + 4 + k * 14, 5, 7); }
+      if (lit && h > maxH * .68 && r() < .5 && tips.length < 4) { var ax = x + w * (.3 + r() * .4), ty = top - 18 - r() * 16;
+        c.strokeStyle = stroke; c.beginPath(); c.moveTo(ax, top); c.lineTo(ax, ty); c.stroke(); c.fillStyle = stroke; c.fillRect(ax - 1.5, ty - 3, 3, 3); tips.push({ x: ax, y: ty, ph: r() * 6 }); }
+      x += w + 6 + r() * 16;
+    }
+    return tips;
+  }
+  function build(){
+    sky = document.createElement('canvas'); sky.width = W * DPR; sky.height = H * DPR;
+    var c = sky.getContext('2d'); c.setTransform(DPR, 0, 0, DPR, 0, 0);
+    var g = c.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#151515'); g.addColorStop(.7, '#141613'); g.addColorStop(1, '#11140f'); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    var r = mulberry(42), baseY = Math.min(H * .92, H - 24);
+    buildRow(c, r, baseY - H * .02, H * .26, 'rgba(120,170,70,.16)', .05, false); // distant row, no antennas
+    antennas = buildRow(c, r, baseY, H * .46, 'rgba(181,232,83,.3)', .12, true);   // near row with antennas
+    c.strokeStyle = 'rgba(181,232,83,.22)'; c.lineWidth = 1; c.beginPath(); c.moveTo(0, baseY); c.lineTo(W, baseY); c.stroke();
+  }
+  function frame(now){
+    raf = 0; var t = now / 1000;
+    ctx.clearRect(0, 0, W, H); ctx.drawImage(sky, 0, 0, W, H);
+    for (var i = 0; i < antennas.length; i++) { var a = antennas[i];
+      for (var k = 0; k < 3; k++) { var p = ((t * .3 + a.ph + k / 3) % 1), rad = 4 + p * 130; ctx.strokeStyle = 'rgba(181,232,83,' + ((1 - p) * .28) + ')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(a.x, a.y, rad, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke(); }
+      var on = (t * 1.5 + a.ph | 0) % 2; ctx.fillStyle = on ? 'rgba(181,232,83,.9)' : 'rgba(181,232,83,.3)'; ctx.fillRect(a.x - 1.5, a.y - 1.5, 3, 3);
+    }
+    if (!reduced) raf = requestAnimationFrame(frame);
+  }
+  function stop(){ if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+  function start(){ if (reduced || raf) return; raf = requestAnimationFrame(frame); }
+  function resize(){ stop(); DPR = Math.min(2, window.devicePixelRatio || 1); W = window.innerWidth; H = window.innerHeight; cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0); build(); frame(performance.now()); }
+  window.addEventListener('resize', resize); resize();
+  document.addEventListener('visibilitychange', function(){ document.hidden ? stop() : start(); });
+})();
+</script>

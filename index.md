@@ -2,6 +2,8 @@
 layout: default
 ---
 
+{% include home-bg.html %}
+
 {% include home-banner.html %}
 
 Welcome to Zero Security, a site dedicated so `Cyber Security`, `Ethical Hacking`, `Red Teaming` and `Penetration Testing` stuff.
