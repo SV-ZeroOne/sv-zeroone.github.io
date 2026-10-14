@@ -10,12 +10,6 @@ Welcome to Zero Security, a site dedicated to `Cyber Security`, `Ethical Hacking
 
 {% include terminal.html %}
 
-# Hacking Write-ups
-
-Check out the write-ups for details on hacking into various different computer systems...
-
-[Hacking Write-ups](./writeups/main-writeups.html)
-
 # Latest Blog Posts
 
 <ul class="home-posts">
@@ -29,6 +23,12 @@ Check out the write-ups for details on hacking into various different computer s
 </ul>
 
 [All blog posts &rarr;](./blog/main-blog.html)
+
+# Hacking Write-ups
+
+Check out the write-ups for details on hacking into various different computer systems...
+
+[Hacking Write-ups](./writeups/main-writeups.html)
 
 <img class="center_robot" alt="Mr Robot" src="/assets/images/mr_robot_0.png" width="20%" height="20%">
 
