@@ -57,8 +57,8 @@
     }
     // a couple of IC chips
     for (var j = 0; j < 3; j++) { var cxp = r() * W * .8 + W * .1, cyp = r() * H * .8 + H * .1, cw = grid * 1.6, chh = grid; c.strokeStyle = 'rgba(' + LIME + ',.14)'; c.strokeRect(cxp, cyp, cw, chh); for (var pin = 0; pin < 5; pin++) { c.beginPath(); c.moveTo(cxp + 4 + pin * (cw - 8) / 4, cyp); c.lineTo(cxp + 4 + pin * (cw - 8) / 4, cyp - 5); c.moveTo(cxp + 4 + pin * (cw - 8) / 4, cyp + chh); c.lineTo(cxp + 4 + pin * (cw - 8) / 4, cyp + chh + 5); c.stroke(); } }
-    // the fat cat
-    var s = Math.min(W, H) * .15, cx = W > 760 ? W * .8 : W * .5, cy = H > 520 ? H * .64 : H * .6;
+    // the fat cat — sits in the content band beside the text
+    var wide = W > 760, s = Math.min(W, H) * (wide ? .11 : .12), cx = wide ? W * .82 : W * .5, cy = wide ? H * .35 : H * .5;
     cat = fatCat(c, cx, cy, s);
   }
 
