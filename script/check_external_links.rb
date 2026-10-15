@@ -13,7 +13,7 @@ HTMLProofer.check_directory(
   enforce_https: false,
   only_4xx: true,
   ignore_status_codes: [403, 429, 999],
-  ignore_urls: [%r{exploit-db\.com/exploits/}, %r{nvd\.nist\.gov/vuln/detail/}],
+  ignore_urls: [%r{exploit-db\.com/exploits/}, %r{nvd\.nist\.gov/vuln/detail/}, %r{/pagefind/}],
   hydra: { max_concurrency: 4 },
   typhoeus: { followlocation: true, connecttimeout: 10, timeout: 30,
               headers: { 'User-Agent' => 'Mozilla/5.0 (link checker for sv-zeroone.github.io)' } }

@@ -6,13 +6,9 @@ layout: default
 
 {% include home-banner.html %}
 
-Welcome to Zero Security, a site dedicated so `Cyber Security`, `Ethical Hacking`, `Red Teaming` and `Penetration Testing` stuff.
+Welcome to Zero Security, a site dedicated to `Cyber Security`, `Ethical Hacking`, `Red Teaming` and `Penetration Testing` stuff.
 
-# Hacking Write-ups
-
-Check out the write-ups for details on hacking into various different computer systems...
-
-[Hacking Write-ups](./writeups/main-writeups.html)
+{% include terminal.html %}
 
 # Latest Blog Posts
 
@@ -27,6 +23,12 @@ Check out the write-ups for details on hacking into various different computer s
 </ul>
 
 [All blog posts &rarr;](./blog/main-blog.html)
+
+# Hacking Write-ups
+
+Check out the write-ups for details on hacking into various different computer systems...
+
+[Hacking Write-ups](./writeups/main-writeups.html)
 
 <img class="center_robot" alt="Mr Robot" src="/assets/images/mr_robot_0.png" width="20%" height="20%">
 

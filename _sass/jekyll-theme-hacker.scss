@@ -335,3 +335,33 @@ a {
     margin: 0;
   }
 }
+
+.post-tags {
+  margin-top: 26px;
+  a { margin-right: 6px; white-space: nowrap; }
+}
+
+.post-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 24px 0;
+  padding-top: 16px;
+  border-top: 1px solid $blockquote-border;
+
+  .next { margin-left: auto; text-align: right; }
+}
+
+.related {
+  margin-top: 24px;
+
+  ul { list-style: none; padding: 0; }
+  li { margin-bottom: 6px; }
+  small { color: $blockquote-color; margin-left: 6px; }
+}
+
+.tag-cloud {
+  line-height: 2;
+  a { margin-right: 10px; white-space: nowrap; }
+  small { color: $blockquote-color; }
+}

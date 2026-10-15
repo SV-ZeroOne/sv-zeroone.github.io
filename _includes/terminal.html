@@ -1,0 +1,77 @@
+<div class="zterm" id="zterm">
+  <div class="zterm-bar"><span class="d r"></span><span class="d y"></span><span class="d g"></span><span class="zterm-title">visitor@zero-security: ~</span></div>
+  <div class="zterm-body" id="zterm-out"></div>
+  <div class="zterm-line"><span class="zterm-ps">$</span><input id="zterm-in" class="zterm-input" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="terminal input" placeholder="type 'help' and press enter"></div>
+</div>
+<style>
+.zterm{border:1px solid #123524;border-radius:4px;background:#020604;margin:18px 0;font-family:Monaco,Consolas,"Courier New",monospace;font-size:13px;overflow:hidden}
+.zterm-bar{display:flex;align-items:center;gap:7px;padding:8px 12px;background:#07140c;border-bottom:1px solid #123524}
+.zterm-bar .d{width:10px;height:10px;border-radius:50%}
+.zterm-bar .r{background:#ff5f56}.zterm-bar .y{background:#ffbd2e}.zterm-bar .g{background:#27c93f}
+.zterm-title{margin-left:8px;color:#6f9b84;font-size:11px}
+.zterm-body{padding:12px 14px;min-height:120px;max-height:320px;overflow-y:auto;color:#d6f5e2;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.zterm-body a{color:#63c0f5}
+.zterm-body .cmd{color:#b5e853}
+.zterm-body .muted{color:#6f9b84}
+.zterm-line{display:flex;align-items:center;gap:8px;padding:0 14px 14px}
+.zterm-ps{color:#b5e853}
+.zterm-input{flex:1;background:transparent;border:0;outline:0;color:#d6f5e2;font:inherit;caret-color:#b5e853}
+</style>
+<script>
+(function(){
+  var out = document.getElementById('zterm-out'), inp = document.getElementById('zterm-in'), box = document.getElementById('zterm');
+  if (!out || !inp || box.dataset.on) return; box.dataset.on = 1;
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function print(html){ var p = document.createElement('div'); p.innerHTML = html; out.appendChild(p); out.scrollTop = out.scrollHeight; }
+  function go(url, ext){ print('<span class="muted">opening ' + esc(url) + ' …</span>'); if (ext) { window.open(url, '_blank', 'noopener'); } else { setTimeout(function(){ window.location.href = url; }, 350); } }
+
+  var nav = {
+    about:    ['/about/', 'whoami'],
+    whoami:   ['/about/', 'whoami'],
+    posts:    ['/blog/main-blog.html', 'the blog'],
+    blog:     ['/blog/main-blog.html', 'the blog'],
+    writeups: ['/writeups/main-writeups.html', 'the write-ups'],
+    projects: ['/projects/', 'projects'],
+    tags:     ['/tags/', 'tags'],
+    search:   ['/search/', 'search'],
+    film:     ['/mycelial-nodes/', 'Mycelial Nodes'],
+    mycelial: ['/mycelial-nodes/', 'Mycelial Nodes'],
+    home:     ['/', 'home']
+  };
+  var HELP = [
+    '<span class="muted">available commands:</span>',
+    '  help           this list',
+    '  whoami         who runs this site',
+    '  ls             list sections',
+    '  about          open the about page',
+    '  posts | blog   latest blog posts',
+    '  writeups       CTF / lab write-ups',
+    '  projects       tools & experiments',
+    '  film           the Mycelial Nodes film',
+    '  tags           browse by tag',
+    '  search         search the site',
+    '  github         the source repo ↗',
+    '  clear          clear the screen'
+  ].join('\n');
+
+  function run(raw){
+    var cmd = raw.trim().toLowerCase();
+    print('<span class="zterm-ps" style="color:#b5e853">$</span> <span class="cmd">' + esc(raw) + '</span>');
+    if (!cmd) return;
+    if (cmd === 'help' || cmd === '?') return print(HELP);
+    if (cmd === 'clear' || cmd === 'cls') { out.innerHTML = ''; return; }
+    if (cmd === 'whoami') return print('zero — Principal Consultant & Practice Lead, Offensive Security Engineering. Red teamer, builder of tools. <a href="/about/">more →</a>');
+    if (cmd === 'ls') return print('about  blog  writeups  projects  film  tags  search');
+    if (cmd === 'date') return print(new Date().toString());
+    if (cmd === 'github' || cmd === 'repo') return go('https://github.com/SV-ZeroOne/sv-zeroone.github.io', true);
+    if (cmd === 'banner' || cmd === 'cat') return print('<span class="cmd">  /\\_/\\   zero security\n ( o.o )  // follow the green\n  &gt; ^ &lt;</span>');
+    var parts = cmd.split(/\s+/), target = parts[0] === 'open' || parts[0] === 'cd' || parts[0] === 'go' ? parts[1] : parts[0];
+    if (nav[target]) return go(nav[target][0], false);
+    print('<span class="muted">command not found: ' + esc(cmd) + " — try 'help'</span>");
+  }
+
+  print('<span class="muted">Zero Security // interactive shell. type <span class="cmd">help</span> to begin.</span>');
+  inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { run(inp.value); inp.value = ''; } });
+  box.addEventListener('click', function(){ inp.focus(); });
+})();
+</script>
