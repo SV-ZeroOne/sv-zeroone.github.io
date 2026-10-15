@@ -4,6 +4,8 @@ title: whoami
 permalink: /about/
 ---
 
+{% include about-bg.html %}
+
 # whoami
 
 Principal Consultant & Practice Lead for Offensive Security Engineering.
