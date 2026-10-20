@@ -59,7 +59,7 @@ GEM
     html-pipeline (2.14.3)
       activesupport (>= 2)
       nokogiri (>= 1.4)
-    html-proofer (5.2.2)
+    html-proofer (5.2.3)
       addressable (~> 2.3)
       async (~> 2.1)
       benchmark (~> 0.5)
@@ -72,7 +72,7 @@ GEM
     http_parser.rb (0.8.1)
     i18n (1.15.2)
       concurrent-ruby (~> 1.0)
-    io-event (1.22.1)
+    io-event (1.22.3)
     jekyll (4.4.1)
       addressable (~> 2.4)
       base64 (~> 0.2)
@@ -174,7 +174,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  html-proofer (~> 5.0)
+  html-proofer (~> 5.2)
   jekyll (~> 4.4)
   jekyll-feed (~> 0.18)
   jekyll-seo-tag (~> 2.9)
