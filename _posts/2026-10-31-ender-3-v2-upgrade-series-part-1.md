@@ -303,7 +303,7 @@ The fix is a hardware mod, documented well by [Eric Myers at SUNY New Paltz](htt
 
 ![Side view of the C270 board with the lens barrel raised out of its holder after the glue was removed](/assets/images/ender3v2_part1/09_camera_lens_glue_removed.jpg){: loading="lazy"}
 
-*Glue blob gone: the lens barrel now turns freely in its holder.*
+*Glue blob removal: the lens barrel wont turn until you remove the small glue blob that holds it.*
 
 I went one better and **printed a focus ring and face plate on the Ender itself**, so the lens can be adjusted from outside without opening the camera again. I printed the lens rings in 6 mm and 8 mm sizes, because newer C270s have a slightly smaller lens than older ones. Test-fit both and keep the one that grips without binding.
 
