@@ -310,6 +310,14 @@ a {
   }
 }
 
+.post-video {
+  display: block;
+  max-width: 100%;
+  max-height: 80vh;
+  margin: 20px auto 0;
+  border: 1px solid $blockquote-border;
+}
+
 .home-posts {
   list-style: none;
   padding: 0;
