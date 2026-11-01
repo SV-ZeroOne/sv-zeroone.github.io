@@ -51,3 +51,5 @@ exclude:
   - README.md
   - CLAUDE.md
   - LICENSE
+  - NEOX1-DRAFT.md
+  - Preview-Neox1.ps1

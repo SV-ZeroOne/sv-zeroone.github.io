@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Explore a conceptual 3D model of Zero's GMKtec NEO-X1 Pro local AI lab: five GPUs, two vendors and a Broadcom PCIe switch.">
+  <meta name="theme-color" content="#0c1013">
+  <title>Inside the NEO-X1 AI Lab · Zero Security</title>
+  <script>if (new URLSearchParams(location.search).has('embed')) document.documentElement.classList.add('embedded');</script>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/neox1/lab.css">
+  <script type="importmap">{"imports":{"three":"../assets/lib/three-r180/three.module.min.js"}}</script>
+</head>
+<body>
+<main class="lab">
+  <header class="masthead">
+    <div><p class="eyebrow">ZERO SECURITY <span>/</span> INSIDE THE HOMELAB</p><h1>Small host.<br><span>Big ambitions.</span></h1></div>
+    <div class="identity"><span class="signal"></span> GMKtec NEO-X1 Pro<br><small>Personal build · October 2026</small></div>
+  </header>
+  <nav class="product-views" aria-label="Hardware views">
+    <button type="button" data-view="host" aria-pressed="true" disabled><span>01</span> NEO-X1 Pro</button>
+    <button type="button" data-view="amd" aria-pressed="false" disabled><span>02</span> Radeon R9700</button>
+    <button type="button" data-view="nvidia" aria-pressed="false" disabled><span>03</span> TUF RTX 3090</button>
+    <button type="button" data-view="switch" aria-pressed="false" disabled><span>04</span> PCIe switch</button>
+    <button type="button" data-view="dock" aria-pressed="false" disabled><span>05</span> RTX 5070 + dock</button>
+    <button type="button" data-view="rig" aria-pressed="false" disabled><span>06</span> Complete rig</button>
+  </nav>
+  <div class="workspace">
+    <section class="scene" aria-label="Interactive hardware model">
+      <div class="scene-meta"><span id="view-title">01 / GMKtec NEO-X1 Pro</span><span><b id="projection">ISOMETRIC</b> · PHOTO-DERIVED 3D STUDY</span></div>
+      <div id="viewport" tabindex="0" role="region" aria-label="3D lab. Isometric projection. Drag to orbit freely; use the arrow keys or turn buttons to step between isometric corners. Select parts using the component list.">
+        <div id="fallback">
+          <img src="../assets/neox1/topology.svg" alt="The NEO-X1 Pro connects to four GPUs through a PEX88096 switch sharing a Gen4 x16 uplink, and to a fifth RTX 5070 by a separate Gen4 x4 OCuLink link.">
+          <p id="load-status" role="status">Loading the 3D view. The topology above is available without WebGL.</p>
+        </div>
+      </div>
+      <div class="model-caption"><strong id="view-dimensions">350 × 165 × 265 mm · body</strong><span id="view-description">Lime mesh · carry handles · dual-fan AIO</span></div>
+      <div class="view-tools" aria-label="Camera controls">
+        <button id="rotate-left" type="button" disabled aria-label="Turn to the previous isometric corner" title="Previous isometric corner">↶</button>
+        <button id="reset-view" type="button" disabled>Isometric view</button>
+        <button id="rotate-right" type="button" disabled aria-label="Turn to the next isometric corner" title="Next isometric corner">↷</button>
+        <button id="zoom-out" type="button" disabled aria-label="Zoom out">−</button>
+        <button id="zoom-in" type="button" disabled aria-label="Zoom in">+</button>
+        <span>Drag to orbit</span>
+      </div>
+    </section>
+    <aside class="inspector" aria-label="Component details">
+      <p class="eyebrow">THE BUILD</p>
+      <label for="component">Inspect a component</label>
+      <select id="component" disabled>
+        <option value="host">01 · GMKtec host</option>
+        <option value="switch">02 · PEX88096 switch</option>
+        <option value="amd1">03 · R9700 / language</option>
+        <option value="amd2">04 · R9700 / vision</option>
+        <option value="nv1">05 · RTX 3090 / video</option>
+        <option value="nv2">06 · RTX 3090 / video</option>
+        <option value="nv3">07 · RTX 5070 / image</option>
+        <option value="power">08 · External power</option>
+      </select>
+      <div id="details" aria-live="polite" aria-atomic="true">
+        <span id="part-tag" class="part-tag">THE FOUNDATION</span>
+        <h2 id="part-title">GMKtec<br>NEO-X1 Pro</h2>
+        <p id="part-copy">Ryzen 9 9955HX3D, 16 cores and 32 threads. The compact host supplies CPU, memory, storage and the PCIe paths for the expanded lab.</p>
+        <dl><dt id="spec-label">HOST MEMORY</dt><dd id="spec-value">64 GB DDR5</dd></dl>
+        <p id="part-note" class="note">The five GPUs and external expansion hardware are a custom build around the host.</p>
+      </div>
+      <a id="reference-link" class="reference-link" href="https://www.gmktec.uk/products/gmktec-neo-x1-series-amd-ryzen%E2%84%A2-9-9955hx-9955hx3d-modt-gaming-pc" target="_blank" rel="noopener">Manufacturer reference ↗</a>
+      <a id="dock-reference-link" class="reference-link" href="https://aoostar.com/products/aoostar-ag03-egpu-dock" target="_blank" rel="noopener" hidden>AOOSTAR dock reference ↗</a>
+      <div class="legend"><span><i class="amd"></i>AMD</span><span><i class="nvidia"></i>NVIDIA</span><span><i class="link"></i>PCIe</span></div>
+    </aside>
+  </div>
+  <section class="controls" aria-label="Model controls">
+    <button id="explode" class="primary" type="button" disabled>Explode the build <span>↗</span></button>
+    <div class="slider"><label for="separation">Assembly separation <output id="separation-value" for="separation">0%</output></label><input id="separation" type="range" min="0" max="100" value="0" disabled></div>
+    <label class="toggle"><input id="links" type="checkbox" disabled> PCIe links</label>
+  </section>
+  <p id="explosion-hint" class="explosion-hint">Open the chassis to reveal the cooling and mainboard.</p>
+  <footer class="footnote"><p><strong>5 discrete GPUs · 124 GB total VRAM</strong><span>Separate memory spaces. Four cards share a Gen4 ×16 uplink; the 5070 uses a separate Gen4 ×4 path.</span></p><p>Manufacturer dimensions; owner's rack layout.<br>Hidden internals and cable routes are illustrative. Not CAD.</p></footer>
+  <noscript><p class="note">JavaScript is disabled. The static diagram shows the connections; the accompanying article explains each component and the benchmarks.</p></noscript>
+</main>
+<script type="module">
+  import('../assets/neox1/lab.js').catch(error => {
+    document.getElementById('load-status').textContent = 'The interactive view is unavailable in this browser. The static topology remains available above.';
+    console.warn('NEO-X1 3D view unavailable:', error);
+  });
+</script>
+</body>
+</html>

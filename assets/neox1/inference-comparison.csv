@@ -1,0 +1,8 @@
+measurement,prompt_tokens,unit,llama_cpp_two_r9700,dflash_one_r9700,date
+prefill,8000,tokens_per_second,1185,3344,2026-10-10
+prefill,32000,tokens_per_second,1163,3036,2026-10-10
+prefill,115000,tokens_per_second,951,2283,2026-10-10
+prompt_time,115000,seconds,124,51.6,2026-10-10
+decode_128_output_tokens,8000,tokens_per_second,62,107,2026-10-10
+decode_128_output_tokens,32000,tokens_per_second,54,98,2026-10-10
+decode_128_output_tokens,115000,tokens_per_second,46,74,2026-10-10
