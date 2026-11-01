@@ -37,6 +37,13 @@ On Windows, run html-proofer as `ridk exec bundle exec htmlproofer ...`. It need
 
 There are no tests. A build followed by html-proofer is the check that a change works. After changing the `Gemfile` on Windows, keep the lockfile usable on CI with `bundle lock --add-platform x86_64-linux`.
 
+If Ruby is not installed locally (the NEO-X1 desktop has Docker but no `C:\Ruby34-x64`), run `.\Preview-Site.ps1` (see `PREVIEW.md`): it builds in the official Ruby image with a named gem-cache volume, serves `_site` on http://127.0.0.1:4100/ and opens the browser. Both files are in `exclude`. The manual equivalent:
+
+```powershell
+docker run --rm -v "${PWD}:/srv" -v k8-blog-gems:/usr/local/bundle -w /srv -e SECURITY_FEEDS=off ruby:3.4 bash -c "bundle install --quiet && bundle exec jekyll build --drafts && bundle exec htmlproofer ./_site --disable-external --ignore-urls '/pagefind/'"
+python -I -m http.server 4100 --directory _site   # preview the build at http://localhost:4100
+```
+
 ## Content structure
 
 There are two kinds of content, and they get onto the site differently:
@@ -61,4 +68,5 @@ Images go in `assets/images/`. Writeups use a per-machine subfolder (e.g. `asset
 - `_includes/home-bg.html` is the homepage background: a `position:fixed` full-viewport canvas (`z-index:-1`) drawing a line-art green city skyline with antennas that broadcast signal rings. Static skyline is pre-rendered to an offscreen canvas; only the rings animate. Reduced-motion renders one still. Included from `index.md`.
 - `_includes/home-banner.html` is the homepage hero: a self-contained canvas animation (SDR waterfall, matrix rain, a network-node graph and pulsing antennas) with its own scoped CSS and script. It pauses off-screen/when hidden and renders a single still under reduced-motion. Included from `index.md`.
 - `mycelial-nodes/index.html` is a standalone full-screen page (`layout: null`, its own `<head>` with `{% seo %}` and both analytics includes). It was converted from a Claude artifact, uses self-hosted fonts from `assets/fonts/mycelial/` (OFL licence files alongside), and is embedded in its blog post via the `.film-embed` iframe wrapper.
+- `k8-range/index.html` is a standalone page (`layout: null`, own `<head>` with `{% seo %}` and analytics) holding an interactive exploded isometric 3D view of the GMKtec NucBox K8 that hosts the Ludus cyber range. It is a Three.js r180 procedural model (`assets/k8/k8-models.js`, one scene unit = 10 mm, case 123 × 112 × 43 mm), driven by `assets/k8/k8.js` (orthographic isometric camera, staged explosion that ghosts the shell and draws a dashed explosion axis, HTML callouts with SVG leader lines that swap to numbered pins below 700 px, a one-shot selection pulse that settles so the renderer still goes idle, "Ludus essentials" highlight, part inspector). The internals follow published teardowns: two side-by-side SO-DIMMs, two M.2 2280 slots, the 2230 Wi-Fi card under the drives and a turbine blower beneath the board. The shell's port cut-outs are generated from the same table as the board's connector blocks, so the ports read correctly when assembled. Three.js is self-hosted and pinned in `assets/lib/three-r180/` (MIT licence alongside; the same files exist on the unmerged `draft/neox1-local-ai` branch). `?embed=1` compacts the layout for the iframe in the Ludus post (`assets/k8/embed.js` syncs the iframe height, same-origin); `?card=1&explode=1` renders a full-window exploded still with tighter framing, used for the social card `assets/images/ludus-k8-exploded.png`. `assets/k8/k8-fallback.svg` is the no-WebGL/no-JS diagram.
 - Before publishing photos, strip EXIF metadata. Phone photos carry GPS coordinates, and some previously published images did.

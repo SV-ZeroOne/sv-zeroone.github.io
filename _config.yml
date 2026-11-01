@@ -51,3 +51,5 @@ exclude:
   - README.md
   - CLAUDE.md
   - LICENSE
+  - PREVIEW.md
+  - Preview-Site.ps1
