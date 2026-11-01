@@ -385,13 +385,13 @@ function playStep(s, t){
   const q16 = 60 / audio.bpm / 4;
   const inten = clamp((t - (audio.startT || t)) / 70, 0, 1);  // whole-reel build over ~70 s
   audio.inten = inten; const full = .35 + inten * .65;
-  const roll = (bar === 7), firstOfPhrase = (s === 0), deep = audio.style === 'deephouse';
-  // kick — four on the floor, with a one-beat gap just before the drop; softer in deep house
-  if (inBar % 4 === 0 && !(roll && inBar === 12)) vKick(t, (firstOfPhrase ? 1.05 : .95) * (deep ? .88 : 1));
+  const roll = (bar === 7), firstOfPhrase = (s === 0), deep = audio.style === 'deephouse' || audio.style === 'deepdub', deeper = audio.style === 'deepdub';
+  // kick — four on the floor, with a one-beat gap just before the drop; softest in the deep-dub turn
+  if (inBar % 4 === 0 && !(roll && inBar === 12)) vKick(t, (firstOfPhrase ? 1.05 : .95) * (deeper ? .8 : deep ? .88 : 1));
   // hats
   if (deep) {
-    if (inBar % 4 === 2) vHat(t, 6400, .14 + .05 * full, .24);          // fat offbeat open hat, the house signature
-    if (inBar === 5 || inBar === 13) vHat(t, 9200, .02, .03);          // a sparse ghost tick
+    if (inBar % 4 === 2) vHat(t, deeper ? 5600 : 6400, (deeper ? .10 : .14) + .05 * full, deeper ? .28 : .24); // fat offbeat open hat, the house signature — darker and longer in deep dub
+    if (!deeper && (inBar === 5 || inBar === 13)) vHat(t, 9200, .02, .03);          // a sparse ghost tick, dropped entirely when deepest
   } else {
     if (inBar % 4 === 2) vHat(t, 7200, .10 + .06 * full, .12);          // offbeat open hat
     if (inBar % 2 === 1) vHat(t, 9000, .035 + .03 * full, .035);        // 16th tick
@@ -401,23 +401,24 @@ function playStep(s, t){
   if (inBar === 4 || inBar === 12) vClap(t, (.13 + .05 * full) * (deep ? .8 : 1));
   // bass — downbeat anchor + rolling offbeat
   if (deep) {
-    if (inBar === 0) vBass(t, root, q16 * 1.1, .44 + .1 * full);
-    if (inBar === 3 || inBar === 6 || inBar === 11 || inBar === 14) vBass(t, root + 12, q16 * 1.5, .36 + .12 * full);
+    if (inBar === 0) vBass(t, root, q16 * (deeper ? 1.5 : 1.1), .44 + .1 * full);
+    if (inBar === 3 || inBar === 6 || inBar === 11 || inBar === 14) vBass(t, root + 12, q16 * (deeper ? 1.7 : 1.5), (deeper ? .3 : .36) + .12 * full);
   } else {
     if (inBar === 0) vBass(t, root, q16 * 1.2, .40 + .12 * full);
     if (inBar % 4 === 2) vBass(t, root + 12 + (inBar === 10 ? 7 : 0), q16 * 1.6, .34 + .14 * full);
   }
   // pad — one chord per bar, filter opening with intensity; kept dark and dubby in deep house
-  if (inBar === 0) { const len = (60 / audio.bpm) * 4, peak = deep ? 1000 : 1400 + 2000 * full;
+  if (inBar === 0) { const len = (60 / audio.bpm) * 4, peak = deeper ? 820 : deep ? 1000 : 1400 + 2000 * full;
     const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(600, t); f.frequency.linearRampToValueAtTime(peak, t + len * .5); f.frequency.linearRampToValueAtTime(700, t + len); f.Q.value = 3;
     const g = ac.createGain(), pv = .05 + .04 * full; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(pv, t + .5); g.gain.setValueAtTime(pv, t + len - .5); g.gain.linearRampToValueAtTime(0, t + len + .05); f.connect(g).connect(audio.bus);
     chord.forEach(m => [-7, 7].forEach(det => { const o = ac.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det; o.connect(f); o.start(t); o.stop(t + len + .1); }));
   }
   if (deep) {
-    // deep house — warm Rhodes chord stabs on the offbeat plus a sustained dub chord, no gated supersaw
-    if (inBar === 2 || inBar === 6 || inBar === 10 || inBar === 14) vRhodes(t, chord.map(m => m + 12), q16 * 2.6, .11 + .05 * full);
-    if (inBar === 7 || inBar === 15) vRhodes(t, chord.map(m => m + 12), q16 * 1.4, .06 + .03 * full);
-    if (inBar === 0) vRhodes(t, chord, (60 / audio.bpm) * 2.6, .05 + .03 * full);
+    // deep house — warm Rhodes chord stabs on the offbeat plus a sustained dub chord, no gated supersaw; deep dub drops the Rhodes an octave and lets it ring longer
+    const voice = deeper ? chord : chord.map(m => m + 12);
+    if (inBar === 2 || inBar === 6 || inBar === 10 || inBar === 14) vRhodes(t, voice, q16 * (deeper ? 3.2 : 2.6), .11 + .05 * full);
+    if (inBar === 7 || inBar === 15) vRhodes(t, voice, q16 * 1.4, .06 + .03 * full);
+    if (inBar === 0) vRhodes(t, chord, (60 / audio.bpm) * (deeper ? 3.4 : 2.6), .05 + .03 * full);
   } else if (inten > .33 && bar >= 2 && [0,2,3,5,6,7,9,10,11,13,14,15].includes(inBar)) {
     // trance lead — 16th gated supersaw, arrives with energy, biggest after the drop
     const idx = [0,1,2,1,0,2,1,2][inBar % 8], oct = inBar % 4 === 0 ? 12 : 0;
@@ -434,7 +435,7 @@ function playStep(s, t){
 function blip(freq, len){ if (!audio.ready || audio.muted) return; const ac = audio.ctx, t = ac.currentTime; const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = freq; g.gain.setValueAtTime(.08, t); g.gain.exponentialRampToValueAtTime(.001, t + len); o.connect(g).connect(audio.comp); o.start(t); o.stop(t + len); }
 function setMusic(level, filterHz, secs){ if (!audio.ready) return; const t = audio.ctx.currentTime; audio.music.gain.cancelScheduledValues(t); audio.music.gain.setTargetAtTime(level, t, secs / 3); audio.radio.frequency.cancelScheduledValues(t); audio.radio.frequency.setTargetAtTime(filterHz, t, secs / 3); }
 function setStatic(level, secs){ if (!audio.ready) return; audio.staticG.gain.setTargetAtTime(level, audio.ctx.currentTime, secs / 3); }
-function setStyle(style){ audio.style = style; audio.bpm = style === 'deephouse' ? 122 : 128; } // deep-house turn drops the tempo and swaps the lead
+function setStyle(style){ audio.style = style; audio.bpm = style === 'deepdub' ? 118 : style === 'deephouse' ? 122 : 128; } // trance (128) → deep house (122) → deep dub (118): the house music evolves deeper and slower
 function setMuted(m){ audio.muted = m; if (audio.ready) audio.master.gain.setTargetAtTime(m ? 0 : .9, audio.ctx.currentTime, .05); $('#mute').textContent = m ? 'Muted' : 'Sound on'; $('#mute').setAttribute('aria-pressed', String(m)); }
 
 // ---------- scenes ----------
@@ -442,7 +443,7 @@ const scenes = [];
 
 // 1 · cold open: rain, skyline, a mast
 scenes.push({
-  eyebrow: 'London · 02:11 · October 2026', title: 'Noise floor', hold: 7000,
+  eyebrow: 'Day 1 · Tue · late night · 02:11 · London · October 2026', title: 'Noise floor', hold: 7000,
   text: 'Two in the morning, and the rain has the city to itself. From the window the river is a dark cable laid through the lights, and the only thing awake on this street is a Raspberry Pi, warm against a radio dongle the size of a thumb. You sit down in front of it the way other people sit down to pray.',
   resize(){
     const r = mulberry(7); this.bld = []; let x = -10;
@@ -479,20 +480,20 @@ scenes.push({
 
 // 2 · the SDR waterfall
 scenes.push({
-  eyebrow: 'RTL-SDR R820T · SDRangel · CF 100.600 MHz · SP 2.400 MHz', title: 'Checking the airwaves', hold: 8000,
-  text: 'The waterfall scrolls. 88 to 108, the FM stations stacked like books nobody reads anymore. Airband at 118, an approach controller counting heights down to a pilot who sounds half asleep. Pager bursts at 153, still carrying hospital shifts in 2026. The long flat hiss of LTE, which is only everyone’s phone, dreaming. You are not looking for anything. You are listening to the city breathe through a twenty-five-pound antenna. And then, at 100.6, someone is playing the right song.',
+  eyebrow: 'Day 1 · Tue · late night · 02:18 · RTL-SDR ▸ SDRangel ▸ CF 100.6 MHz', title: 'Checking the airwaves', hold: 8000,
+  text: 'The waterfall scrolls. 88 to 108, the FM stations stacked like books nobody reads anymore. Airband at 118, an approach controller counting heights down to a pilot who sounds half asleep. Pager bursts at 153, still carrying hospital shifts in 2026. The long flat hiss of LTE, which is only everyone’s phone, dreaming. You are not looking for anything. You are listening to the city breathe through a twenty-five-pound antenna. And then, at 100.9, someone is playing the right song.',
   bins: 420, lo: 99.4, hi: 101.8,
   resize(){ this.wf = document.createElement('canvas'); this.wf.width = this.bins; this.wf.height = Math.max(120, Math.floor(H * .5)); this.wctx = this.wf.getContext('2d'); this.wctx.fillStyle = '#060a18'; this.wctx.fillRect(0, 0, this.wf.width, this.wf.height); this.row = this.wctx.createImageData(this.bins, 1); this.cur = new Float32Array(this.bins); },
   enter(){ this.t0 = -1; this.tune = 99.4; this.locked = false; setStatic(.035, 1.5); setMusic(0, 700, .5);
     // the stations as the R820T sees them in a 2.4 MHz slice of the London FM band
     this.sig = [ { f: 99.62, a: .35, w: .09, kind: 'fm' }, { f: 99.82, a: .9, w: .1, kind: 'fm' }, { f: 100.02, a: .6, w: .09, kind: 'fm' }, { f: 101.42, a: .3, w: .09, kind: 'fm' },
-      { f: 100.6, a: 0, w: .09, kind: 'song' } ]; },
+      { f: 100.9, a: 0, w: .09, kind: 'song' } ]; },
   readout(){ return `${this.tune.toFixed(3)} MHz  ·  2.400 MS/s  ·  ${this.locked ? 'WFM 180 kHz  RDS  LOCK' : 'scanning'}`; },
   draw(t, dt){
     if (this.t0 < 0) this.t0 = t;
     const el = t - this.t0, bins = this.bins, span = this.hi - this.lo;
     // tuning behaviour: sweep, then lock on 101.3 at ~7 s
-    if (!this.locked) { this.tune = this.lo + ((el * .34) % span); if (el > 7) { this.tune = 100.6; this.locked = true; blip(1320, .25); setStatic(.005, 2); setMusic(.6, 1400, 2.5); } }
+    if (!this.locked) { this.tune = this.lo + ((el * .34) % span); if (el > 7) { this.tune = 100.9; this.locked = true; blip(1320, .25); setStatic(.005, 2); setMusic(.6, 1400, 2.5); } }
     const song = this.sig[this.sig.length - 1]; song.a = this.locked ? Math.min(.9, song.a + dt * .5) : 0;
     // new row
     const cur = this.cur; for (let i = 0; i < bins; i++) cur[i] = .10 + Math.random() * .11;
@@ -521,7 +522,7 @@ scenes.push({
     band(99.4, 101.8, 'FM BROADCAST · R820T · 2.4 MS/s · GAIN 29.7');
     // tuning cursor
     const tx = (this.tune - this.lo) / span * W; ctx.strokeStyle = this.locked ? '#00ff66' : 'rgba(0,255,102,.6)'; ctx.lineWidth = this.locked ? 2 : 1; ctx.setLineDash(this.locked ? [] : [4, 4]); ctx.beginPath(); ctx.moveTo(tx, top - 16); ctx.lineTo(tx, H); ctx.stroke(); ctx.setLineDash([]);
-    if (this.locked) { ctx.fillStyle = '#00ff66'; ctx.font = '600 11px JetBrains Mono, monospace'; ctx.textAlign = tx > W * .8 ? 'right' : 'left'; ctx.fillText('100.600 WFM  ◉ LOCK', tx + (tx > W * .8 ? -8 : 8), top + 14); }
+    if (this.locked) { ctx.fillStyle = '#00ff66'; ctx.font = '600 11px JetBrains Mono, monospace'; ctx.textAlign = tx > W * .8 ? 'right' : 'left'; ctx.fillText('100.900 WFM  ◉ LOCK', tx + (tx > W * .8 ? -8 : 8), top + 14); }
     ctx.textAlign = 'left';
     // scanline + phosphor glow
     ctx.fillStyle = 'rgba(47,208,195,.05)'; ctx.fillRect(0, (t * 140) % H, W, 2);
@@ -531,7 +532,7 @@ scenes.push({
 
 // 3 · Super 8: the song arrives
 scenes.push({
-  eyebrow: '100.600 MHz · Coccolino Deep · “Super 8”', title: 'Coccolino deep, you', hold: 9000,
+  eyebrow: 'Day 1 · Tue · late night · 02:30 · 100.9 MHz ▸ Coccolino Deep · “Super 8”', title: 'Coccolino deep, you', hold: 9000,
   text: 'A kick drum like a kind hand on the back. A bass line that takes the stairs two at a time. It is film music for a camera nobody makes anymore, and that is the whole point: everything good is a format somebody declared dead. You turn it up until the window hums. The rain changes tempo to match.',
   enter(){ setMusic(.95, 16000, 3); setStatic(0, 1); this.scratch = []; this.t0 = -1; },
   readout(t){ return `WFM stereo  ·  128 BPM · trance  ·  ${Math.floor((t * 24) % 1e6).toString().padStart(6, '0')} f`; },
@@ -565,7 +566,7 @@ scenes.push({
 
 // 4 · Proxmox: the building under the desk
 scenes.push({
-  eyebrow: 'pve-core-01 · Proxmox VE 9 · uptime 41 d', title: 'Virtual environment, deep', hold: 8000,
+  eyebrow: 'Day 1 · Tue · late night · 02:50 · pve-core-01 ▸ Proxmox VE 9 ▸ uptime 41 d', title: 'Virtual environment, deep', hold: 8000,
   text: 'Under the desk, the real building. Sixty-four cores, two hundred and fifty-six gigabytes, fans breathing like a sleeping dog. Inside the virtual environment, boxes inside boxes: two 3090s rendering video in a container, a 5070 on an OCuLink cable painting plates, two R9700s holding a language model and a pair of eyes. You built a city in there one container at a time. None of it has a face yet.',
   enter(){ setMusic(.7, 5000, 2); setStatic(0, 1);
     this.rows = [ ['CT 210', 'comfyui-qwen', ':8188', 'RTX 5070', .55], ['CT 211', 'comfyui-h3-b', ':8189', 'RTX 3090 B', .9], ['CT 212', 'comfyui-h3-a', ':8190', 'RTX 3090 A', .82],
@@ -603,7 +604,7 @@ scenes.push({
 
 // 5 · mycelium: imagination grows in the dark
 scenes.push({
-  eyebrow: 'Interlude · Psilocybe · substrate', title: 'How all good things start', hold: 12000,
+  eyebrow: 'Day 1 · Tue · late night · 03:00 · interlude ▸ the substrate', title: 'How all good things start', hold: 12000,
   text: 'Here is the part the biographies leave out. Every good thing began with somebody in a slightly creative mood, looking at a wall and seeing a door. Tonight the door opens onto a nebula, and through it, unhurried, drifts a very fat grey cat in round galaxy glasses and a headset. He does not explain himself. The first idea never does; the first idea is always ridiculous. Mycelium works the same way: no plan, a thousand soft guesses in the dark, and the ones that touch something keep going. Imagination is the fruiting body. The hard work comes after.',
   resize(){ this.net = document.createElement('canvas'); this.net.width = W * DPR; this.net.height = H * DPR; this.nctx = this.net.getContext('2d'); this.nctx.setTransform(DPR, 0, 0, DPR, 0, 0); this.started = false; this.cosmos = makeCosmos(W, H, mulberry(42)); },
   enter(){ setMusic(.5, 2600, 3); setStatic(0, 1); if (!this.net) this.resize(); this.nctx.clearRect(0, 0, W, H); this.tips = [{ x: W * .5, y: H * .96, a: -Math.PI / 2, w: 2.4, age: 0 }]; this.bodies = []; this.count = 1; this.started = true; this.t0 = -1; },
@@ -642,8 +643,8 @@ scenes.push({
 
 // 6 · vibe coding: a terminal and a picture coming up in the tray
 scenes.push({
-  eyebrow: 'vidpipe · POST /prompt · MiniMax-H3 · 768×1344 · 243 f', title: 'Vibe coding it into reality', hold: 11000,
-  text: 'So you start talking to the machine the way you would talk to a friend who happens to be very fast. Give me a cat. No, fatter. Round galaxy glasses, a headset. Now put him in space, with the aurora, and make it move. The noise clears step by step, like a photograph coming up in the tray, until he is there, exactly as you saw him through the door, and he is looking at you. It is 03:14. The zeitgeist, it turns out, is a terminal with a cursor in it. The cursor is blinking. It is your turn.',
+  eyebrow: 'Day 1 · Tue · late night · 03:14 · vidpipe ▸ MiniMax-H3 ▸ 768×1344', title: 'Vibe coding it into reality', hold: 11000,
+  text: 'So you start talking to the machine the way you would talk to a friend who happens to be very fast. Give me a cat. No, fatter. Round galaxy glasses, a headset. Now put him in space, with the aurora, and make it move. The noise clears step by step, like a photograph coming up in the tray, until he is there, exactly as you saw him through the door, and he is looking at you — and it is you, a little, the hacker you are at three in the morning rendered fat and calm and cosmic, an avatar with the volume turned up. He is only a still for now; he does not move yet. It is 03:14. The zeitgeist, it turns out, is a terminal with a cursor in it. The cursor is blinking. It is your turn.',
   K: 20,
   lines: [ '$ uv run vidpipe plates fat-cat/film.yaml', '  P0: "a very fat grey cat in round galaxy sunglasses and a headset, floating in a nebula, aurora, planets"', '→ POST http://127.0.0.1:8188/prompt   {"prompt": {…}, "client_id": "vp"}', '← {"prompt_id": "6c1f9a2e…", "number": 3}', '→ GET  /history/6c1f9a2e…            status: running', '  TextEncodeQwenImage21  ✓   VAE  ✓   KSampler 20/20', '← plates/P0.png   768×1344   seed 1337   face 0.74 (cat)', '$ uv run vidpipe approve fat-cat/film.yaml P0 P1', '$ uv run vidpipe clips fat-cat/film.yaml', '→ POST http://127.0.0.1:8189/prompt   MiniMax-H3 · 243 f · 24 fps · shift 6/3', '  sampling  ▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮▮  8 m 02 s', '← out/clip1.mp4   identity 0.61   seam 0.93   beat: shown', '$ _' ],
   resize(){ this.iw = 90; this.ih = 160; this.target = this.makeTarget(); this.img = new ImageData(this.iw, this.ih); this.off = document.createElement('canvas'); this.off.width = this.iw; this.off.height = this.ih; this.octx = this.off.getContext('2d'); },
@@ -681,7 +682,7 @@ scenes.push({
 
 // 7 · the voice in the carrier — an agent tunes Classic FM, and something is under the noise
 scenes.push({
-  eyebrow: 'HackRF One · 89.100 MHz · Qwen3.8 ▸ Hermes agent ▸ auto-tune', title: 'The voice under the music', hold: 11000,
+  eyebrow: 'Day 1 · Tue · small hours · 03:40 · HackRF ▸ 100.9 MHz ▸ Qwen3 ▸ Hermes auto-tune', title: 'The voice under the music', hold: 11000,
   text: 'You should sleep. Instead you hand the dial to the machine. Tune for me, you tell it, and the little agent — Qwen, wearing Hermes like a coat — starts nudging the radio a kilohertz at a time, chasing the cleanest Classic FM it can find. Strings, a nocturne, the announcer’s velvet hush. And then, under the violins, right at the floor of the noise, a voice. Women’s voices, far away, saying something that is not English and not quite language: counting, maybe, or praying, or nothing at all, the brain inventing company at three in the morning. You lean in. The agent flags it too. Neither of you can say what it is. You write down the frequency and promise to come back.',
   resize(){ this.spec = document.createElement('canvas'); this.spec.width = 260; this.spec.height = Math.max(90, Math.floor(H * .3)); this.sctx = this.spec.getContext('2d'); this.sctx.fillStyle = '#05080f'; this.sctx.fillRect(0, 0, this.spec.width, this.spec.height); this.srow = this.sctx.createImageData(1, this.spec.height); },
   enter(){ this.t0 = -1; this.flagged = false; setStatic(.05, 1.5); setMusic(.3, 1100, 1.5);
@@ -722,7 +723,7 @@ scenes.push({
 
 // 8 · ADS-B over London — sleepless, watching metal cross the dark
 scenes.push({
-  eyebrow: 'dump1090 · 1090 MHz ADS-B · EGLL / EGLC traffic · 04:52', title: 'Everything above London', hold: 11000,
+  eyebrow: 'Day 1 · Tue · pre-dawn · 04:52 · dump1090 ▸ ADS-B ▸ EGLL / EGLC traffic', title: 'Everything above London', hold: 11000,
   text: 'You still cannot sleep, so you watch the sky instead. 1090 megahertz: the frequency every aircraft uses to shout its own name into the dark — callsign, height, heading, forty times a minute. The scope fills with them. A widebody stepping down the stack into Heathrow. A little twin feeling its way toward City. Two freighters crossing high over it all, bound for somewhere that is already tomorrow. Nobody up there knows you are listening. And you think about the future the way you only can at five in the morning, when it feels close enough to touch and far too big to hold, while the planes keep coming down out of the black like they have somewhere better to be.',
   resize(){ const r = mulberry(21); this.craft = []; const names = ['BAW', 'EZY', 'RYR', 'VIR', 'UAE', 'QFA', 'DLH', 'AFR', 'TOM', 'BCS'];
     for (let i = 0; i < 11; i++) { this.craft.push({ a: r() * Math.PI * 2, rad: .12 + r() * .86, spd: .02 + r() * .05, alt: Math.floor(30 + r() * 360) * 100, cs: names[i % names.length] + (100 + Math.floor(r() * 899)), hold: r() < .25, trail: [] }); } },
@@ -760,7 +761,7 @@ scenes.push({
 
 // 9 · day shift — the graph, the alert, and the colour that means cooperation
 scenes.push({
-  eyebrow: 'Day job · remote · BloodHound CE · analyst online', title: 'Red, blue, and the colour between', hold: 12000,
+  eyebrow: 'Day 1 · Tue · midday → afternoon · 11:30 · day job ▸ remote ▸ BloodHound CE', title: 'Red, blue, and the colour between', hold: 12000,
   text: 'Morning arrives sideways, through a gap in the curtains, and you are already at work without having gone anywhere. The small boxes you left on a client’s network weeks ago wake up and phone home, polite as houseguests, and you begin the slow, careful business of mapping what their systems trust — not to break anything, but to show them where a real intruder would walk straight through. BloodHound draws it as a constellation: every account, every machine, every quiet permission, joined by lines nobody meant to leave open. Then you wait. The whole point of the day is the waiting — for their defenders to notice you, raise the alarm, and call. They find you late in the afternoon. You confirm every step with them, out loud. Red team and blue team on one call, turning the whole thing purple. It is the job you would happily do for free. Do not tell the clients that.',
   resize(){ const r = mulberry(88), N = W < 640 ? 26 : 42; this.nodes = [];
     for (let i = 0; i < N; i++) this.nodes.push({ x: .1 + r() * .8, y: .12 + r() * .72, k: r() < .18 ? 'grp' : (r() < .5 ? 'usr' : 'host'), hot: r() < .14, ph: r() * 6 });
@@ -798,7 +799,7 @@ scenes.push({
 
 // 10 · the real world, briefly — a walk along the Thames
 scenes.push({
-  eyebrow: 'Thames · low tide · 17:58 · headphones in', title: 'Out to see the river', hold: 10000,
+  eyebrow: 'Day 1 · Tue · evening · 17:58 · Thames ▸ low tide ▸ headphones in', title: 'Out to see the river', hold: 10000,
   text: 'Then you do the bravest thing a person who works like this can do: you put on a coat and go outside. London is running its end-of-day colours, the sky bruised peach over the water, and the Thames is out at low tide showing its old bones — shingle, a lost shopping trolley, four hundred years of broken clay pipes. Gulls argue over nothing. A tour boat goes by half empty. In your headphones the same song is still playing, because some loops are good loops, and for twenty minutes you are not a signal or a user or a threat model, just a person on a wall watching a river that has seen all of this before and was not especially impressed then either.',
   resize(){ const r = mulberry(13); this.bld = []; let x = -20; while (x < W + 40) { const w = 16 + r() * 60, h = 20 + r() * r() * H * .3; this.bld.push({ x, w, h, lit: r() < .5 }); x += w + r() * 14; } this.birds = Array.from({ length: 7 }, () => ({ x: r() * W, y: H * .12 + r() * H * .2, s: r() < .5 ? 1 : -1, ph: r() * 6 })); },
   enter(){ this.t0 = -1; setStatic(0, 1); setMusic(.85, 11000, 3); },
@@ -822,7 +823,7 @@ scenes.push({
 
 // 11 · signal out — the post goes up, a message to the universe
 scenes.push({
-  eyebrow: 'sv-zeroone.github.io · _posts · git push · 22:40', title: 'A message to the universe', hold: 12000,
+  eyebrow: 'Day 1 · Tue · night · 22:40 · git push ▸ sv-zeroone.github.io', title: 'A message to the universe', hold: 12000,
   text: 'Home again, kettle on, the cat — the real idea of the cat — watching from the top of the bookshelf. You write it all down: not the client’s secrets, never those, but the shape of the problem, the small cheap box that should never have been trusted, the lesson anyone can use. You publish it to the quiet corner of the internet that is yours, and you let yourself want one specific thing out loud: that somewhere a company that makes the little machines you love might read it, and decide to back the strange thing you are building. You hit push. The post goes live. It is only a blog, and it is also a flare, fired straight up into the dark on the off chance that the right people are looking at the sky. Chapter two ends with the cursor blinking and the whole future still unwritten.',
   lines: ['---', 'title: Physical Network Implants — The Rogue Device Problem', 'author: zero', 'tags: [red-team, hardware, defence]', '---', '', 'Every network has a door nobody remembers fitting.', 'A device the size of a paperback, left where trust is assumed,', 'and the whole careful fortress quietly routes around its own walls.', '', 'Here is how we find them before someone less friendly does →', '', '$ git add _posts/2026-10-12-physical-network-implants.md', '$ git commit -m "new post: the rogue device problem"', '$ git push origin master', '→ published ✓  ·  https://sv-zeroone.github.io'],
   enter(){ this.t0 = -1; this.n = 0; this.next = .4; this.pulse = -1; setStatic(0, 1); setMusic(.8, 9000, 2.5); if (!this.cosmos) this.cosmos = makeCosmos(W, H, mulberry(7)); },
@@ -854,7 +855,7 @@ scenes.push({
 
 // 12 · morning calls — planning the walk-through on paper
 scenes.push({
-  eyebrow: 'Day 2 · 09:40 · client bridge · red team planning', title: 'Drawing the doors', hold: 11000,
+  eyebrow: 'Day 2 · Wed · morning · 09:40 · client bridge ▸ red team planning', title: 'Drawing the doors', hold: 11000,
   text: 'Morning, and the first calls are about buildings that are not yours. A tower with a marble lobby and a turnstile that trusts a plastic card; a loading bay somebody props open for the smokers; a server room whose door is only as strong as the reader beside it. You sit on a bridge with the client and sketch it out loud — where you would walk in, which badge you would clone, where a small quiet box would sit on their network and never be noticed. It is all hypothetical, all authorised, all written down. That is the strange luxury of the job: they ask you to plan the heist, and then they thank you for the map.',
   resize(){ const r = mulberry(31); this.rooms = []; const cols = 4, rows = 3, pad = Math.min(W, H) * .06;
     const gw = (W * .66 - pad) / cols, gh = (H * .64 - pad) / rows, ox = W * .17, oy = H * .16;
@@ -880,7 +881,7 @@ scenes.push({
 
 // 13 · nmap — the subnet lights up
 scenes.push({
-  eyebrow: 'nmap -sS -sV 10.20.0.0/22 · mapping the internal estate', title: 'Knocking on every door', hold: 12000,
+  eyebrow: 'Day 2 · Wed · late morning · 11:10 · nmap -sS -sV 10.20.0.0/22', title: 'Knocking on every door', hold: 12000,
   text: 'Inside their network now — on paper, under contract, with their blessing — you let the scanner off its lead. A quiet knock at every address in the range, and a map draws itself as the replies come back: here a print server that should not still exist, there a database nobody owns any more, a jump host, a dozen desktops, a handful of little appliances humming to themselves in a cupboard. Every open port is a lit window in a building at night. You are not breaking anything. You are just making a map so honest it is almost rude.',
   resize(){ const r = mulberry(55); this.cols = W < 640 ? 10 : 16; this.rows = W < 640 ? 10 : 12; this.hosts = [];
     const gw = W * .6 / this.cols, gh = H * .62 / this.rows, ox = W * .32, oy = H * .16;
@@ -911,7 +912,7 @@ scenes.push({
 
 // 14 · the analyst — an LLM reads the banners back to you
 scenes.push({
-  eyebrow: 'results.gnmap ▸ qwen-analyst · version triage', title: 'Asking the machine what it sees', hold: 11000,
+  eyebrow: 'Day 2 · Wed · afternoon · 14:05 · results.gnmap ▸ qwen-analyst triage', title: 'Asking the machine what it sees', hold: 11000,
   text: 'Too many results to read by hand, so you pour them into the model and ask it to be your tired second pair of eyes. It reads the version banners the way a mechanic listens to an engine: this SSH is a decade old, that web server still admits to a build with a name and a number, this appliance is running firmware with a bad reputation. It does not touch anything. It just points, politely and relentlessly, at the soft spots — and sorts them by how much trouble they would be in the wrong hands. One line near the bottom makes you sit up.',
   lines: ['$ qwen-analyst triage results.gnmap --rank', '  parsing 41 hosts · 112 open services', '← OpenSSH 6.6.1p1        host .17   age: high · legacy', '← Apache httpd 2.4.29    host .33   banner leaks build', '← ProFTPD 1.3.5          host .44   known-bad version', '← nginx 1.14.0           host .51   outdated', '← "PowerLogic" mgmt UI   host .9    ⚠ operational tech', '← suggest: review .9 first — exposed control interface', '$ _'],
   enter(){ setMusic(.66, 6000, 2.5); setStatic(0, 1); this.t0 = -1; this.n = 0; this.next = .5; },
@@ -935,7 +936,7 @@ scenes.push({
 
 // 15 · the finding — a hand on the building's light switch
 scenes.push({
-  eyebrow: 'host 10.20.1.9 · PowerLogic ▸ breaker control · read/write', title: 'With great power', hold: 12000,
+  eyebrow: 'Day 2 · Wed · afternoon · 15:40 · host 10.20.1.9 ▸ PowerLogic breaker control', title: 'With great power', hold: 12000,
   text: 'And then one of the soft spots turns out to be the mains. A power management interface, wide open on the inside, the kind of panel that decides whether a floor of the building keeps its lights. You do not throw a single switch — of course you do not — but you screenshot the plain fact that you could, and you write the careful email: I have control of one of your critical power systems, here is exactly how I got here, here is how to shut that door tonight. What to do with all this power, you think, grinning at the ceiling — and then you think the only correct thought, the one every good one of us learns early: with great power comes responsibility. You hand it straight back. That is the whole job.',
   resize(){ const r = mulberry(77); this.breakers = Array.from({ length: 8 }, () => ({ on: true, ph: r() * 6 })); },
   enter(){ setMusic(.72, 7000, 3); setStatic(0, 1); this.t0 = -1; },
@@ -961,7 +962,7 @@ scenes.push({
 
 // 16 · Canary Wharf — the hour the towers empty
 scenes.push({
-  eyebrow: 'E14 · 18:20 · the towers let out · headphones in', title: 'Watching the hustle go home', hold: 11000,
+  eyebrow: 'Day 2 · Wed · evening · 18:20 · E14 ▸ the towers let out', title: 'Watching the hustle go home', hold: 11000,
   text: 'You close the laptop while there is still colour in the sky and walk east to where the glass towers stand with their feet in the old docks. It is going-home time, and the lobbies breathe out: thousands of people in good coats spilling onto the plaza, checking phones, peeling off toward the trains, each one a small certain purpose in a hurry. You are not in a hurry. You stand by the water with the same loop still playing and watch the hustle drain away floor by floor, lights going dark in the towers like a slow exhale, and for a little while you are simply one more quiet signal in a city full of them.',
   resize(){ const r = mulberry(140); this.towers = []; let x = W * .06; while (x < W * .94) { const w = 30 + r() * 60, h = H * (.3 + r() * .42); this.towers.push({ x, w, h, lit: Array.from({ length: Math.floor(h / 16) }, () => r() < .7) }); x += w + 8 + r() * 18; }
     this.people = Array.from({ length: Math.floor(W / 22) }, () => ({ x: r() * W, s: (r() < .5 ? 1 : -1) * (14 + r() * 16), ph: r() * 6 })); },
@@ -983,7 +984,7 @@ scenes.push({
 
 // 17 · the second post — because the first one landed
 scenes.push({
-  eyebrow: 'sv-zeroone.github.io ▸ _posts ▸ hardware implants, part 2', title: 'Pressing publish again', hold: 12000,
+  eyebrow: 'Day 2 · Wed · night · 22:10 · git push ▸ hardware implants, part 2', title: 'Pressing publish again', hold: 12000,
   text: 'Home, kettle on, the cat back on the shelf. The first post about the little rogue boxes did better than anything you have written — people shared it, argued with it, thanked you for making them paranoid — so tonight you finish the sequel: the implant zoo, from a USB stick that is not a USB stick all the way down to a chip baked into a motherboard, and the quiet trick they all share. Outbound to get inbound, phoning home through a channel nobody is watching. You tidy the last paragraph, you check the images one more time, and you push. Part two goes live next to part one. The flare goes up again.',
   lines: ['---', 'title: "Hardware Implants, Part 2: Hiding in Plain Sight"', 'tags: [red-team, hardware, badusb, supply-chain]', '---', '', 'The scariest implants aren’t the ones that look like hacking tools.', 'They look like a cable. A charger. A USB stick that isn’t.', '', 'Outbound to get inbound, in effect — the box phones home', 'through a channel the defender never thought to watch.', '', '$ git add _posts/2026-10-13-hardware-implants-part-2.md', '$ git commit -m "part 2: hiding in plain sight"', '$ git push origin master', '→ published ✓  ·  /2026/10/13/hardware-implants-part-2.html'],
   enter(){ setMusic(.8, 9000, 2.5); setStatic(0, 1); this.t0 = -1; this.n = 0; this.next = .4; this.pulse = -1; },
@@ -1012,7 +1013,7 @@ scenes.push({
 
 // 18 · the implant — a quiet box that phones home
 scenes.push({
-  eyebrow: 'rogue node ▸ dropped on the LAN ▸ out-of-band beacon', title: 'Outbound to get inbound', hold: 13000,
+  eyebrow: 'Day 2 · Wed · night · 22:25 · rogue node ▸ out-of-band beacon', title: 'Outbound to get inbound', hold: 13000,
   text: 'This is the picture the whole post is really about. A small box, the size of a paperback, that someone plugs into a network jack nobody watches. It wakes up looking like it belongs. It joins the switch, it listens — quietly pulling copies of the traffic that drifts past — and then it does the clever, patient thing: it never waits to be called. It reaches outward, over a channel the defenders are not looking at, and dribbles what it has learned home, a few bytes at a time, for as long as it likes. Outbound to get inbound. A map drawn from the inside by a device that looks like nothing at all — which is exactly why you teach them to go looking for it.',
   resize(){ const r = mulberry(202); const cx = W * .42, cy = H * .46, R = Math.min(W, H) * .3;
     this.sw = { x: cx, y: cy }; this.nodes = []; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; this.nodes.push({ x: cx + Math.cos(a) * R, y: cy + Math.sin(a) * R, ph: r() * 6 }); }
@@ -1047,7 +1048,7 @@ scenes.push({
 
 // 19 · the brief — a client's laptop, "assume it was stolen"
 scenes.push({
-  eyebrow: 'Day 3 · 09:00 · leadership sync → engagement brief', title: 'Assume it was stolen', hold: 12000,
+  eyebrow: 'Day 3 · Thu · morning · 09:00 · leadership sync → engagement brief', title: 'Assume it was stolen', hold: 12000,
   text: 'Not much sleep, and the morning opens with the grown-up part of the job: a leadership call about where the company goes next, which doors to knock on, how to turn a reputation into a roadmap. Then the real toy lands on the bench — a laptop one of our clients handed us with a simple, chilling instruction: pretend a thief has it now. No login, no mercy, no network to lean on. Just the machine, its secrets, and however long it takes. You pour a coffee you do not need and look at it the way you look at a locked door that has personally insulted you.',
   resize(){ this.cat = Math.min(W, H) * .1; },
   enter(){ setMusic(.6, 4000, 3); setStatic(0, 1); this.t0 = -1; },
@@ -1068,7 +1069,7 @@ scenes.push({
 
 // 20 · the screw — today I took a drill to a laptop
 scenes.push({
-  eyebrow: 'HP chassis · M.2 retention screw · thread-locked', title: 'Taking a drill to it', hold: 13000,
+  eyebrow: 'Day 3 · Thu · late morning · 11:20 · HP chassis ▸ M.2 retention screw', title: 'Taking a drill to it', hold: 13000,
   text: 'The creds we lifted from a keyboard implant are useless: the machine was never joined to the domain, so there is nobody for them to be. The BIOS is open, which feels like luck until you nudge VT-d and BitLocker recovery slams down like a portcullis — you back out fast and leave the firmware exactly as you found it. To do the clever attack you need the drive out, and that is where today turns ridiculous: the little screw holding the NVMe down will not move. Thread-locked at the factory, maybe glued, and three well-fitted bits later its head is a smooth stripped crater. So you do the unthinkable to a working laptop: you take a drill to it, slowly, breathing, and lift the ruined screw out in a curl of metal. Not normal. Necessary.',
   resize(){ this.shav = []; },
   enter(){ setMusic(.66, 5200, 2.5); setStatic(.03, 2); this.t0 = -1; },
@@ -1093,7 +1094,7 @@ scenes.push({
 
 // 21 · the DMA attack — reading the machine's mind over PCIe
 scenes.push({
-  eyebrow: 'Screamer FPGA · M.2 PCIe DMA · MemProcFS + Volatility 3', title: 'Reading its mind', hold: 14000,
+  eyebrow: 'Day 3 · Thu · afternoon · 14:15 · Screamer FPGA ▸ PCIe DMA ▸ MemProcFS', title: 'Reading its mind', hold: 14000,
   text: 'With the drive finally free, the real trick: a field-programmable chip on a little board that speaks PCIe fluently, slid into the slot the SSD used to own. The first try — the FPGA in the spare Wi-Fi M.2 — just hangs the boot, so you improvise: move the NVMe onto the Wi-Fi slot with a keyed adapter, drop the DMA board into the full-fat slot instead, and this time Windows comes up none the wiser while you quietly read its kernel memory straight off the bus. The full-disk encryption is no help to anyone here: memory in a running machine is already decrypted, plain as day, so the locked logon screen is just a picture of a door. You cannot write a byte — VT-d and HVCI see to that — but you do not need to. Reading is plenty. You pour sixteen gigabytes of its mind into a dump, carve out the SAM, SYSTEM and SECURITY hives, and let Volatility walk the rest for anything that glitters.',
   resize(){ this.wf = []; },
   enter(){ setMusic(.74, 7000, 3); setStatic(.02, 2); this.t0 = -1; this.n = 0; this.next = 1.2;
@@ -1126,10 +1127,179 @@ scenes.push({
   }
 });
 
-// 22 · end of reel
+// ======== Chapter Five · Friday ========
+// shared: a jointed figure (OpenPose-style), driven by two pose generators — a fight loop and a tai-chi form
+const BONES = [ ['head','neck','#e23c3c'], ['neck','hip','#e2a53c'],
+  ['neck','sL','#8ce23c'], ['sL','eL','#3ce26a'], ['eL','wL','#3ce2c0'],
+  ['neck','sR','#3c8ce2'], ['sR','eR','#6a3ce2'], ['eR','wR','#c03ce2'],
+  ['hip','hL','#e23c8c'], ['hL','kL','#e2d23c'], ['kL','aL','#9ce23c'],
+  ['hip','hR','#3ce2a5'], ['hR','kR','#3cc0e2'], ['kR','aR','#8c6ae2'] ];
+function kfJoints(p){ // martial loop, figure faces +x; units: head-to-ankle ≈ 1.56
+  const sw = Math.sin(p * Math.PI * 2), la = Math.max(0, sw), ra = Math.max(0, -sw), hy = .05 * Math.abs(sw);
+  return { hip:[0,hy], neck:[.02*sw,hy-.5], head:[.04*sw,hy-.72], sL:[-.16,hy-.44], sR:[.16,hy-.44],
+    hL:[-.12,hy], hR:[.12,hy], kL:[-.26,hy+.42], aL:[-.34,hy+.84], kR:[.26,hy+.42], aR:[.34,hy+.84],
+    eL:[lerp(-.22,.32,la),hy-.34], wL:[lerp(-.06,.62,la),lerp(hy-.28,hy-.42,la)],
+    eR:[lerp(.2,.3,ra),hy-.18], wR:[lerp(0,.56,ra),lerp(hy-.2,hy-.3,ra)] };
+}
+function taiJoints(p){ // slow cloud-hands form
+  const a = p * Math.PI * 2, sw = .05 * Math.sin(a), hy = .04 * Math.sin(a);
+  const J = { hip:[sw,hy], neck:[sw,hy-.5], head:[sw,hy-.72], sL:[sw-.16,hy-.44], sR:[sw+.16,hy-.44],
+    hL:[-.1,hy], hR:[.1,hy], kL:[-.2,hy+.44], aL:[-.24,hy+.86], kR:[.22,hy+.44], aR:[.28,hy+.86],
+    wL:[sw-.1+.34*Math.cos(a+.6), hy-.2+.26*Math.sin(a+.6)], wR:[sw+.1+.34*Math.cos(a+Math.PI+.6), hy-.2+.26*Math.sin(a+Math.PI+.6)] };
+  J.eL = [(J.sL[0]+J.wL[0])/2 - .04, (J.sL[1]+J.wL[1])/2 + .05];
+  J.eR = [(J.sR[0]+J.wR[0])/2 + .04, (J.sR[1]+J.wR[1])/2 + .05];
+  return J;
+}
+function drawFigure(c, cx, cy, u, J, o){ o = o || {}; const S = k => [cx + J[k][0]*u, cy + J[k][1]*u];
+  c.lineCap = 'round'; c.globalAlpha = o.alpha == null ? 1 : o.alpha;
+  for (const [a,b,col] of BONES){ const pa = S(a), pb = S(b); c.strokeStyle = o.mono || col; c.lineWidth = o.lw || Math.max(2, u*.03); c.beginPath(); c.moveTo(pa[0],pa[1]); c.lineTo(pb[0],pb[1]); c.stroke(); }
+  if (o.joints !== false){ c.fillStyle = o.jointCol || '#fff'; for (const k in J){ const p = S(k); c.beginPath(); c.arc(p[0], p[1], o.jr || Math.max(2, u*.022), 0, 7); c.fill(); } }
+  c.globalAlpha = 1; c.lineCap = 'butt';
+}
+function drawGpu(c, x, y, w, h, load, t, seed){
+  roundRect(c, x, y, w, h, 6); c.fillStyle = '#14181d'; c.fill(); c.strokeStyle = '#2a333c'; c.lineWidth = 1.5; c.stroke();
+  for (let k = 0; k < 2; k++){ const fx = x + w*(.3 + k*.4), fy = y + h*.5, fr = h*.32;
+    c.fillStyle = '#0c0f12'; c.beginPath(); c.arc(fx, fy, fr, 0, 7); c.fill(); c.strokeStyle = '#243039'; c.lineWidth = 1; c.stroke();
+    if (!reduced){ c.save(); c.translate(fx, fy); c.rotate(t*(4 + seed*.3) + k); c.strokeStyle = 'rgba(120,180,140,.5)'; c.lineWidth = 1.5;
+      for (let b = 0; b < 5; b++){ c.rotate(Math.PI*2/5); c.beginPath(); c.moveTo(0,0); c.quadraticCurveTo(fr*.3, -fr*.3, 0, -fr*.85); c.stroke(); } c.restore(); } }
+  c.fillStyle = '#0a0d10'; c.fillRect(x+6, y+h-7, w-12, 3); c.fillStyle = '#b5e853'; c.fillRect(x+6, y+h-7, (w-12)*clamp(load,0,1), 3);
+  const on = (t*3 + seed | 0) % 2; c.fillStyle = on ? '#b5e853' : '#1f3012'; c.beginPath(); c.arc(x+w-8, y+8, 3, 0, 7); c.fill();
+}
+
+// 22 · hashcat in the cloud — turning the laptop's memory into keys (morning, GPUs grinding)
 scenes.push({
-  eyebrow: 'End of reel 01', title: 'The reel keeps running', hold: 1e9,
-  text: 'The song is still going. Somewhere in the rack a clip is rendering that nobody has seen yet; out past the aurora the fat cat waits in his galaxy glasses; a drilled-open laptop on the bench has given up its secrets; and in a quiet corner of the internet a new post sits with its hand up, hoping the right people are reading. Four chapters in, and the real work has barely started. Press ◀ to run the reel again, or open the real soundtrack and let it carry you out.',
+  eyebrow: 'Day 4 · Fri · morning · 09:30 · rented GPUs ▸ hashcat -m 1000 / -m 2100 ▸ cloud', title: 'What the laptop remembered', hold: 14000,
+  text: 'Yesterday’s memory dump is sitting in a file now, and locked inside it are the passwords the machine used to know — NTLM for the local account, DCC2 for the domain users it once cached. You do not own a cracking farm for a single day’s work, so you rent one: a fistful of GPUs in a datacentre somewhere, woken for an hour, pointed at the hashes and told to try every word anyone ever thought was clever. The rate climbs into the billions a second. Most hashes just sit there, stubborn and good. A few give up almost at once — a season and a year, a name and an exclamation mark — and those are the ones that matter, because a password a machine guesses in a minute is a door that was never really locked. You write down the plaintext and nothing else. The drive itself never opened: safe mode, recovery, diskpart, bcdedit, every polite knock on the boot path, and BitLocker never blinked. That is not the failure — that is the finding. The memory trick already made the point, and a pre-boot PIN with Kernel DMA Protection would have closed even that. So the drive goes back into its slot, the panel is taped shut where the drilled screw used to be, and the laptop boots none the worse and goes home to the client whole.',
+  enter(){ setStyle('deepdub'); setMusic(.66, 4600, 3); setStatic(.015, 2); this.t0 = -1; this.n = 0; this.next = 1;
+    this.hashes = [ { alg:'NTLM', mask:'8846f7eaee8f…', plain:'Summer2025!' }, { alg:'NTLM', mask:'31d6cfe0d16a…', plain:null },
+      { alg:'DCC2', mask:'$DCC2$10240#…', plain:'Liverpool08' }, { alg:'DCC2', mask:'$DCC2$10240#…', plain:null },
+      { alg:'NTLM', mask:'e19ccf75ee54…', plain:'Autumn#Leaves' }, { alg:'DCC2', mask:'$DCC2$10240#…', plain:null } ]; },
+  readout(t){ const rate = (t - this.t0 < 1 ? 0 : 7.4 + Math.sin(t*3)*.5); const got = this.hashes.slice(0, this.n).filter(h => h.plain).length; return `recovered ${got}/${this.hashes.length}  ·  ${rate.toFixed(1)} GH/s  ·  wordlist + rules  ·  drive: still sealed`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0, narrow = W < 680;
+    ctx.fillStyle = '#05070a'; ctx.fillRect(0, 0, W, H);
+    const n = 5, gap = narrow ? 8 : 18, gw = Math.min((W*.92)/n - gap, 150), gh = gw*.42, totalW = n*(gw+gap) - gap, gx0 = (W - totalW)/2, gy = H*.14;
+    for (let i = 0; i < n; i++) drawGpu(ctx, gx0 + i*(gw+gap), gy, gw, gh, .55 + .35*Math.sin(t*2 + i), t, i);
+    const rate = el < 1 ? el*7.4 : 7.4 + Math.sin(t*3)*.5;
+    ctx.textAlign = 'center'; ctx.fillStyle = '#b5e853'; ctx.font = `800 ${Math.min(W*.07, 38)}px Syne, Arial Black, sans-serif`;
+    ctx.fillText(rate.toFixed(1) + ' GH/s', W/2, gy + gh + (narrow ? 40 : 56));
+    ctx.font = '11px JetBrains Mono, monospace'; ctx.fillStyle = 'rgba(236,229,212,.45)';
+    ctx.fillText('candidates ▸ ' + Math.floor(el * rate * 1e9).toLocaleString('en-GB'), W/2, gy + gh + (narrow ? 58 : 76));
+    ctx.textAlign = 'left';
+    if (el > this.next && this.n < this.hashes.length){ this.n++; this.next = el + (this.hashes[this.n-1].plain ? 1.1 : .5); if (this.hashes[this.n-1].plain) blip(900 + this.n*30, .06); }
+    const lh = 18, pw = narrow ? W - 28 : Math.min(560, W*.7), px = (W - pw)/2, py = gy + gh + (narrow ? 72 : 96);
+    ctx.fillStyle = 'rgba(8,12,14,.85)'; ctx.fillRect(px, py, pw, this.hashes.length*lh + 30); ctx.strokeStyle = '#1f2536'; ctx.lineWidth = 1; ctx.strokeRect(px+.5, py+.5, pw, this.hashes.length*lh + 30);
+    ctx.font = '600 10px Monaco, monospace'; ctx.fillStyle = '#63c0f5'; ctx.fillText('RECOVERED ▸ SAM / SECURITY hives', px + 10, py + 16);
+    ctx.font = '11px Monaco, monospace';
+    for (let i = 0; i < this.n; i++){ const h = this.hashes[i], yy = py + 32 + i*lh, cr = !!h.plain;
+      ctx.textAlign = 'left'; ctx.fillStyle = 'rgba(236,229,212,.45)'; ctx.fillText(h.alg + '  ' + h.mask, px + 10, yy);
+      ctx.textAlign = 'right'; ctx.fillStyle = cr ? '#b5e853' : 'rgba(226,90,90,.65)'; ctx.fillText(cr ? '→ ' + h.plain : '→ not cracked', px + pw - 10, yy); }
+    ctx.textAlign = 'left';
+    vignette(); drawGrain(.07);
+  }
+});
+
+// 23 · the other engagement — kerberoast, SCCM creds, tripping the alarm (mid-late afternoon)
+scenes.push({
+  eyebrow: 'Day 4 · Fri · afternoon · 15:30 · other engagement ▸ Kerberoast ▸ SCCM ▸ break-glass', title: 'Making the alarm go off on purpose', hold: 13000,
+  text: 'Meanwhile, the other job — the one with its hand on the building’s lights. This afternoon you go loud on purpose. You ask the domain for the service tickets you are allowed to grind offline, and while you are in there a configuration server coughs up a whole cupboard of passwords someone left lying in plain text. Then you do the thing a red team exists to do: you pick up the break-glass account — the emergency key that is supposed to set off every bell in the building — and you turn it, not to break in, but to find out whether anyone is listening. They are. The screen lights up with the hunt; the defenders start closing doors and tracing you back through the dark. And when they finally have you cornered, you put your hands up and say the four best words in the trade: stand down, it’s me. The alarm worked. That is the whole point — you made it ring, and then you handed them the map.',
+  resize(){ const r = mulberry(42); this.nodes = Array.from({ length: 26 }, () => ({ x: r(), y: r(), u: r() < .14 })); this.edges = Array.from({ length: 34 }, () => [Math.floor(r()*26), Math.floor(r()*26)]); },
+  enter(){ setStyle('deepdub'); setMusic(.7, 5000, 2.5); setStatic(.015, 2); this.t0 = -1; this.n = 0; this.next = .8;
+    this.lines = ['$ GetUserSPNs.py -request  ▸ 7 SPN accounts', '← krb5tgs harvested ▸ offline grind', '$ loot SCCM ▸ PXE + policy share', '← 14 plaintext creds in a config blob (!)', '$ use BREAK-GLASS account ▸ emergency key', '⚠ SIEM: anomalous break-glass logon', '⚠ SOC hunt started ▸ tracing source', '← blue team: "who is on DC02?"', '$ operator ▸ stand down — authorised', '← engagement confirmed · purple']; },
+  readout(){ return `Kerberoast ▸ SCCM ▸ break-glass · SOC: ${this.n >= 6 ? 'ALERTED' : 'quiet'} · authorised`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0, narrow = W < 680;
+    ctx.fillStyle = '#05070c'; ctx.fillRect(0, 0, W, H);
+    const gx = narrow ? W*.5 : W*.3, gy = H*.52, gr = Math.min(W, H)*.36, Pn = i => [gx + (this.nodes[i].x - .5)*gr*1.4, gy + (this.nodes[i].y - .5)*gr*1.4];
+    ctx.strokeStyle = 'rgba(99,192,245,.18)'; ctx.lineWidth = 1; for (const [a, b] of this.edges){ const pa = Pn(a), pb = Pn(b); ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.stroke(); }
+    this.nodes.forEach((nd, i) => { const p = Pn(i), tw = .6 + .4*Math.sin(t*2 + i); ctx.fillStyle = nd.u ? `rgba(226,180,60,${tw})` : `rgba(99,192,245,${tw*.8})`; ctx.beginPath(); ctx.arc(p[0], p[1], nd.u ? 4 : 2.5, 0, 7); ctx.fill(); });
+    if (this.n >= 5){ const ap = (el*.6) % 1; ctx.strokeStyle = `rgba(226,60,60,${(1-ap)*.5})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(gx, gy, 10 + ap*gr, 0, 7); ctx.stroke(); }
+    if (el > this.next && this.n < this.lines.length){ this.n++; this.next = el + .7 + Math.random()*.3; blip(this.lines[this.n-1].startsWith('⚠') ? 300 : 700, .05); }
+    const lh = 18, pw = narrow ? W - 28 : W*.4, px = narrow ? 14 : W*.57, py = H*.14;
+    ctx.fillStyle = 'rgba(8,12,14,.86)'; ctx.fillRect(px, py, pw, this.lines.length*lh + 24); ctx.strokeStyle = '#1f2536'; ctx.lineWidth = 1; ctx.strokeRect(px+.5, py+.5, pw, this.lines.length*lh + 24);
+    ctx.font = '11px JetBrains Mono, monospace';
+    for (let i = 0; i < this.n; i++){ const L = this.lines[i]; ctx.fillStyle = L.startsWith('$') ? '#00ff66' : L.startsWith('⚠') ? '#e23c3c' : L.startsWith('←') ? '#2fd0c3' : 'rgba(236,229,212,.8)'; let s = L; while (ctx.measureText(s).width > pw - 20 && s.length > 8) s = s.slice(0, -1); ctx.fillText(s, px + 10, py + 22 + i*lh); }
+    if (!narrow) drawCat(ctx, W*.3, H*.86, Math.min(W, H)*.07, t, .5);
+    vignette(); drawGrain(.07);
+  }
+});
+
+// 24 · the render pipeline learns to move — ControlNet choreography, "I know kung fu" (evening)
+scenes.push({
+  eyebrow: 'Day 4 · Fri · evening · 19:10 · vidpipe ▸ ControlNet OpenPose ▸ MiniMax-H3', title: 'Teaching a ghost to throw a punch', hold: 13000,
+  text: 'Blue team stood down, the work laptop closed, you finally get an hour of your own — and you spend it talking a pipeline into existence, the way you talk to a fast friend. You hand it a skeleton — a little puppet of joints, an OpenPose rig — and it hangs a body on the bones and makes it move: a guard, a turn, a strike, a hundred frames holding one face while the limbs learn to fight. The face is the cat’s, of course. It is always the cat; the cat is you with the volume turned up, the self you wear at three in the morning. You rendered him weeks ago and he never moved — tonight you taught him how. And as the frames come up out of the noise, a man in a long coat opens his eyes somewhere behind yours and says I know kung fu, and you understand him completely, because you have just poured a martial art straight into a machine: the same download, the same impossible shortcut, the fight arriving before the years that should have bought it.',
+  enter(){ setStyle('deepdub'); setMusic(.82, 8200, 2.5); setStatic(.01, 2); this.t0 = -1; this.trail = []; },
+  readout(t){ return `OpenPose rig ▸ MiniMax-H3 · 24 fps · frame ${Math.floor(((t-this.t0)*24) % 1e6).toString().padStart(6,'0')} · identity 0.63`; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0, u = Math.min(W, H)*.22, cx = W*.5, cy = H*.46;
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H)*.6); g.addColorStop(0, '#0a1410'); g.addColorStop(1, '#04060a'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const p = (el*.5) % 1, J = kfJoints(p);
+    if (!reduced){ this.trail.push(kfJoints((el*.5 - .05 + 1) % 1)); if (this.trail.length > 7) this.trail.shift();
+      this.trail.forEach((TJ, i) => drawFigure(ctx, cx, cy, u, TJ, { mono: 'rgba(80,255,160,' + (.04 + i*.02).toFixed(3) + ')', joints: false, lw: u*.05 })); }
+    drawFigure(ctx, cx, cy, u, J, { lw: Math.max(2, u*.03), jointCol: '#fff', jr: Math.max(2, u*.03) });
+    ctx.save(); ctx.globalAlpha = .1; ctx.fillStyle = '#00ff66'; ctx.textAlign = 'center'; ctx.font = `800 ${Math.min(W*.085, H*.1)}px Syne, Arial Black, sans-serif`; ctx.fillText('I KNOW KUNG FU', W/2, H*.9); ctx.restore(); ctx.textAlign = 'left';
+    const fn = 6, fw = Math.min((W*.8)/fn - 6, 86), fh = fw*.92, fx0 = (W - (fn*(fw+6) - 6))/2, fy = H*.07;
+    for (let i = 0; i < fn; i++){ const x = fx0 + i*(fw+6); ctx.fillStyle = '#0a0d10'; ctx.fillRect(x, fy, fw, fh); ctx.strokeStyle = '#1f2a22'; ctx.lineWidth = 1; ctx.strokeRect(x+.5, fy+.5, fw, fh);
+      drawFigure(ctx, x + fw/2, fy + fh*.52, fh*.32, kfJoints((p + i/fn) % 1), { mono: '#3ce26a', joints: false, lw: 2 }); }
+    drawCat(ctx, W*.9, H*.82, Math.min(W, H)*.07, t, .5);
+    vignette(); drawGrain(.08);
+  }
+});
+
+// 25 · first Tai Chi class — the oldest render pipeline runs on tendon and breath (end of day)
+scenes.push({
+  eyebrow: 'Day 4 · Fri · end of day · 20:30 · first Tai Chi class ▸ off-screen ▸ body online', title: 'Slow is smooth, smooth is fast', hold: 13000,
+  text: 'Then you leave the machine and go and do the very same thing with your own body. First Tai Chi class, a room of strangers moving like they are underwater, and years of training this machine of muscle and breath pay off quietly: you can flow, your weight knows where it is going before you ask it. Shift. Root. Cloud hands. Push, and yield, and push. It is exactly what you spent the evening teaching the GPUs — a body learning to move through a shape — except the oldest render pipeline in the room runs on tendon and attention and draws no power at all. Slow is smooth, the teacher says, and smooth is fast. You think of the queue grinding frames back home, and for the first time you think you understand the queue.',
+  enter(){ setStyle('deepdub'); setMusic(.46, 2200, 6); setStatic(0, 2); this.t0 = -1; this.tl = []; this.tr = []; },
+  readout(){ return 'form 01 · breathe in 4 · out 6 · root → shift → cloud hands · no GPUs required'; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0, u = Math.min(W, H)*.24, cx = W*.5, cy = H*.46;
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0a0f14'); g.addColorStop(.6, '#10161a'); g.addColorStop(1, '#07100b'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const fg = ctx.createRadialGradient(cx, cy + u, 0, cx, cy + u, u*2); fg.addColorStop(0, 'rgba(120,255,160,.08)'); fg.addColorStop(1, 'rgba(0,0,0,0)'); ctx.fillStyle = fg; ctx.fillRect(0, 0, W, H);
+    const p = (el*.08) % 1, J = taiJoints(p), S = k => [cx + J[k][0]*u, cy + J[k][1]*u];
+    if (!reduced){ this.tl.push(S('wL')); this.tr.push(S('wR')); if (this.tl.length > 44){ this.tl.shift(); this.tr.shift(); } }
+    const ribbon = (arr, col) => { ctx.lineCap = 'round'; for (let i = 1; i < arr.length; i++){ ctx.strokeStyle = col.replace('A', (i/arr.length*.5).toFixed(2)); ctx.lineWidth = u*.04*(i/arr.length); ctx.beginPath(); ctx.moveTo(arr[i-1][0], arr[i-1][1]); ctx.lineTo(arr[i][0], arr[i][1]); ctx.stroke(); } ctx.lineCap = 'butt'; };
+    ribbon(this.tl, 'rgba(130,255,170,A)'); ribbon(this.tr, 'rgba(90,220,255,A)');
+    drawFigure(ctx, cx, cy, u, J, { mono: 'rgba(200,245,210,.85)', jointCol: 'rgba(150,255,190,.9)', lw: Math.max(2, u*.028), jr: Math.max(2, u*.02) });
+    const br = .5 + .5*Math.sin(el*.5); ctx.strokeStyle = `rgba(130,255,170,${.08 + br*.1})`; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy + u*.1, u*(1.08 + br*.12), 0, 7); ctx.stroke();
+    vignette(); drawGrain(.05);
+  }
+});
+
+// 26 · back at the machine, 1am — hunting the voice, drafting the big post (late night)
+scenes.push({
+  eyebrow: 'Day 4 · Fri · late night · 01:00 · back at the machine ▸ HackRF ▸ 100.9 MHz ▸ Hermes', title: 'Fire a bigger flare', hold: 15000,
+  text: 'Tai Chi done, you come home and go straight back to the machine — and find yourself exactly where you started the week: a radio in the dark, hunting the voice under the music while the build carries on around you. The HackRF sweeps the shoulders of Classic FM and the little Hermes agent walks the dial a kilohertz at a time, listening for the women who were counting in a language that was not quite language. Not tonight. The flares you have already fired — the little rogue boxes, the implant zoo — are still up there with their hands raised, and the sky has not answered one of them yet. So you decide the flares are simply too small, and you start sketching the biggest one you have ever built: a full write-up, coming this weekend, of the machine itself — five GPUs, one pipeline — and of Ludus, the lab you can tear down and rebuild in minutes. Nothing is pushed tonight; it is only a draft with a blinking cursor. But it is going to be bright. It is still your turn.',
+  enter(){ setStyle('trance'); setMusic(.8, 12000, 4); setStatic(.03, 2); this.t0 = -1; this.n = 0; this.next = 1.4; this.flares = [];
+    this.lines = ['---', 'title: "The Machine and the Lab"   # draft', 'tags: [homelab, ai, ludus, cyber-range]', '---', '', '# five GPUs, one pipeline — building the machine', '# Ludus: a range you can rebuild in minutes', '', '$ git status ▸ draft · not yet pushed', '→ this weekend: the biggest flare yet']; },
+  readout(){ return 'Fri 01:00 · HackRF ▸ ~100.9 MHz · Hermes auto-tune · voice: not found · post: draft'; },
+  draw(t, dt){
+    if (this.t0 < 0) this.t0 = t; const el = t - this.t0, narrow = W < 680, myc = scenes[4];
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#070423'); g.addColorStop(1, '#04060a'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    if (myc && myc.cosmos) drawCosmos(ctx, W, H, t, myc.cosmos, .3);
+    const sy = H*.5, sh = H*.16;
+    ctx.strokeStyle = 'rgba(47,208,195,.5)'; ctx.lineWidth = 1.2; ctx.beginPath();
+    for (let x = 0; x <= W; x += 4){ const nf = .12 + Math.random()*.08, stn = .5*Math.exp(-Math.pow((x - W*.55)/(W*.02), 2)), voice = (Math.sin(el*2) > .3 ? 1 : 0)*.18*Math.exp(-Math.pow((x - W*.62)/(W*.008), 2)), v = nf + stn + voice, y = sy - v*sh; x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+    ctx.stroke();
+    const cur = W*.6 + Math.sin(el*.8)*W*.06; ctx.strokeStyle = 'rgba(0,255,102,.6)'; ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(cur, sy - sh*1.2); ctx.lineTo(cur, sy + 10); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(0,255,102,.7)'; ctx.font = '10px JetBrains Mono, monospace'; ctx.fillText('Hermes ▸ auto-tune', cur + 6, sy - sh*1.1);
+    if (!reduced && Math.random() < .02) this.flares.push({ x: W*(.2 + Math.random()*.6), life: 0 });
+    this.flares = this.flares.filter(f => (f.life += dt*.25) < 1);
+    for (const f of this.flares){ const yy = lerp(H, H*.12, f.life); ctx.fillStyle = `rgba(181,232,83,${1 - f.life})`; ctx.shadowColor = 'rgba(181,232,83,.8)'; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(f.x, yy, 2.5, 0, 7); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = `rgba(181,232,83,${(1 - f.life)*.3})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(f.x, yy); ctx.lineTo(f.x, yy + 20); ctx.stroke(); }
+    if (el > this.next && this.n < this.lines.length){ this.n++; this.next = el + .4; if (this.n === this.lines.length) blip(1320, .3); }
+    const lh = 16, pw = narrow ? W - 28 : W*.42, px = narrow ? 14 : W*.06, py = H*.64;
+    ctx.fillStyle = 'rgba(6,10,14,.82)'; ctx.fillRect(px, py, pw, this.lines.length*lh + 20); ctx.strokeStyle = '#1f2536'; ctx.lineWidth = 1; ctx.strokeRect(px+.5, py+.5, pw, this.lines.length*lh + 20);
+    ctx.font = '10px JetBrains Mono, monospace';
+    for (let i = 0; i < this.n; i++){ const L = this.lines[i]; ctx.fillStyle = L.startsWith('$') ? '#00ff66' : L.startsWith('→') ? '#2fd0c3' : 'rgba(236,229,212,.75)'; let s = L; while (ctx.measureText(s).width > pw - 18 && s.length > 6) s = s.slice(0, -1); ctx.fillText(s, px + 9, py + 18 + i*lh); }
+    drawCat(ctx, W*.82, H*.3, Math.min(W, H)*.08, t, .8);
+    vignette(); drawGrain(.09);
+  }
+});
+
+// 27 · end of reel
+scenes.push({
+  eyebrow: 'End of reel 01 · Tue → Fri · four days, one signal', title: 'The reel keeps running', hold: 1e9,
+  text: 'The song has not stopped. The cat moves now — a short, strange clip of him throwing shapes against the aurora, the first time he has ever been more than a still. A laptop, drilled open and taped shut again, gave up what it remembered and went home whole; a rack of borrowed GPUs is still turning words into keys; an alarm rang in a building across the city and the right people answered; and in a quiet corner of the internet the flares already sent are still up with their hands raised, unseen so far. Five chapters, and a bigger one is being drafted — the machine and the lab, this weekend — aimed at a sky that has not written back yet. So the reel does not really end; it reloads, a little brighter each time. Press ◀ to run it again, or open the real soundtrack and let it carry you out.',
   enter(){ setMusic(.75, 9000, 3); setStatic(0, 1); this.t0 = -1; },
   readout(t){ return `reel 01 · ${Math.floor((t * 24) % 1e6).toString().padStart(6, '0')} f · to be continued`; },
   draw(t, dt){
