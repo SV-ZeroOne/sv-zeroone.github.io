@@ -1,0 +1,71 @@
+{%- comment -%}
+  Image gallery with back/forward buttons. No dependencies.
+
+  Usage (images come from a front-matter list of {src, alt, caption}):
+    {% include gallery.html id="k8-build" images=page.k8_gallery label="Building the K8" %}
+
+  Without JavaScript every slide is shown stacked. With it, one slide shows at a
+  time; arrow buttons, keyboard arrows (when the gallery has focus) and swipe
+  move between them. Images are lazy-loaded; the neighbours of the current
+  slide are loaded ahead so stepping through doesn't stall.
+{%- endcomment -%}
+{%- assign gallery_images = include.images -%}
+{%- assign gallery_total = gallery_images | size -%}
+<section class="gallery" id="{{ include.id }}" data-gallery aria-roledescription="carousel" aria-label="{{ include.label | default: 'Photo gallery' | escape }}" tabindex="0">
+  <div class="gallery-stage">
+    {%- for img in gallery_images %}
+    <figure class="gallery-slide{% if forloop.first %} is-active{% endif %}" role="group" aria-roledescription="slide" aria-label="{{ forloop.index }} of {{ gallery_total }}">
+      <a href="{{ img.src | relative_url }}" target="_blank" rel="noopener" title="Open full size"><img src="{{ img.src | relative_url }}" alt="{{ img.alt | escape }}"{% unless forloop.first %} loading="lazy"{% endunless %} decoding="async"></a>
+      {%- if img.caption %}
+      <figcaption>{{ img.caption | markdownify | remove: '<p>' | remove: '</p>' | strip }}</figcaption>
+      {%- endif %}
+    </figure>
+    {%- endfor %}
+  </div>
+  <div class="gallery-controls" hidden>
+    <button type="button" class="gallery-prev" aria-label="Previous photo">&larr; back</button>
+    <span class="gallery-count" aria-live="polite">1 / {{ gallery_total }}</span>
+    <button type="button" class="gallery-next" aria-label="Next photo">next &rarr;</button>
+  </div>
+</section>
+<script>
+(function () {
+  var g = document.getElementById({{ include.id | jsonify }});
+  if (!g || g.dataset.ready) return;
+  g.dataset.ready = "1";
+  var slides = g.querySelectorAll(".gallery-slide");
+  var count = g.querySelector(".gallery-count");
+  var controls = g.querySelector(".gallery-controls");
+  var n = slides.length, i = 0;
+  if (n < 2) return;
+  g.classList.add("is-enhanced");
+  controls.hidden = false;
+
+  function warm(k) {
+    var img = slides[(k + n) % n].querySelector("img");
+    if (img && img.loading === "lazy") img.loading = "eager";
+  }
+  function show(k) {
+    slides[i].classList.remove("is-active");
+    i = (k + n) % n;
+    slides[i].classList.add("is-active");
+    count.textContent = (i + 1) + " / " + n;
+    warm(i + 1); warm(i - 1);
+  }
+  g.querySelector(".gallery-prev").addEventListener("click", function () { show(i - 1); });
+  g.querySelector(".gallery-next").addEventListener("click", function () { show(i + 1); });
+  g.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowLeft") { show(i - 1); e.preventDefault(); }
+    else if (e.key === "ArrowRight") { show(i + 1); e.preventDefault(); }
+  });
+  var x0 = null;
+  g.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  g.addEventListener("touchend", function (e) {
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    if (Math.abs(dx) > 40) show(dx < 0 ? i + 1 : i - 1);
+    x0 = null;
+  });
+  warm(1); warm(-1);
+})();
+</script>

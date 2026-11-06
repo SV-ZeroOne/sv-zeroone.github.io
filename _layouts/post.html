@@ -7,6 +7,12 @@ layout: default
 
 <p class="view">by {{ page.author | default: site.author }}</p>
 
+{% if page.hero %}
+<figure class="post-hero">
+  <img src="{{ page.hero.src | relative_url }}" alt="{{ page.hero.alt | escape }}"{% if page.hero.width %} width="{{ page.hero.width }}" height="{{ page.hero.height }}"{% endif %} decoding="async" fetchpriority="high">
+</figure>
+{% endif %}
+
 {{ content }}
 
 {% if page.tags %}

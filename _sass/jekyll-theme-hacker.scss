@@ -373,3 +373,88 @@ a {
   a { margin-right: 10px; white-space: nowrap; }
   small { color: $blockquote-color; }
 }
+
+/* Image gallery (_includes/gallery.html). Without JS all slides stack. */
+.gallery {
+  margin: 20px 0;
+  border: 1px solid $blockquote-border;
+  background: rgba(0, 0, 0, 0.35);
+
+  &:focus-visible { outline: 1px dashed $conifer; outline-offset: 3px; }
+
+  .gallery-slide {
+    margin: 0;
+    padding: 10px;
+
+    img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+  }
+
+  figcaption {
+    margin-top: 8px;
+    color: $blockquote-color;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  &.is-enhanced {
+    .gallery-slide { display: none; }
+    .gallery-slide.is-active { display: block; }
+
+    .gallery-slide img {
+      width: 100%;
+      height: min(70vh, 560px);
+      object-fit: contain;
+    }
+  }
+
+  .gallery-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px 10px;
+    border-top: 1px dashed $blockquote-border;
+  }
+
+  .gallery-controls[hidden] { display: none; }
+
+  .gallery-count { color: $blockquote-color; }
+
+  button {
+    font: inherit;
+    color: $conifer;
+    background: transparent;
+    border: 1px solid $conifer;
+    border-radius: 3px;
+    padding: 4px 14px;
+    cursor: pointer;
+
+    &:hover, &:focus-visible { background: rgba(181, 232, 83, 0.12); }
+  }
+}
+
+// Optional full-width illustration under a post's title (front matter `hero:`).
+.post-hero {
+  margin: 0 0 24px;
+  border: 1px solid $blockquote-border;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+// Tall phone photos inline in a post: cap the size and centre them.
+// Kramdown: ![alt](/assets/images/...){: .photo-portrait}
+img.photo-portrait {
+  display: block;
+  max-width: min(100%, 420px);
+  height: auto;
+  margin: 0 auto;
+}
