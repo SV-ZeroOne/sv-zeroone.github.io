@@ -13,3 +13,6 @@ vendor/
 Thumbs.db
 desktop.ini
 *.swp
+
+# Drafts stay local (preview with `jekyll serve --drafts`); move a post to _posts/ to publish it
+_drafts/

@@ -53,3 +53,13 @@ exclude:
   - LICENSE
   - PREVIEW.md
   - Preview-Site.ps1
+  # Photos staged next to a draft: with --drafts Jekyll reads every file under
+  # _drafts/ as a post and errors on binaries. Published copies live in assets/.
+  - "_drafts/*.jpg"
+  - "_drafts/*.jpeg"
+  - "_drafts/*.png"
+  - "_drafts/*.gif"
+  - "_drafts/*.mp4"
+  # Research notes kept beside a draft (any notes/ folder under _drafts/);
+  # without this --drafts would publish them as posts.
+  - "_drafts/*notes/*"

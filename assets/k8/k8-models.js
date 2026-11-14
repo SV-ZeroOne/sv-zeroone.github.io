@@ -6,16 +6,21 @@ import { RoundedBoxGeometry } from '../lib/three-r180/RoundedBoxGeometry.js';
 // Sources for the reconstruction, so nobody has to guess later:
 //   Envelope 123 x 112 x 43 mm, all-plastic silver: Liliputing review, TechRadar
 //   review (111 mm on the depth, we use the manufacturer's 112).
-//   Front I/O: power button, pinhole reset, 3.5 mm jack, USB4, 2 x USB-A 3.2 Gen 2x1.
-//   Rear I/O: Kensington slot, USB 3.2 Gen 2x1 and USB 2.0, DisplayPort 1.4 and
-//   HDMI 2.0, dual 2.5 GbE (Realtek RTL8125), DC jack, vent strip along the base.
-//   Left/right: one large air vent per side.
-//   Internals: two side-by-side DDR5 SO-DIMM slots and two M.2 2280 slots on the
-//   top of the board, Wi-Fi 2230 under the drives, turbine blower and fin stack
+//   Port positions are measured from photos of the owner's own K8 (blog post
+//   assets/images/ludus_k8/02-front.jpg, 03-rear-ports.jpg), scaled to the case.
+//   Front I/O, left to right facing it: pinhole, power button, 3.5 mm jack,
+//   USB4 (Type-C), 2 x USB-A 3.2. Facing the front, +x is to the right.
+//   Rear I/O, left to right facing the back (+x to -x): USB 2.0 over USB 3.2 with
+//   the Kensington slot below, DisplayPort over HDMI, dual 2.5 GbE (Realtek
+//   RTL8125), DC jack; three vent slots along the base show the copper fin stack.
+//   Left/right: a large mesh vent along most of each side.
+//   Internals (lid-off photos 05/06/09): the two DDR5 SO-DIMM sockets run front to
+//   back along the +x side, staggered so the outer module overlaps the inner one;
+//   the two M.2 2280 drives run front to back along the -x side with their
+//   sockets at the front. Wi-Fi 2230 under the drives, turbine blower and fin stack
 //   under the board (Liliputing teardown, GMKtec K8 Plus teardown video).
-// The exact left-to-right order of the rear port cluster is taken from a reviewer
-// walking along the back of the machine; hidden routing and proportions are
-// illustrative. It is an explanatory reconstruction, not CAD.
+// Hidden routing and proportions are illustrative. It is an explanatory
+// reconstruction, not CAD.
 const standard = (color, metalness = .5, roughness = .4) => new T.MeshStandardMaterial({ color, metalness, roughness });
 export const materials = {
   silver: standard(0x9aa1a9, .42, .44), lid: standard(0x969ea7, .4, .44),
@@ -124,10 +129,11 @@ function blower(parent, radius, position) {
   box(b, [radius * .9, .74, 2.5], [0, .02, -radius - .8], m.tray, .12);   // outlet duct to the fins
   return b;
 }
+// Copper fins: they show through the three rear vent slots in 03-rear-ports.jpg.
 function finStack(parent, length, height, depth, position) {
   const p = group(parent, 'fins', position), positions = [];
   for (let x = -length / 2; x <= length / 2; x += .14) positions.push([x, 0, 0]);
-  instances(p, new T.BoxGeometry(.05, height, depth), m.steel, positions); return p;
+  instances(p, new T.BoxGeometry(.05, height, depth), m.copper, positions); return p;
 }
 // Port block. face = the side of the block that faces out of the case, so the
 // opening sits on the visible face after the wall is cut around it.
@@ -163,7 +169,7 @@ export function buildK8() {
   const cooler = part('cooler', root, [0, .3, 0], [0, 1.5, 0], [.25, .65], [W / 2 - 1.2, .5, -4.6]);
   blower(cooler, 2.55, [-.9, .42, 1.1]);
   finStack(cooler, 7.4, .9, .9, [0, .46, -4.65]);
-  box(cooler, [7.5, .95, .08], [0, .46, -5.12], m.plastic);
+  box(cooler, [7.5, .95, .08], [0, .46, -4.16], m.plastic);  // duct face, inboard of the fins
   box(cooler, [3.2, .14, 3.2], [1.9, .98, .2], m.copper, .05);
   tube(cooler, [[1.9, 1.02, .2], [.4, 1.02, -1.8], [-1.4, .95, -3.6], [-1.6, .92, -4.3]], .22, m.copper);
   tube(cooler, [[2.1, 1.02, -.4], [1.7, 1.02, -2.2], [1.4, .95, -3.6], [1.4, .92, -4.3]], .22, m.copper);
@@ -172,45 +178,66 @@ export function buildK8() {
   box(board, [11.6, .14, 10.6], [0, .07, 0], m.pcb, .15);
   plane(board, 11.5, 10.5, tracesMaterial(), [0, .141, 0]).rotation.x = -Math.PI / 2;
   box(board, [3.3, .12, 3.3], [1.9, -.06, .2], m.chip, .04);
-  decal(board, 'RYZEN 7 8845HS', 2.9, [1.9, .15, 3.2], '#5c7a66', .32);
-  // Two side-by-side SO-DIMM sockets (the K8 does not stack them). A 67.6 mm
-  // module is 6.76 units long, so the pair is centred at RAM_X to keep both the
-  // module and its connector inside the 116 mm board and the 123 mm case.
-  const RAM_X = -2.1;
-  for (const z of [-2.6, 1.1]) box(board, [7.0, .34, .42], [RAM_X, .3, z + 1.62], m.plastic, .04);
-  // Two M.2 2280 sockets running front to back, plus the 2230 Wi-Fi socket.
-  for (const x of [2.4, 4.75]) { box(board, [2.3, .3, .5], [x, .29, -4.95], m.plastic, .04); box(board, [.4, .18, .4], [x, .23, 2.9], m.steel, .04); }
-  box(board, [3.1, .26, 2.3], [3.6, .26, 4.1], m.plastic, .04);
-  // Rear I/O. The blocks pass through the cut-outs in the shell wall, so the
-  // assembled view shows real ports rather than painted rectangles.
-  const rearPorts = [
-    { id: 'ken', kind: 'slot', x: -5.05, y: .95, w: .85, h: .34 },
-    { id: 'usb2', kind: 'usbA', x: -2.6, y: 1.58, w: 1.2, h: .42 },
-    { id: 'usb3', kind: 'usbA', x: -2.6, y: 1.08, w: 1.2, h: .42 },
-    { id: 'dp', kind: 'video', x: -.95, y: 1.58, w: 1.15, h: .42 },
-    { id: 'hdmi', kind: 'video', x: -.95, y: 1.08, w: 1.2, h: .4 },
-    { id: 'lan2', kind: 'rj45', x: 1.55, y: 1.28, w: 1.32, h: 1.02 },
-    { id: 'lan1', kind: 'rj45', x: 3.05, y: 1.28, w: 1.32, h: 1.02 },
-    { id: 'dc', kind: 'dc', x: 4.85, y: 1.2, w: .62, h: .62 },
+  decal(board, 'RYZEN 7 8845HS', 2.3, [-.1, .15, 4.3], '#5c7a66', .26);
+  // Two SO-DIMM sockets running front to back along the +x side. They are
+  // staggered: the outer socket is taller, so its module lies over most of the
+  // inner one, leaving an ~11 mm strip of the lower module showing (photo 09).
+  // A module is 67.6 x 30 mm, so 6.76 units long and ~2.86 wide.
+  const RAM_Z = .2;
+  const RAM = [
+    { socketX: 4.2, socketH: .34, x: 2.6, y: .4 },    // slot 1: inner, lower
+    { socketX: 5.35, socketH: .7, x: 3.72, y: .74 },  // slot 2: outer, raised
   ];
+  for (const r of RAM) box(board, [.42, r.socketH, 7.0], [r.socketX, .14 + r.socketH / 2, RAM_Z], m.plastic, .04);
+  // Two M.2 2280 sockets running front to back along the -x side, socket at the
+  // front and the retaining screw at the rear, by the I/O shields. Slot 1 is
+  // raised on a taller socket and standoff so the 2230 Wi-Fi card fits beneath
+  // it (its antenna lead disappears under that drive in photo 06).
+  const SSD = [{ x: -2.4, y: .45 }, { x: -4.75, y: .3 }];
+  for (const { x, y } of SSD) {
+    const socket = y + .05 - .14, standoff = y - .05 - .14;  // board top is y .14
+    box(board, [2.3, socket, .5], [x, .14 + socket / 2, 3.25], m.plastic, .04);
+    box(board, [.4, standoff, .4], [x, .14 + standoff / 2, -4.85], m.steel, .04);
+  }
+  box(board, [2.3, .05, .4], [-2.4, .165, -.05], m.plastic, .02);  // Wi-Fi socket
+  // Rear and front I/O. One table per face drives both the port blocks on the
+  // board and the cut-outs in the shell wall, so the assembled view shows real
+  // ports. x is world x (case centre 0); y is height above the shell's base.
+  // Measured from 03-rear-ports.jpg and 02-front.jpg: the rear face is ~71 px
+  // per unit across and ~36 px per unit up (the photo looks down at it).
+  // Seen from behind, +x is on the left, so the table runs right to left.
+  const LAN1_X = -2.45, LAN_Y = 1.68;
+  const rearPorts = [
+    { id: 'ken', kind: 'slot', x: 4.14, y: .3, w: .3, h: .2 },
+    { id: 'usb2', kind: 'usbA', x: 3.9, y: 2.57, w: 1.22, h: .42, tongue: m.dark },
+    { id: 'usb3', kind: 'usbA', x: 3.9, y: 1.68, w: 1.22, h: .42 },
+    { id: 'dp', kind: 'video', x: 1.78, y: 2.52, w: 1.55, h: .48 },
+    { id: 'hdmi', kind: 'video', x: 1.78, y: 1.46, w: 1.35, h: .46 },
+    { id: 'lan2', kind: 'rj45', x: -.39, y: LAN_Y, w: 1.38, h: 1.25 },
+    { id: 'lan1', kind: 'rj45', x: LAN1_X, y: LAN_Y, w: 1.38, h: 1.25 },
+    { id: 'dc', kind: 'dc', x: -4.18, y: 1.74, w: .62, h: .62 },
+  ];
+  // Three slots along the base of the rear face, over the copper fin stack.
+  const rearVents = [2.27, -.12, -2.44].map(x => roundedPath(T.Path, x, .4, 2.2, .64, .2));
+  // Facing the front, +x is on the right: pinhole, power, audio, USB-C, 2 x USB-A.
   const frontPorts = [
-    { id: 'audio', kind: 'audio', x: -1.9, y: 1.15, w: .6, h: .6 },
-    { id: 'usbA1', kind: 'usbA', x: -.5, y: 1.15, w: 1.2, h: .45 },
-    { id: 'usbA2', kind: 'usbA', x: .9, y: 1.15, w: 1.2, h: .45 },
-    { id: 'usb4', kind: 'usbC', x: 2.3, y: 1.15, w: 1.0, h: .42 },
-    { id: 'reset', kind: 'pinhole', x: 3.3, y: 1.15, w: .16, h: .16 },
-    { id: 'power', kind: 'power', x: 4.5, y: 1.15, w: .68, h: .68 },
+    { id: 'reset', kind: 'pinhole', x: -4.3, y: 1.75, w: .16, h: .16 },
+    { id: 'power', kind: 'power', x: -3.4, y: 1.75, w: 1.04, h: 1.04 },
+    { id: 'audio', kind: 'audio', x: -2.33, y: 1.75, w: .6, h: .6 },
+    { id: 'usb4', kind: 'usbC', x: -.71, y: 1.75, w: 1.0, h: .42 },
+    { id: 'usbA1', kind: 'usbA', x: 1.32, y: 1.75, w: 1.2, h: .45 },
+    { id: 'usbA2', kind: 'usbA', x: 3.27, y: 1.75, w: 1.2, h: .45 },
   ];
   const rear = group(board, 'rear-io', [0, 0, -D / 2 + TW / 2]);
   for (const p of rearPorts) {
     const y = ioy(p.y);
     if (p.kind === 'rj45') {
-      const g = portBlock(rear, [1.3, 1.1, .5], [p.x, y, 0], m.dark, -1);
+      const g = portBlock(rear, [p.w - .04, p.h - .05, .5], [p.x, y, 0], m.dark, -1);
       g.name = 'rj45'; g.userData.part = 'nic'; g.userData.essential = true;
-      for (const dx of [-.42, .42]) box(g, [.16, .1, .06], [dx, .5, -.26], dx < 0 ? m.led : m.lime);
+      for (const dx of [-.42, .42]) box(g, [.16, .1, .06], [dx, p.h / 2 - .12, -.26], dx < 0 ? m.led : m.lime);
     } else if (p.kind === 'usbA') {
       const g = portBlock(rear, [1.25, .5, .5], [p.x, y, 0], m.steel, -1);
-      box(g, [1.0, .16, .06], [0, .06, -.26], m.blue);
+      box(g, [1.0, .16, .06], [0, .06, -.26], p.tongue || m.blue);
     } else if (p.kind === 'video') {
       portBlock(rear, [p.w + .1, .55, .5], [p.x, y, 0], m.steel, -1);
     } else if (p.kind === 'dc') {
@@ -221,7 +248,7 @@ export function buildK8() {
       box(rear, [p.w, p.h, .3], [p.x, y, 0], m.void);
     }
   }
-  anchors.nic = group(rear, 'anchor', [3.05, ioy(1.28) + .7, -.3]);
+  anchors.nic = group(rear, 'anchor', [LAN1_X, ioy(LAN_Y) + .75, -.3]);
   const front = group(board, 'front-io', [0, 0, D / 2 - TW / 2]);
   for (const p of frontPorts) {
     const y = ioy(p.y);
@@ -230,9 +257,10 @@ export function buildK8() {
       disc(g, .3, .54, [0, 0, 0], m.dark, 24).rotation.x = Math.PI / 2;
       disc(g, .16, .56, [0, 0, 0], m.void, 16).rotation.x = Math.PI / 2;
     } else if (p.kind === 'power') {
+      // ~10 mm lime button with a lit ring, as on the real front panel.
       const g = group(front, 'power', [p.x, y, 0]);
-      disc(g, .34, .54, [0, 0, 0], m.steel, 24).rotation.x = Math.PI / 2;
-      disc(g, .25, .56, [0, 0, 0], m.led, 24).rotation.x = Math.PI / 2;
+      disc(g, .5, .54, [0, 0, 0], m.led, 32).rotation.x = Math.PI / 2;
+      disc(g, .4, .56, [0, 0, 0], m.lime, 32).rotation.x = Math.PI / 2;
     } else if (p.kind === 'pinhole') {
       disc(front, .09, .54, [p.x, y, 0], m.void, 12).rotation.x = Math.PI / 2;
     } else if (p.kind === 'usbC') {
@@ -244,45 +272,52 @@ export function buildK8() {
     }
   }
   // The wired uplink Ludus requires: a lime patch lead in LAN1.
-  const plug = group(board, 'patch-lead', [3.05, ioy(1.28), -D / 2]);
+  const plug = group(board, 'patch-lead', [LAN1_X, ioy(LAN_Y), -D / 2]);
   plug.userData.part = 'nic'; plug.userData.essential = true;
   box(plug, [1.0, .8, 1.2], [0, 0, -.5], m.lime, .08); box(plug, [.5, .3, .6], [0, .5, -.6], m.lime, .06);
   // Drop the lead close behind the port. Under an orthographic camera a point
   // further back projects *higher*, so a cable that reaches far rearward climbs
   // above the lid and reads as a floating artefact.
-  tube(plug, [[0, -.2, -1.0], [-.2, -.9, -1.5], [-.8, -2.4, -1.9], [-1.6, -3.8, -2.1]], .17, m.lime);
+  // It curls inboard (+x): LAN1 is near the -x corner, so curling outward would
+  // poke past the case silhouette from the front-left corner.
+  tube(plug, [[0, -.2, -1.0], [.2, -.9, -1.5], [.8, -2.4, -1.9], [1.6, -3.8, -2.1]], .17, m.lime);
   // The lead hangs below the case, where it would otherwise drop a soft shadow
   // onto the invisible ground plane and read as a smudge behind the machine.
   plug.traverse(o => { if (o.isMesh) o.castShadow = false; });
-  // 04/05 Two DDR5 SO-DIMMs, side by side as fitted.
-  for (let n = 0; n < 2; n++) {
-    const ram = part(`ram${n + 1}`, board, [RAM_X, .5, n ? 1.1 : -2.6], [0, 1.2 + n * .7, 0], [.4 + n * .03, .8 + n * .05], [RAM_X, .12, n ? 1.4 : -2.3], true);
-    box(ram, [6.76, .12, 2.86], [0, 0, 0], m.module, .04);
-    for (let i = 0; i < 8; i++) box(ram, [.72, .09, 1.2], [-2.9 + i * .83, .1, -.3], m.chip, .03);
-    box(ram, [6.76, .06, .18], [0, -.02, 1.46], m.gold);
-    for (const x of [-3.15, 3.15]) box(ram, [.3, .4, .5], [x, .12, 1.2], m.plastic, .04);
-    decal(ram, 'DDR5 SO-DIMM 48 GB', 3.4, [0, .07, .8], '#9ea6a0', .34);
-  }
+  // 04/05 Two DDR5 SO-DIMMs lying flat, running front to back, the outer
+  // (slot 2) module overlapping the inner one. Gold fingers face the socket on
+  // the +x side; text runs along the module.
+  const ALONG = [-Math.PI / 2, 0, -Math.PI / 2];
+  RAM.forEach((r, n) => {
+    const ram = part(`ram${n + 1}`, board, [r.x, r.y, RAM_Z], [0, 1.2 + n * .7, 0], [.4 + n * .03, .8 + n * .05], [r.x - .6, .12, RAM_Z - 1.6], true);
+    box(ram, [2.86, .12, 6.76], [0, 0, 0], m.module, .04);
+    for (let i = 0; i < 8; i++) box(ram, [1.2, .09, .72], [.3, .1, -2.9 + i * .83], m.chip, .03);
+    box(ram, [.18, .06, 6.76], [1.46, -.02, 0], m.gold);
+    decal(ram, 'DDR5 SO-DIMM 48 GB', 3.4, [-.85, .07, 0], '#9ea6a0', .34, ALONG);
+  });
+  // Socket latches clip the far corners of the modules.
+  for (const r of RAM) for (const z of [-3.55, 3.55]) box(board, [.5, r.y + .1 - .14, .3], [r.x - 1.2, .14 + (r.y + .1 - .14) / 2, RAM_Z + z], m.plastic, .04);
   // 06/07 Two M.2 2280 NVMe drives; the first wears a heatsink.
-  const ssd1 = part('ssd1', board, [2.4, .3, -1.0], [0, 1.4, 0], [.38, .8], [2.4, .4, -3.2], true);
+  const ssd1 = part('ssd1', board, [SSD[0].x, SSD[0].y, -1.0], [0, 1.4, 0], [.38, .8], [SSD[0].x, .4, -3.2], true);
   box(ssd1, [2.1, .1, 8.0], [0, 0, 0], m.module, .03);
   box(ssd1, [2.0, .34, 7.4], [0, .21, .1], standard(0x3a3f45, .7, .35), .06);
   const fins = []; for (let z = -3.4; z <= 3.4; z += .27) fins.push([0, .43, z]); instances(ssd1, new T.BoxGeometry(1.85, .1, .09), standard(0x3a3f45, .7, .35), fins);
   decal(ssd1, 'NVMe', .9, [0, .5, 3.6], '#c4cad0', .22);
-  const ssd2 = part('ssd2', board, [4.75, .3, -1.0], [.45, 1.8, 0], [.4, .82], [4.75, .1, -3.2], true);
+  const ssd2 = part('ssd2', board, [SSD[1].x, SSD[1].y, -1.0], [-.45, 1.8, 0], [.4, .82], [SSD[1].x, .1, -3.2], true);
   box(ssd2, [2.1, .1, 8.0], [0, 0, 0], m.module, .03);
   for (let i = 0; i < 4; i++) box(ssd2, [1.5, .1, 1.3], [0, .1, -2.4 + i * 1.7], m.chip, .03);
   box(ssd2, [.9, .12, .9], [0, .11, 3.1], m.chip, .03);
   decal(ssd2, 'PCIe 4.0 ×4', 1.5, [0, .06, 3.1], '#9ea6a0', .3);
-  // 08 M.2 2230 Wi-Fi 6E / Bluetooth 5.2 module (not used by Ludus). It sits at
-  // the front end of the drive bay, under the first SSD, with the antenna leads
-  // routed to the shell rather than stopping in mid-air.
-  const wifi = part('wifi', board, [3.6, .4, 4.1], [0, 1.0, 0], [.36, .76], [3.6, .1, 4.1]);
-  box(wifi, [3.0, .08, 2.2], [0, 0, 0], m.module, .03);
-  box(wifi, [1.7, .16, 1.5], [0, .11, -.1], m.steel, .04);
-  for (const x of [-.6, .6]) {
-    disc(wifi, .13, .1, [x, .1, .85], m.gold, 12);
-    tube(wifi, [[x, .14, .85], [x - .2, .2, 1.4], [x - .3, .1, 2.1]], .03, m.dark);
+  // 08 M.2 2230 Wi-Fi 6E / Bluetooth 5.2 module (not used by Ludus). It lies
+  // under the raised first SSD, socket to the rear, with its antenna leads
+  // running forward and out from under the drive towards the shell.
+  // While exploding it slides forward out from under the drive so it stays visible.
+  const wifi = part('wifi', board, [SSD[0].x, .2, 1.5], [0, 1.0, 3.4], [.36, .76], [0, .1, 1.2]);
+  box(wifi, [2.2, .06, 3.0], [0, 0, 0], m.module, .03);
+  box(wifi, [1.5, .08, 1.7], [0, .06, -.2], m.steel, .03);
+  for (const x of [-.55, .55]) {
+    disc(wifi, .13, .06, [x, .06, 1.2], m.gold, 12);
+    tube(wifi, [[x, .08, 1.2], [x - .3, .1, 1.9], [x - 1.4, .14, 2.9]], .03, m.dark);
   }
   // 09 Shell: one rounded chassis with a real vent grille per side and real
   // cut-outs at the front and rear, instead of four boxes with painted ports.
@@ -298,16 +333,18 @@ export function buildK8() {
     for (const h of holes) shape.holes.push(h);
     return new T.ExtrudeGeometry(shape, OPT);
   };
-  mesh(shell, wall(rearPorts, [roundedPath(T.Path, -1.0, .2, 7.0, .3, .06)]), m.panel, [0, 0, -D / 2]);
+  mesh(shell, wall(rearPorts, rearVents), m.panel, [0, 0, -D / 2]);
   mesh(shell, wall(frontPorts), m.panel, [0, 0, D / 2 - TW]);
+  // Side vents: the mesh runs along most of each side (product shots, and the
+  // inside of the walls in photo 09).
   for (const sx of [-1, 1]) {
     const shape = roundedPath(T.Shape, 0, H / 2, D - 2 * RC, H, .1);
-    shape.holes.push(roundedPath(T.Path, 0, 1.55, 5.6, 2.0, .2));
+    shape.holes.push(roundedPath(T.Path, 0, 1.6, 8.4, 2.3, .2));
     const w = mesh(shell, new T.ExtrudeGeometry(shape, OPT), m.panel, [sx * W / 2, 0, 0]);
     w.rotation.y = -sx * Math.PI / 2;
-    const slats = []; for (let z = -2.66; z <= 2.66; z += .19) slats.push([0, 0, z]);
-    const g = instances(shell, new T.BoxGeometry(.05, 1.94, .1), m.grille, slats);
-    g.position.set(sx * (W / 2 - TW / 2), 1.55, 0);
+    const slats = []; for (let z = -4.1; z <= 4.1; z += .19) slats.push([0, 0, z]);
+    const g = instances(shell, new T.BoxGeometry(.05, 2.24, .1), m.grille, slats);
+    g.position.set(sx * (W / 2 - TW / 2), 1.6, 0);
   }
   for (const x of [-1, 1]) for (const z of [-1, 1]) disc(shell, RC, H, [x * (W / 2 - RC), H / 2, z * (D / 2 - RC)], m.panel, 28);
   // 10 Fan tray: a light grey carrier with the top extractor fan. Lighter than
