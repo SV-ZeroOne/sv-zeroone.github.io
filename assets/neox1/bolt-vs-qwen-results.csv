@@ -1,0 +1,15 @@
+section,measurement,qwen36_35b_rocm_b1336,qwen36_35b_vulkan_b11669,bolt_vulkan_no_draft,bolt_vulkan_draft3,bolt_vulkan_draft4,bolt_vulkan_draft7,unit,date
+speed,prompt processing 8k,4526,2610,1829,,1612,1611,tokens_per_second,2026-10-16
+speed,prompt processing 32k,4061,2398,1735,,1555,1551,tokens_per_second,2026-10-16
+speed,prompt processing 115k,2654,1765,1379,,1246,1261,tokens_per_second,2026-10-16
+speed,generation after 8k (raw continuation),89,115,69,,65,31,tokens_per_second,2026-10-16
+speed,generation after 32k (raw continuation),82,103,67,,58,39,tokens_per_second,2026-10-16
+speed,generation after 115k (raw continuation),66,80,61,,55,43,tokens_per_second,2026-10-16
+speed,chat generation code,94,124,69,91,97,75,tokens_per_second,2026-10-16
+speed,chat generation prose,94,123,69,78,72,50,tokens_per_second,2026-10-16
+speed,chat generation json,94,124,69,85,87,67,tokens_per_second,2026-10-16
+qa,total time for 702 QA calls,1269,1063,,,1396,1613,seconds,2026-10-16
+qa,storyboard frames passing,11,,,,,25,of_45,2026-10-16
+qa,beat checks unreliable,4,,,,,23,of_43,2026-10-16
+qa,head-count answers the parser can read,305,,,,92,,of_344,2026-10-16
+memory,VRAM at 262k context with vision,about 30,,25.7,,29.5,29.5,GB,2026-10-16
