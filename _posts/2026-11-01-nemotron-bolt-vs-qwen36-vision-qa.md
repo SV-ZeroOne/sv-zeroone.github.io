@@ -3,13 +3,11 @@ title: "Nemotron 3.5 Bolt vs Qwen3.6-35B: Testing a 2-bit 74B Model as My Vision
 author: zero
 tags: homelab ai amd local-llm benchmarks vision
 description: "I tested NVIDIA's 2-bit Nemotron 3.5 Bolt against Qwen3.6-35B-A3B on two Radeon AI PRO R9700s, using 702 real QA calls from my AI video pipeline. What the speed and quality numbers mean, and why Qwen kept the job."
-image: /assets/images/neox1-lab.png
-published: false
 ---
 
-NVIDIA released Nemotron 3.5 Bolt on 15 October: a 74-billion-parameter vision model squeezed to 2 bits so it fits in about 24 GB, with benchmark scores that beat Qwen3.6-35B-A3B, the model that does vision work in my lab. The next day I ran them side by side on my two Radeon AI PRO R9700s, using 702 real requests from my own video pipeline rather than a generic benchmark. Qwen kept the job. It was faster on every speed test, and Bolt broke my pipeline's answer parsing and could not tell video clips apart. The more useful result was a surprise: the same Qwen model ran my workload 16% faster on a different build of llama.cpp.
+NVIDIA released Nemotron 3.5 Bolt on 15 October: a 74-billion-parameter vision model squeezed to 2 bits so it fits in about 24 GB, with benchmark scores that beat Qwen3.6-35B-A3B, the model that does vision work in my lab. The next day I ran them side by side on my two Radeon AI PRO R9700s, using 702 real requests from my own video pipeline rather than a generic benchmark. Qwen kept the job. On the same llama.cpp build it was faster on every speed test, and Bolt broke my pipeline's answer parsing and could not tell video clips apart. The more useful result was a surprise: the same Qwen model ran my workload 16% faster on a different build of llama.cpp.
 
-This post explains what I measured, what each number means, and what I changed afterwards. It follows on from [my NEO-X1 Pro lab build](/2026/10/16/gmktec-neox1-pro-local-ai-lab.html), which covers the hardware.
+This post explains what I measured, what each number means, and what I changed afterwards. Everything ran on my GMKtec NEO-X1 Pro lab; the full hardware and software details are at the end of the post.
 
 ## The two contenders
 
@@ -24,7 +22,7 @@ Both are mixture-of-experts (MoE) models. An MoE model holds many small "expert"
 | Speculative decoding | None in my GGUF | LiLiCorr drafter, 1 GB |
 | VRAM used here, 262k context | About 30 GB | 29.5 GB with the drafter |
 
-Bolt is NVIDIA's bet that a big model squeezed to 2 bits beats a smaller model at 4 bits, given the same memory. They compressed it from a 120B parent, then trained it further while quantised so it learns to cope with the low precision. Their [model card](https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF) shows it ahead of Qwen3.6-35B on most agent and reasoning benchmarks: Terminal-Bench 2.1 50.98 vs 44.38, BrowseComp 66.75 vs 48.74, GPQA Diamond 86.43 vs 83.40. Interestingly, NVIDIA's own speed table had Qwen ahead: 97 vs 84 tokens per second on their hardware.
+Bolt is NVIDIA's bet that a big model squeezed to 2 bits beats a smaller model at 4 bits, given the same memory. They compressed it from a 120B parent, then trained it further while quantised so it learns to cope with the low precision. Their [model card](https://huggingface.co/nvidia/NVIDIA-Nemotron-3.5-Bolt-74B-A9B-24GB-GGUF) shows it ahead of Qwen3.6-35B on most agent and reasoning benchmarks: Terminal-Bench 2.1 50.98 vs 44.38, BrowseComp 66.75 vs 48.74, GPQA Diamond 86.43 vs 83.40. Interestingly, NVIDIA's own speed table, in their [research blog](https://research.nvidia.com/labs/nemotron/Nemotron-3.5-Bolt-24GB/), had Qwen ahead: 97 vs 84 tokens per second on their RTX Spark, with each model using its own speculative decoding.
 
 ## What my vision model actually does
 
@@ -41,7 +39,7 @@ I stopped my main language model for the test, which freed one R9700 for Bolt. T
 
 A small test harness ran the pipeline's real checking code over four finished short films: 45 storyboard frames and 43 clips. That came to **702 requests per model**. The harness only swapped the server address, so both models received byte-for-byte identical requests and I could compare every answer one-to-one. I also replayed the same requests against Bolt at different drafter settings, and against Qwen on a second llama.cpp build.
 
-Separately, I measured raw speed with the same long prompts I used in [my earlier benchmarks](/2026/10/16/gmktec-neox1-pro-local-ai-lab.html), and logged host memory while each model loaded.
+Separately, I measured raw speed with the same long prompts (8k, 32k and 115k tokens) I use for all my speed benchmarks, and logged host memory while each model loaded.
 
 ## Speed: two numbers, and which one matters
 
@@ -58,7 +56,7 @@ Here are both, in tokens per second, on the same card model and the same llama.c
 | 32k tokens | **2,398** / **103** | 1,735 / 67 |
 | 115k tokens | **1,765** / **80** | 1,379 / 61 |
 
-Qwen reads 1.3 to 1.4 times faster and writes 1.3 to 1.7 times faster. That fits the active parameters. Bolt runs 9B parameters per token against Qwen's 3B. Even at 2 bits on its experts, my rough estimate from the model file is that Bolt reads about twice as many bytes per generated token. Its Mamba layers and attention are stored at 4 and 8 bits, and they are read for every token.
+Qwen reads 1.3 to 1.4 times faster and writes 1.3 to 1.7 times faster. That fits the active parameters. Bolt runs 9B parameters per token against Qwen's 3B. Even at 2 bits on its experts, my rough estimate from the model file is that Bolt reads about twice as many bytes per generated token. Bolt is a hybrid model: alongside its experts it has Mamba layers (a lighter alternative to attention) and some attention layers. NVIDIA stores those at 4 and 8 bits, and they are read for every token.
 
 For my pipeline, the number that matters is how long a whole QA pass takes, because the requests are short and run one after another:
 
@@ -67,23 +65,23 @@ For my pipeline, the number that matters is how long a whole QA pass takes, beca
 | Qwen3.6-35B, Vulkan b11669 | **1,063 s** |
 | Qwen3.6-35B, ROCm build (my previous production setup) | 1,269 s |
 | Bolt, best drafter setting | 1,396 s |
-| Bolt, NVIDIA's default drafter setting | 1,613 s |
+| Bolt, NVIDIA's recommended drafter setting | 1,613 s |
 
 Bolt beat the ROCm Qwen on only two kinds of request, both about a single still image: plate questions (1.78 s median against 1.97 s) and bounding boxes (2.36 s against 2.97 s). Against Qwen on the Vulkan build it won none. Every video request took it about a second longer, 30 to 70% more time.
 
-## Speculative decoding: the default was wrong for my card
+## Speculative decoding: NVIDIA's setting was wrong for my card
 
 Bolt ships with a small "drafter" model. The drafter guesses the next few tokens cheaply, and the big model checks all the guesses in one pass. Every guess it accepts is a token you did not have to generate the slow way. When the guesses are good, you get several tokens for the price of one. When they are poor, the checking costs more than it saves.
 
-NVIDIA's recommended setting drafts **7 tokens** at a time. On my R9700s with the Vulkan build, that was slower than no drafter at all for most text. Shorter drafts worked much better. Speeds are for 512-token chat answers with thinking off, in tokens per second:
+NVIDIA's recipe for 32 GB cards drafts up to **7 tokens** at a time (6 in its 28 GB recipe). On my R9700s with the Vulkan build, that was slower than no drafter at all for most text. Shorter drafts worked much better. Speeds are for 512-token chat answers with thinking off, in tokens per second:
 
-| Task | No drafter | Draft 3 | Draft 4 | Draft 7 (NVIDIA default) |
+| Task | No drafter | Draft 3 | Draft 4 | Draft 7 (NVIDIA's 32 GB recipe) |
 |---|---:|---:|---:|---:|
 | Writing code | 69 | 91 | **97** | 75 |
 | Writing prose | 69 | **78** | 72 | 50 |
 | Writing JSON | 69 | 85 | **87** | 67 |
 
-With 7 drafted tokens, fewer than half were accepted on prose, so most of the checking was wasted work. With 3 or 4, between 46% and 78% were accepted. The drafter also slowed prompt processing by about 12%, because it reads the prompt too.
+With 7 drafted tokens, fewer than half were accepted on prose, so most of the checking was wasted work. With 3 or 4, between 46% and 78% were accepted. The drafter also slowed prompt processing by 10 to 12%, because it reads the prompt too.
 
 Even at its best setting, Bolt topped out around Qwen's speed on the ROCm build (94 tokens per second) and well below Qwen on Vulkan (124). The lesson I would pass on: a vendor's drafter setting is tuned for their hardware. Measure a few values on yours.
 
@@ -91,7 +89,7 @@ Even at its best setting, Bolt topped out around Qwen's speed on the ROCm build 
 
 Both models were well behaved at the basics. **All 1,404 answers were valid JSON**: none ran out of tokens, and neither leaked any thinking text. The differences are in what they said.
 
-Agreement means both models gave the same yes/no answer, count or "found it" verdict to the same question:
+Agreement means both models gave the same yes/no answer, count or "found it" verdict to the same question. It is counted per question, and some requests ask several questions at once, so the disagreement counts can be larger than the number of requests:
 
 | Check | Requests | Agreement | Where they differed |
 |---|---:|---:|---|
@@ -105,7 +103,7 @@ Three findings decided it.
 
 **1. Bolt broke my parser on head counts.** Each head-count answer is a list with an item number `n` for each thing being counted. For the question "1. women", Qwen answers `{"n": 1, "count": 2}`. Bolt very often answered `{"n": 2, "count": 2}`, putting the count where the item number belongs. My parser looks for item 1, finds nothing, and records **zero people**. Only 92 of Bolt's 344 head-count answers were in a shape the parser could read, against 305 for Qwen. When I read the answers by hand, generously, the two models gave the same count 87% of the time. So Bolt can count fine; it just fills in the form wrongly.
 
-**2. Bolt could not tell video clips apart.** My beat check includes a trap: alongside "does this clip show *its* action?", it asks "does this clip show the action from a *different* clip?" A good judge says no. Bolt said yes to the other clip's action on **23 of 43 clips**, which makes those checks worthless. Qwen did that on 4. NVIDIA's report says Bolt's vision adapter was trained on images only, which fits.
+**2. Bolt could not tell video clips apart.** My beat check includes a trap: alongside "does this clip show *its* action?", it asks "does this clip show the action from a *different* clip?" A good judge says no. Bolt said yes to the other clip's action on **23 of 43 clips**, which makes those checks worthless. Qwen did that on 4. NVIDIA's model card says Bolt's vision adapter was trained on images only, with no video, which fits.
 
 **3. Bolt is far more lenient.** It passed **25 of 45** storyboard frames; Qwen passed **11**. On both frame questions and checklists, almost all disagreements were Bolt saying "yes, that's fine" where Qwen said no. I have not hand-labelled the disagreements yet, so I can't say whether Qwen is too strict or Bolt misses real defects. For a quality checker, though, I would rather have the strict one: a false alarm costs me a look, a missed defect ends up in the film.
 

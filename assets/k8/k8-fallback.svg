@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="900" height="640" role="img" aria-labelledby="t d">
+  <title id="t">Exploded diagram of the GMKtec NucBox K8</title>
+  <desc id="d">Stacked isometric layers from top to bottom: lid, extractor fan tray, silver shell with side vents, DDR5 SO-DIMMs and M.2 NVMe drives, the Ryzen 7 8845HS mainboard with dual 2.5 GbE, the heat-pipe blower cooler and the bottom plate.</desc>
+  <defs>
+    <style>
+      .plate{stroke:#9aa3a8;stroke-width:1.2;fill:#1b2226}
+      .silver{fill:#3a4047}.pcb{fill:#17332c;stroke:#4d7a63}.dark{fill:#15181b;stroke:#6b7378}.lime{fill:#b5e853;stroke:#b5e853}
+      .lbl{font:12px ui-monospace,Consolas,monospace;fill:#e6f0cf}.sub{font:10px ui-monospace,Consolas,monospace;fill:#a4b1b4}
+      .lead{stroke:#c9f07a;stroke-width:1;fill:none;stroke-opacity:.8}
+      .title{font:600 16px system-ui,sans-serif;fill:#ecf0e8}
+    </style>
+  </defs>
+  <rect width="900" height="640" fill="#141a1f"/>
+  <text class="title" x="24" y="34">GMKtec NucBox K8 · exploded layout</text>
+  <text class="sub" x="24" y="52">Static fallback. Scene units follow the 123 × 112 × 43 mm case. Layout from published teardowns; not CAD.</text>
+  <!-- Isometric plates: a parallelogram per layer, stacked with explosion gaps. -->
+  <g transform="translate(450,110)">
+    <!-- lid -->
+    <polygon class="plate silver" points="-150,0 0,-62 150,0 0,62"/>
+    <text class="sub" x="-28" y="4" fill="#9ca2a7">GMKtec</text>
+    <!-- fan tray -->
+    <g transform="translate(0,70)"><polygon class="plate dark" points="-140,0 0,-58 140,0 0,58"/><ellipse cx="-14" cy="0" rx="38" ry="16" fill="#0a0d10" stroke="#5b6368"/><ellipse cx="-14" cy="0" rx="9" ry="4" fill="#2a2f34"/></g>
+    <!-- shell -->
+    <g transform="translate(0,140)"><polygon class="plate silver" points="-150,0 0,-62 150,0 0,62" fill-opacity=".35"/><polygon class="plate silver" points="-150,0 -150,26 0,88 150,26 150,0 0,62"/>
+      <g stroke="#0a0d10" stroke-width="2"><line x1="-128" y1="12" x2="-24" y2="54"/><line x1="-128" y1="18" x2="-24" y2="60"/><line x1="-128" y1="24" x2="-24" y2="66"/><line x1="24" y1="54" x2="128" y2="12"/><line x1="24" y1="60" x2="128" y2="18"/><line x1="24" y1="66" x2="128" y2="24"/></g></g>
+    <!-- modules -->
+    <g transform="translate(0,250)">
+      <polygon class="plate pcb" points="-120,-8 -50,-37 20,-8 -50,21"/><polygon class="plate pcb" transform="translate(0,-14)" points="-120,-8 -50,-37 20,-8 -50,21"/>
+      <polygon class="plate dark" points="40,8 95,-15 125,-3 70,20"/><polygon class="plate dark" points="70,22 125,-1 155,11 100,34"/>
+      <polygon class="plate dark" points="-96,30 -78,22 -60,30 -78,38"/>
+    </g>
+    <!-- board -->
+    <g transform="translate(0,330)"><polygon class="plate pcb" points="-142,0 0,-59 142,0 0,59"/>
+      <polygon class="lime" points="-112,-6 -100,-11 -88,-6 -100,-1"/><polygon class="lime" points="-98,-12 -86,-17 -74,-12 -86,-7"/>
+      <polygon class="plate dark" points="-70,-24 -58,-29 -46,-24 -58,-19"/><polygon class="plate dark" points="-56,-30 -44,-35 -32,-30 -44,-25"/>
+      <line class="lime" x1="-106" y1="-8" x2="-150" y2="20" stroke-width="3"/></g>
+    <!-- cooler -->
+    <g transform="translate(0,410)"><ellipse cx="-20" cy="6" rx="40" ry="17" fill="#15181b" stroke="#6b7378"/><ellipse cx="-20" cy="6" rx="12" ry="5" fill="#2a2f34"/>
+      <polygon class="plate" points="-100,-22 -10,-60 20,-48 -70,-10" fill="#5e6368"/><path d="M-20,2 C-30,-18 -60,-26 -70,-34" stroke="#c08552" stroke-width="5" fill="none"/><path d="M-10,0 C-14,-20 -40,-30 -50,-40" stroke="#c08552" stroke-width="5" fill="none"/></g>
+    <!-- bottom -->
+    <g transform="translate(0,470)"><polygon class="plate silver" points="-150,0 0,-62 150,0 0,62"/><g fill="#0a0d10"><ellipse cx="-110" cy="4" rx="7" ry="3"/><ellipse cx="110" cy="4" rx="7" ry="3"/><ellipse cx="0" cy="48" rx="7" ry="3"/><ellipse cx="0" cy="-44" rx="7" ry="3"/></g></g>
+  </g>
+  <!-- Callouts -->
+  <g>
+    <path class="lead" d="M120,112 H270 L300,110"/><text class="lbl" x="24" y="116">Top lid</text>
+    <path class="lead" d="M150,182 H300 L330,180"/><text class="lbl" x="24" y="186">Extractor fan</text>
+    <path class="lead" d="M170,266 H290 L300,250"/><text class="lbl" x="24" y="270">Shell + side vents</text>
+    <path class="lead" d="M210,358 H330 L380,352"/><text class="lbl" x="24" y="362">DDR5 SO-DIMM ×2 · 96 GB</text>
+    <path class="lead" d="M690,352 H560 L540,358"/><text class="lbl" x="700" y="356">M.2 NVMe ×2 · PCIe 4.0</text>
+    <path class="lead" d="M690,430 H560 L450,440"/><text class="lbl" x="700" y="434">Ryzen 7 8845HS board</text>
+    <path class="lead" d="M240,445 H318 L340,432"/><text class="lbl" x="24" y="449">Dual 2.5 GbE · wired uplink</text>
+    <path class="lead" d="M690,512 H520 L440,520"/><text class="lbl" x="700" y="516">Heat-pipe blower</text>
+    <path class="lead" d="M190,590 H300 L320,584"/><text class="lbl" x="24" y="594">Bottom plate · VESA</text>
+  </g>
+</svg>

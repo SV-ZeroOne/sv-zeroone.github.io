@@ -1,0 +1,79 @@
+---
+layout: null
+title: Inside the Ludus Range Host
+description: "Interactive exploded isometric view of the GMKtec NucBox K8 mini PC that runs my Ludus cyber range: lid, fan, 96 GB of DDR5, twin NVMe, the 8845HS board and the wired 2.5 GbE uplink."
+image: /assets/images/ludus-k8-exploded.png
+---
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0c1013">
+<link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+{% seo %}
+{% include google-analytics.html %}
+<script>(function(p){if(p.has('embed'))document.documentElement.classList.add('embedded');if(p.has('card'))document.documentElement.classList.add('card');})(new URLSearchParams(location.search));</script>
+<link rel="stylesheet" href="/assets/k8/k8.css">
+<script type="importmap">{"imports":{"three":"/assets/lib/three-r180/three.module.min.js"}}</script>
+</head>
+<body>
+<main class="lab">
+  <header class="masthead">
+    <div><p class="eyebrow">ZERO SECURITY <span>/</span> THE RANGE HOST</p><h1>One silver box.<br><span>A whole domain.</span></h1></div>
+    <div class="identity"><span class="signal"></span> GMKtec NucBox K8<br><small>Ludus host · exploded isometric study</small></div>
+  </header>
+  <div class="workspace">
+    <section class="scene" aria-label="Interactive exploded view of the mini PC">
+      <div class="scene-meta"><span>GMKtec NucBox K8 · Ryzen 7 8845HS</span><span><b id="projection">ISOMETRIC</b> · TEARDOWN-DERIVED 3D STUDY</span></div>
+      <div id="viewport" tabindex="0" role="region" aria-label="3D model of the mini PC. Isometric projection. Drag to orbit, arrow keys step between isometric corners, E explodes or reassembles. Select a part or a callout for its details.">
+        <svg id="leaders" aria-hidden="true"></svg>
+        <div id="labels" aria-label="Part callouts"></div>
+        <div id="fallback">
+          <img src="/assets/k8/k8-fallback.svg" width="900" height="640" alt="Exploded diagram of the NucBox K8, top to bottom: lid, extractor fan, silver shell with side vents, two DDR5 SO-DIMMs and two M.2 NVMe drives, the Ryzen 7 8845HS mainboard with dual 2.5 GbE at the rear, the heat-pipe blower and the bottom plate.">
+          <p id="load-status" role="status">Loading the 3D view. The diagram above shows the layout without WebGL.</p>
+        </div>
+      </div>
+      <div class="model-caption"><strong>123 × 112 × 43 mm · 96 GB DDR5 · 2 × NVMe</strong><span>Wired 2.5 GbE only · Ludus needs 32 GB and 200 GB NVMe to start</span></div>
+      <div class="view-tools" aria-label="Camera controls">
+        <button id="rotate-left" type="button" disabled aria-label="Turn to the previous isometric corner" title="Previous isometric corner">↶</button>
+        <button id="reset-view" type="button" disabled>Isometric view</button>
+        <button id="rotate-right" type="button" disabled aria-label="Turn to the next isometric corner" title="Next isometric corner">↷</button>
+        <button id="zoom-out" type="button" disabled aria-label="Zoom out">−</button>
+        <button id="zoom-in" type="button" disabled aria-label="Zoom in">+</button>
+        <span>Drag to orbit</span>
+      </div>
+    </section>
+    <aside class="inspector" aria-label="Part details">
+      <div id="details" aria-live="polite" aria-atomic="true">
+        <span id="part-tag" class="part-tag">07 · NETWORK</span>
+        <h2 id="part-title">Dual 2.5 GbE</h2>
+        <p id="part-copy">Two 2.5 GbE ports on the rear. Ludus assumes one plain wired interface and builds its own virtual networks behind it, so one cable is all you need.</p>
+        <dl><dt id="spec-label">REQUIRED</dt><dd id="spec-value">Wired, not Wi-Fi</dd></dl>
+        <p id="part-note" class="note">Realtek RTL8125 on the original K8; the K8 Plus swapped in Intel I226V. Either is fine for Debian.</p>
+      </div>
+      <a class="reference-link" href="https://docs.ludus.cloud/docs/deployment-options/bare-metal" target="_blank" rel="noopener">Ludus bare-metal hardware notes ↗</a>
+      <div class="legend"><span><i></i>Ludus essentials: RAM, NVMe, wired NIC</span></div>
+    </aside>
+  </div>
+  <section class="controls" aria-label="Model controls">
+    <button id="explode" class="primary" type="button" disabled>Explode the K8 ↗</button>
+    <div class="slider"><label for="separation">Assembly separation <output id="separation-value" for="separation">0%</output></label><input id="separation" type="range" min="0" max="100" value="0" disabled></div>
+    <div class="toggles">
+      <label class="toggle"><input id="labels-toggle" type="checkbox" checked disabled> Callouts</label>
+      <label class="toggle"><input id="essentials" type="checkbox" disabled> Ludus essentials</label>
+    </div>
+  </section>
+  <p id="explosion-hint" class="explosion-hint">Assembled. Rear face shown: dual 2.5 GbE with the wired uplink Ludus insists on.</p>
+  <footer class="footnote"><p><strong>GMKtec NucBox K8 (original silver model) · AMD Ryzen 7 8845HS · 8C/16T</strong><span>Case size from the manufacturer; internal layout from published teardowns. Hidden routing and exact part proportions are illustrative. Not CAD.</span></p><p>Part of <a href="/blog/main-blog.html">Zero Security</a>.<br>Built with Three.js r180, no tracking beyond the site analytics.</p></footer>
+  <noscript><p class="note">JavaScript is disabled. The static diagram shows the layout; the accompanying article explains each part and the Ludus setup.</p></noscript>
+</main>
+<script type="module">
+  import('/assets/k8/k8.js').catch(error => {
+    document.getElementById('load-status').textContent = 'The interactive view is unavailable in this browser. The static diagram remains available above.';
+    console.warn('K8 3D view unavailable:', error);
+  });
+</script>
+</body>
+</html>
