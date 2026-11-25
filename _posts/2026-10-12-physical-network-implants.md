@@ -24,7 +24,7 @@ Dropping one is a brilliant test of the controls most organisations *assume* are
 Implants have come a long way:
 
 - **[Raspberry Pis](https://www.raspberrypi.com/)** - where most people start. Cheap and flexible, but limited horsepower, and it *looks* like a Pi if someone finds it.
-- **[Hak5 LAN Turtle](https://shop.hak5.org/collections/lan-turtle/products/lan-turtle)** - tiny and convenient for a fast drop, but modest resources.
+- **[Hak5 LAN Turtle](https://shop.hak5.org/pages/lan-turtle)** - tiny and convenient for a fast drop, but modest resources.
 - **Mini PCs like the [GMKtec NucBox G5](https://www.gmktec.com/products/gmktec-nucbox-g5-mini-pc-intel%C2%AE-alder-lake-n97)** - now my favourite primary implant and launching pad (more below).
 - **A custom circuit board implant** - built in-house, small enough to hide *inside a keyboards*, that exfiltrates keystrokes over an IoT SIM. More on why that one matters shortly.
 
