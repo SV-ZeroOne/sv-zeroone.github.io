@@ -7,7 +7,7 @@
 
 require 'html-proofer'
 
-HTMLProofer.check_directory(
+proofer = HTMLProofer.check_directory(
   './_site',
   checks: %w[Links Images],
   enforce_https: false,
@@ -17,4 +17,17 @@ HTMLProofer.check_directory(
   hydra: { max_concurrency: 4 },
   typhoeus: { followlocation: true, connecttimeout: 10, timeout: 30,
               headers: { 'User-Agent' => 'Mozilla/5.0 (link checker for sv-zeroone.github.io)' } }
-).run
+)
+
+# typhoeus 1.7+ labels a response body with the charset its Content-Type
+# declares. html-proofer then raises "invalid byte sequence" on a body that is
+# not valid in that charset, and the whole run dies. Drop the invalid bytes
+# before html-proofer handles the response.
+proofer.before_request do |request|
+  request.on_complete do |response|
+    body = response.body
+    body.scrub!('') if body.is_a?(String) && !body.frozen? && !body.valid_encoding?
+  end
+end
+
+proofer.run

@@ -817,6 +817,5 @@ Looking ahead, the implications of emerging trends such as AI-driven password pr
 - [https://github.com/A-poc/RedTeam-Tools](https://github.com/A-poc/RedTeam-Tools)
 - [https://github.com/Cloud-Architekt/AzureAD-Attack-Defense/blob/main/PasswordSpray.md](https://github.com/Cloud-Architekt/AzureAD-Attack-Defense/blob/main/PasswordSpray.md)
 - [https://github.com/ivanversluis/pentest-hacktricks/blob/master/windows/active-directory-methodology/password-spraying.md](https://github.com/ivanversluis/pentest-hacktricks/blob/master/windows/active-directory-methodology/password-spraying.md)
-- [https://github.com/TheJoyOfHacking/blacklanternsecurity-TREVORspray](https://github.com/TheJoyOfHacking/blacklanternsecurity-TREVORspray)
 - [https://github.com/dafthack/MSOLSpray/blob/master/README.md](https://github.com/dafthack/MSOLSpray/blob/master/README.md)
 - [https://www.trustedsec.com/tools](https://www.trustedsec.com/tools)
