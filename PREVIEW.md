@@ -11,13 +11,14 @@ cd C:\Users\Neo\Desktop\Claude_Projects\sv-zeroone.github.io
 ```
 
 That builds the site (drafts included) and opens the Ludus post at
-<http://127.0.0.1:4100/2026/10/13/building-a-cyber-range-with-ludus-on-a-mini-pc.html>.
+<http://127.0.0.1:4100/2026/11/05/building-a-cyber-range-with-ludus-on-a-mini-pc.html>.
 
 | Want to…                              | Run                                               |
 |---------------------------------------|---------------------------------------------------|
 | Rebuild after editing a post          | `.\Preview-Site.ps1` then refresh the browser     |
 | Open a different page                 | `.\Preview-Site.ps1 -Page /k8-range/`             |
 | See only what the public site shows   | `.\Preview-Site.ps1 -NoDrafts`                    |
+| See a post marked `published: false`  | `.\Preview-Site.ps1 -Unpublished -Page <its URL>`  |
 | Run the same link/image check as CI   | `.\Preview-Site.ps1 -Check`                       |
 | Just open the existing build          | `.\Preview-Site.ps1 -SkipBuild -Page /`           |
 | Stop the local web server             | `.\Preview-Site.ps1 -Stop`                        |
@@ -51,6 +52,11 @@ python -I -m http.server 4100 --bind 127.0.0.1 --directory _site
 - **Drafts and dates.** Anything in `_drafts/` is included with `--drafts` and
   gets its URL date from the filename when it has one. To publish, move the
   file to `_posts/` and commit.
+- **Held-back posts.** A file in `_posts/` with `published: false` in its front
+  matter (the NEO-X1 Pro post) is skipped even with drafts on. Add
+  `-Unpublished`:
+  `.\Preview-Site.ps1 -Unpublished -Page /2026/10/16/gmktec-neox1-pro-local-ai-lab.html`.
+  A later build without the switch removes the page from `_site/` again.
 - **Search does not work locally.** `/search/` needs the Pagefind index, which
   only the GitHub Actions build creates.
 - **Docker Desktop must be running.** The script starts it if the daemon is

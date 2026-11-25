@@ -2,6 +2,76 @@
 
 Prepared on the local branch `draft/neox1-local-ai`. No remote push or publication has been performed.
 
+## Status: a six-post series (2026-11-21)
+
+The owner decided on one overview post followed by five separate posts. The post file named below is
+now the **overview**. The single long article it replaced (the 16 October draft, with the full switch
+measurements, the complete DFlash table and the daily-use section) is in git at commit `67013e4`:
+`git show 67013e4:_posts/2026-10-16-gmktec-neox1-pro-local-ai-lab.md`. Parts 3 to 5 should start from it.
+
+| Post | Subject | State |
+| --- | --- | --- |
+| Overview | What the build is, what is good about it, what to copy on a smaller budget | Written, `published: false` |
+| 1 | The host: what the NEO-X1 Pro offers, and where the build started | Not started |
+| 2 | The cards: R9700, RTX 3090, RTX 5070 | Not started |
+| 3 | Getting GPUs outside the box: docks, OCuLink, PCIe switches, power, the frame | Not started |
+| 4 | Making the models fast: engines, tuning, benchmarks | Not started |
+| 5 | Running it every day, and which configuration to build | Not started |
+
+Before publishing the overview: rename the file to its real publication date (the URL and the two
+preview scripts carry `2026/10/16`), and do not link to the parts until they exist.
+
+What the overview states that the 16 October draft did not, and where each comes from:
+
+- Host figures (96 GB, 213,840-token context, two requests at once, the vision server's two slots):
+  read from the live rig on 2026-11-20, recorded in `INDEX.md` section 0 of the parent workspace.
+- The RTX 5070 shipped fitted in the PC, the dock is the AOOSTAR AG03, and the two RTX 3090 prices
+  (GBP 511 in June 2024, GBP 1,000 brand new in August 2026): told by the owner on 2026-11-21.
+- The 14.6-litre case, liquid-cooled CPU and 96 GB memory ceiling: GMKtec's product page.
+- AG03 details (800 W supply, OCuLink plus two Thunderbolt 5 ports, PCIe 4.0 x4, incompatibility list):
+  AOOSTAR's product page.
+- 54 GB/s for a card directly in the slot and 3.5 GB/s through the PCIe 3.0 switch:
+  `hardware_baseline_2026-09-03_*` and the master context in the parent workspace.
+- The build timeline: the dated HWiNFO reports in the parent workspace and the build photos
+  (see `NEOX1-IMAGES.md`).
+- Both RTX 3090s dropping out once: master context, hardware traps. The owner asked for no dates in
+  the reliability paragraph.
+- Added on the owner's feedback (2026-11-21), in his words: the laptop was an old MSI GS75 with a mobile
+  RTX 2080 that hosted the first Hermes Agent setup; the RTX 3090 joined it in an original Razer Core X
+  for more VRAM and had been used for password cracking in his cyber security day job; he bought the
+  first R9700 in August expecting high-VRAM cards to rise in price, it now costs GBP 200 to 300 more
+  than he paid, and a second followed quickly; the NEO-X1 Pro was good value on its launch deal; the
+  cards run at stock power and lowering it is a future test; the early instability was AMD driver
+  software and it is stable now.
+- Processor figures (16 Zen 5 cores, up to 5.4 GHz, 55 W default TDP, "world's fastest mobile gaming
+  processor" as AMD's own claim): AMD's product page. Power modes (54 / 85 / 160 W): GMKtec's page.
+- Power supply (2000 W, aimed at servers and AI machines, fully modular, 2000 W only on 200 to 240 V
+  mains and 1600 W on 115 V): Cooler Master's product page. "Ten power connections for four cards" is
+  counted from the hardware: two 8-pin per RTX 3090, one 16-pin per R9700, one 6-pin per breakout
+  board (seen in the build photos). How the supply's own leads are shared out is **not** confirmed.
+- "More than a week without a restart" was true on 2026-11-21: Windows had been up 7.6 days. The
+  owner's wording was "has not crashed in weeks"; the System log shows unexpected-shutdown events
+  (Kernel-Power 41) on 12 and 13 November, which may be deliberate power cycles. Re-check when publishing.
+- The 350 W figure for an RTX 3090: the 30 September four-card run, where both sat at that limit.
+
+**The 3D viewer was rebuilt on 2026-11-21** against the owner's build photos: every component model and
+the complete-rig layout (power supply on the top shelf, four-card frame, breakout boards, switch card
+running front to back in the PC, side-mounted radiator, full cabling). Codex and Antigravity reviewed
+renders against the photos over four rounds and both accepted all six views. What changed, the evidence
+and the tooling are in section 0 of `NEOX1-3D-RENDER-HANDOFF.md` in the parent workspace. The viewer
+now takes `?view=<host|amd|nvidia|switch|dock|rig>`, so a later post can link straight to one part, and
+the social card `assets/images/neox1-lab.png` was regenerated from the rebuilt rig.
+
+**The PC's internals were rebuilt on 2026-11-22** from three more pictures and the owner's description:
+the 850 W supply stands in the top front corner with its leads leaving downwards, the two SO-DIMMs
+stand upright beside the pump, there are five case fans (two under the lime top, one on the floor, two
+on the radiator), and the radiator bracket has a two-circle fan cut-out plus the slot that shows the
+supply's label. Codex and Antigravity both accepted the result on the second pass (reports in `tmp/neox1-blog/review-*-internals2.md`, renders in `tmp/neox1-blog/round5/`).
+
+The 3D viewer's text was brought up to date at the same time (`assets/neox1/parts.js`,
+`neox1-lab/index.html`, `assets/neox1/topology.svg`): 96 GB, the current context size, and the service
+placement, which is now measured and no longer "intended".
+
 ## Files
 
 - `_posts/2026-10-16-gmktec-neox1-pro-local-ai-lab.md`: article; `published: false` deliberately keeps it out of normal builds.

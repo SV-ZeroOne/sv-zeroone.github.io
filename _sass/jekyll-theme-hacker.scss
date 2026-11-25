@@ -450,6 +450,25 @@ a {
   }
 }
 
+// Two hero images side by side (front matter `hero.second`). The layout sets
+// --hero-a / --hero-b from the images' aspect ratios, which makes them the same
+// height without cropping either. On a phone they stack.
+.post-hero.post-hero-pair {
+  display: grid;
+  grid-template-columns: var(--hero-a, 1fr) var(--hero-b, 1fr);
+  gap: 10px;
+  border: 0;
+
+  img {
+    box-sizing: border-box;
+    border: 1px solid $blockquote-border;
+  }
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 // Tall phone photos inline in a post: cap the size and centre them.
 // Kramdown: ![alt](/assets/images/...){: .photo-portrait}
 img.photo-portrait {

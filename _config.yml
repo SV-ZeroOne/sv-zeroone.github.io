@@ -52,6 +52,7 @@ exclude:
   - CLAUDE.md
   - LICENSE
   - NEOX1-DRAFT.md
+  - NEOX1-IMAGES.md
   - Preview-Neox1.ps1
   - PREVIEW.md
   - Preview-Site.ps1

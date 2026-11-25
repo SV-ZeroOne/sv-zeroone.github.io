@@ -8,9 +8,19 @@ layout: default
 <p class="view">by {{ page.author | default: site.author }}</p>
 
 {% if page.hero %}
+{%- if page.hero.second %}
+{%- comment %} Two images at the same height: each column's weight is its image's aspect ratio. {% endcomment %}
+{%- assign hero_a = page.hero.width | times: 1000 | divided_by: page.hero.height %}
+{%- assign hero_b = page.hero.second.width | times: 1000 | divided_by: page.hero.second.height %}
+<figure class="post-hero post-hero-pair" style="--hero-a: {{ hero_a }}fr; --hero-b: {{ hero_b }}fr;">
+  <img src="{{ page.hero.src | relative_url }}" alt="{{ page.hero.alt | escape }}" width="{{ page.hero.width }}" height="{{ page.hero.height }}" decoding="async" fetchpriority="high">
+  <img src="{{ page.hero.second.src | relative_url }}" alt="{{ page.hero.second.alt | escape }}" width="{{ page.hero.second.width }}" height="{{ page.hero.second.height }}" decoding="async" fetchpriority="high">
+</figure>
+{%- else %}
 <figure class="post-hero">
   <img src="{{ page.hero.src | relative_url }}" alt="{{ page.hero.alt | escape }}"{% if page.hero.width %} width="{{ page.hero.width }}" height="{{ page.hero.height }}"{% endif %} decoding="async" fetchpriority="high">
 </figure>
+{%- endif %}
 {% endif %}
 
 {{ content }}

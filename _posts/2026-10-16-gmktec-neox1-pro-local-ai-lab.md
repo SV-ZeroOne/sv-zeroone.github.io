@@ -2,40 +2,69 @@
 title: "One GMKtec, Five GPUs: Taking the NEO-X1 Pro into Local AI"
 author: zero
 tags: homelab ai hardware gmktec amd nvidia local-llm
-description: "How I expanded a GMKtec NEO-X1 Pro into a mixed AMD and NVIDIA local AI lab, with a Broadcom PCIe switch and measured Qwen inference results."
+description: "An overview of the five-GPU local AI lab I built around a GMKtec NEO-X1 Pro: what it runs, the results I am happiest with, and which parts are worth copying on a smaller budget."
 image: /assets/images/neox1-lab.png
 published: false
+hero:
+  src: /assets/images/neox1/build/30-two-sided-ai-beast.jpg
+  alt: "A poster headed Two Sided AI Beast, with NVIDIA RTX and AMD Radeon logos above a photo of the open rack: two RTX 3090s and two Radeon AI PRO R9700s on the top shelf, thick bundles of power cables, and the GMKtec NEO-X1 Pro on its side below."
+  width: 1000
+  height: 1908
+  second:
+    src: /assets/images/neox1/build/28-four-gpus-on-tall.jpg
+    alt: "Four graphics cards standing upright side by side in an open frame: two black GeForce RTX 3090s with purple-lit logos on the left and two silver Radeon AI PRO R9700s on the right. A Radeon AI PRO R9700 box sits behind them and a Cooler Master X Mighty Platinum 2000 power supply stands at the right."
+    width: 1080
+    height: 1146
+neox1_gallery:
+  - src: /assets/images/neox1/build/10-rtx3090-on-dock-on-neox1.jpg
+    alt: "A black triple-fan RTX 3090 standing in a silver eGPU dock, which sits on the lime-green top of the dark grey GMKtec NEO-X1 Pro between its carry handles."
+    caption: "**2 September.** The first week with the NEO-X1 Pro: an RTX 3090 in the AOOSTAR AG03 dock, parked on top of the PC. The dock has its own power supply, so the card needs nothing from the PC but a data cable."
+  - src: /assets/images/neox1/build/09-rtx3090-vs-r9700.jpg
+    alt: "Two graphics cards side by side on a desk mat: a black triple-fan ASUS TUF RTX 3090 above a silver single-fan Gigabyte Radeon AI PRO R9700."
+    caption: "**Two ecosystems.** The ASUS TUF RTX 3090 (top) has 24 GB and an open triple-fan cooler. The Gigabyte Radeon AI PRO R9700 (bottom) has 32 GB and a single blower fan."
+  - src: /assets/images/neox1/build/18-neox1-m2-oculink-fitted.jpg
+    alt: "Close view of the NEO-X1 Pro motherboard: a small adapter board in the second M.2 socket with an OCuLink cable plugged into it, beside the empty full-length PCIe slot and an SSD in the first M.2 socket."
+    caption: "**3 September.** A way out of the case: an M.2-to-OCuLink adapter in the second M.2 socket. That one cable now carries the fifth GPU at PCIe 4.0 ×4."
+  - src: /assets/images/neox1/build/20-switch-card.jpg
+    alt: "A blue full-length PCIe card with a finned heatsink, a blower fan and ten SlimSAS sockets lettered A to E in pairs."
+    caption: "**12 September.** The PCIe switch card. It takes the PC's one ×16 slot and fans it out to ten SlimSAS sockets. Each graphics card uses two of them."
+  - src: /assets/images/neox1/build/26-gpu-frame-half-built.jpg
+    alt: "A black metal frame on top of an open rack holding two bare green breakout boards on the left and two silver Radeon cards standing upright on the right, with cables dropping to the PC below."
+    caption: "**30 September.** The four-card frame half built. Each card stands in a small breakout board, and two cables from each board run down to the switch card in the PC below."
 ---
 
-My GMKtec NEO-X1 Pro now hosts five discrete GPUs: two AMD Radeon AI PRO R9700s, two NVIDIA RTX 3090s and an RTX 5070. That is 124 GB of VRAM across a compact host and its external expansion hardware. Getting them connected was only the start. The really satisfying bit was getting my main local LLM running faster on **one** AMD card than it had on two, leaving the other card available for vision work.
+My GMKtec NEO-X1 Pro arrived as a compact gaming PC with one graphics card inside. It now drives five: two AMD Radeon AI PRO R9700s, two NVIDIA RTX 3090s and the RTX 5070 it shipped with. That is 124 GB of VRAM, and it runs a language model, a vision model, image generation and video generation at the same time, all of it at home.
 
-If you have read my [old hacking lab build](/2020/08/29/hacking-server-lab.html), you will know where this is going. Give me a useful computer, some expansion hardware and a reason to experiment, and the desk tends to get a little more complicated. This time the goal is a local AI workstation: language models, vision, image generation and video work, with control over which model runs where.
+This post is the overview: what the build is, what I like most about it, and which parts are worth copying even if you never go near five GPUs. Five follow-up posts will take it apart piece by piece.
 
-**The NEO-X1 Pro is the centre of this build.** The extra GPUs, PCIe switch, cabling and external power are my expansion. They do not all fit inside the GMKtec case, and this is my tested configuration rather than a stock five-GPU product.
+If you have read my [old hacking lab build](/2020/08/29/hacking-server-lab.html), you will know where this is going. Give me a useful computer, some expansion hardware and a reason to experiment, and the desk tends to get a little more complicated.
 
 *Disclosure: I bought the NEO-X1 Pro myself. This post is not sponsored by GMKtec, and the machine was not supplied or loaned for review.*
 
-## The lab as it actually looks
+## The build in two tables
 
-Here is the build in its current home. The GMKtec lies on its side on the lower level of a TecMojo 12U open rack, with the upward-facing side panel removed and the PEX88096 expansion card plugged directly into the motherboard's PCIe slot. Above it, the top shelf carries the two RTX 3090s and two silver Gigabyte Radeon AI PRO R9700s. My rack has only the bottom and top shelves; there is no middle shelf. The ZOTAC RTX 5070 Twin Edge OC sits alongside the host on an AOOSTAR AG03 dock with its own integrated PSU. A single OCuLink cable connects that dock to the GMKtec. The large external power supply is up beside the four-card shelf. A couple of small fans help move air around the open assembly. This is very much a working homelab, cables and all.
+| Part | What I have |
+|---|---|
+| Host | GMKtec NEO-X1 Pro: Ryzen 9 9955HX3D (16 cores, 32 threads), 96 GB DDR5, 2 TB NVMe, in a 14.6-litre case |
+| AMD cards | 2 × Gigabyte Radeon AI PRO R9700 AI TOP, 32 GB each |
+| NVIDIA cards | 2 × ASUS TUF RTX 3090 OC, 24 GB each, and the ZOTAC RTX 5070 that came in the PC, 12 GB |
+| Four of the cards | On a Broadcom PEX88096 PCIe switch card in the PC's single ×16 slot |
+| The fifth card | On an AOOSTAR AG03 dock, over one OCuLink cable from an M.2 socket |
+| Power | The PC's own 850 W supply, a Cooler Master X Mighty Platinum 2000 (2000 W) for the four cards, and the dock's built-in 800 W supply |
+| Software | Windows 11 Pro, with Ubuntu under WSL2 for the main model |
 
-<link rel="stylesheet" href="/assets/neox1/article.css">
-<div class="neox1-photos">
-  <figure>
-    <a href="/assets/images/neox1/setup-overview.jpg" target="_blank" rel="noopener"><img src="/assets/images/neox1/setup-overview.jpg" width="2252" height="4000" loading="lazy" decoding="async" alt="Full view of the open rack, with four GPUs above the silver GMKtec host, a fifth GPU beside it, and a monitor above the build."></a>
-    <figcaption><strong>01 / The whole build</strong>The NEO-X1 Pro anchors the lower level. The GPU expansion occupies the shelf above and the space beside it.</figcaption>
-  </figure>
-  <figure>
-    <a href="/assets/images/neox1/gpu-shelf-closeup.jpg" target="_blank" rel="noopener"><img src="/assets/images/neox1/gpu-shelf-closeup.jpg" width="2252" height="4000" loading="lazy" decoding="async" alt="Close view of two black GeForce RTX cards and two silver Gigabyte Radeon cards, with power cables and an external power supply to the right."></a>
-    <figcaption><strong>02 / Two GPU ecosystems</strong>Black RTX 3090s on the left, silver R9700s on the right, with external power and additional airflow.</figcaption>
-  </figure>
-  <figure>
-    <a href="/assets/images/neox1/gpu-shelf-overhead.jpg" target="_blank" rel="noopener"><img src="/assets/images/neox1/gpu-shelf-overhead.jpg" width="2252" height="4000" loading="lazy" decoding="async" alt="Overhead view showing four upright graphics cards arranged side by side across the upper rack shelf."></a>
-    <figcaption><strong>03 / The expansion shelf</strong>The overhead view makes the four-card arrangement clear. The electrical paths are explained in the diagram below.</figcaption>
-  </figure>
-</div>
+**The NEO-X1 Pro is the centre of this build.** The extra GPUs, the switch, the cabling and the external power are my additions. They do not fit inside the GMKtec case, and this is my own tested configuration, not a five-GPU product you can buy.
 
-*Photos by me. Select a photo to open the full image.*
+This is what the cards do:
+
+| Job | Model | Where it runs |
+|---|---|---|
+| Main language model | Qwen3.8-27B | One R9700 |
+| Vision, for images and video | Qwen3.6-35B-A3B | The other R9700 |
+| Image generation | Qwen-Image in ComfyUI | The RTX 5070 (the 3090s can do it too) |
+| Video generation | MiniMax-H3 in ComfyUI | The two RTX 3090s |
+
+The five cards do not add up to one 124 GB GPU. Each card owns its memory, and I give each job a card of its own.
 
 ## Pull the lab apart
 
@@ -47,139 +76,111 @@ Here is the build in its current home. The GMKtec lies on its side on the lower 
 
 **[Explore the lab in a full window ↗](/neox1-lab/)**
 
-Start with the GMKtec enclosure study and open its chassis, or choose the R9700, ASUS TUF RTX 3090, **PCIe switch** and **RTX 5070 + dock** close-ups to inspect the hardware. Drag to orbit and use the zoom buttons for details. The **Complete rig** view shows the open-sided arrangement: host below with the switch seated upright across its motherboard, four cards above, and the fifth on its dock alongside. Separate the assembly and turn on **PCIe links** to follow the shared host connection and the separate route to the fifth GPU.
+Start with the GMKtec and open its chassis, or choose the R9700, RTX 3090, **PCIe switch** and **RTX 5070 + dock** close-ups. Drag to orbit and use the zoom buttons for detail. The **Complete rig** view shows the arrangement: the host on its side below with the switch card standing in its PCIe slot, four cards in their frame above with the power supply beside them, and the fifth on its dock alongside. Separate the assembly and turn on **PCIe links** to follow the shared connection and the separate route to the fifth GPU.
 
-The models use the manufacturers' published chassis and GPU dimensions, product photographs and my rack and switch references. The TecMojo frame is 520 mm wide, 512 mm deep and 604 mm high including its casters, with only the top and bottom shelves fitted. The switch model follows the blue PCB, ten SFF-8654 connectors and silver blower/heatsink in my reference image. Each of the four switch-connected GPUs uses two SFF-8654 cables and a breakout board. This is a photo-derived reconstruction, not manufacturer CAD: concealed internals, the switch and dock's exact dimensions, and precise cable routing and port assignments are illustrative. The PCIe relationships reflect the measured setup. Visual references: [GMKtec NEO-X1 series](https://www.gmktec.uk/products/gmktec-neo-x1-series-amd-ryzen%E2%84%A2-9-9955hx-9955hx3d-modt-gaming-pc), [Gigabyte R9700 AI TOP](https://www.gigabyte.com/uk/Graphics-Card/GV-R9700AI-TOP-32GD-rev-10), [ASUS TUF RTX 3090 OC](https://www.asus.com/motherboards-components/graphics-cards/tuf-gaming/tuf-rtx3090-o24g-gaming/), [ZOTAC Twin Edge OC](https://www.zotac.com/product/graphics_card/zotac-gaming-geforce-rtx-5070-twin-edge-oc) and [AOOSTAR AG03](https://aoostar.com/products/aoostar-ag03-egpu-dock).
+The models are reconstructed from the manufacturers' dimensions and my own photos, not from CAD, so hidden internals and exact cable routes are illustrative. The PCIe connections are the ones I measured.
 
-## Why the GMKtec made a good starting point
+## What I like most about it
 
-The useful combination here is a compact chassis, a Ryzen 9 9955HX3D with 16 cores and 32 threads, replaceable memory, and PCIe expansion I could actually put to work. GMKtec markets the NEO-X1 Pro as a compact gaming machine; I have been using that foundation to build an AI lab. [GMKtec's product page](https://www.gmktec.com/products/gmktec-neo-x1-pro-modt-gaming-pc-amd-ryzen-9-9955hx3d-nvidia-geforce-rtx-5070)
+**A gaming mini PC is doing a workstation's job.** GMKtec sells the NEO-X1 Pro as a compact gaming machine: a 14.6-litre case with carry handles, a liquid-cooled 16-core CPU and an RTX 5070. Inside there is one full-length PCIe slot and two M.2 sockets, and that turned out to be enough to hang five graphics cards off it. The PC still does everything else: CPU, memory, storage and the desktop.
 
-My host has **64 GB of DDR5 memory and a 2 TB Crucial E100 NVMe SSD**. Windows 11 Pro runs the desktop and several GPU services, with Ubuntu 24.04 under WSL2 for the main language model. The small Radeon 610M integrated GPU handles the display, leaving the discrete cards available for inference.
+**The processor is a laptop chip, and that suits this job.** The Ryzen 9 9955HX3D is what AMD calls the world's fastest mobile gaming processor: 16 Zen 5 cores, 32 threads, 3D V-Cache and a boost speed of up to 5.4 GHz. Because it was designed for laptops, AMD's default power rating for it is only 55 W. GMKtec puts it on a desktop board with liquid cooling and lets you choose how hard it runs: 54 W in silent mode, 85 W balanced, or 160 W for performance. That is a lot of processor for the power, and it comfortably covers what the CPU has to do here, which is run Windows, WSL and the services around the GPUs. I have not measured what the 3D V-Cache does for inference, so I am not crediting it for any of the speed figures below.
 
-The CPU gives me room for orchestration, tokenisation and the rest of the lab around the GPU workloads. I have not isolated the effect of its 3D V-Cache on inference, so I am not attributing the token-rate gains below to that feature. Those gains came from changing the inference stack.
+**One slot, four fast links.** The switch card takes the PC's single ×16 slot and gives each of four cards its own PCIe 4.0 ×16 connection. I measured 26 to 28 GB/s between the host and each card through it. For comparison, a card plugged straight into the slot measured 54 GB/s, and the PCIe 3.0 switch I tried first managed 3.5. The four cards do share one connection to the host, so when they all load models at once they split about 28 GB/s between them.
 
-What I like about the GMKtec is that it has given me a practical platform to keep experimenting on. I could change the GPU topology, compare engines and move services between cards without rebuilding the whole host each time.
+**One power supply feeds all four cards.** The cards on the switch run from a Cooler Master X Mighty Platinum 2000, a 2000 W unit that Cooler Master aims at servers and AI machines. Four cards need a surprising number of power leads. Each RTX 3090 takes two 8-pin plugs, each R9700 takes one 16-pin plug, and each of the four breakout boards has its own 6-pin socket to power the slot the card stands in. That is ten power connections for four cards, all from the one supply, and it is why the cabling looks the way it does in the photos. The supply is fully modular, so only the leads in use are attached. One thing to know if you copy this: its full 2000 W rating needs 200 to 240 V mains, and on 115 V Cooler Master rates it at 1600 W.
 
-## The hardware, as built
+**The biggest speed-up cost nothing in hardware.** My main model used to be split across both R9700s. Moving it to a different inference stack, [mike2153's Qwen3.8 DFlash setup](https://github.com/mike2153/mbea-qwen38-dflash) on vLLM, made it faster on one card than it had been on two:
 
-| Component | My configuration |
-|---|---|
-| Host | GMKtec NEO-X1 Pro |
-| CPU | AMD Ryzen 9 9955HX3D, 16 cores / 32 threads |
-| System memory | 64 GB DDR5, two 32 GB modules |
-| Storage | 2 TB Crucial E100 NVMe |
-| AMD GPUs | 2 × Gigabyte Radeon AI PRO R9700 AI TOP, 32 GB each |
-| NVIDIA GPUs | 2 × ASUS TUF RTX 3090 OC, 24 GB each; 1 × ZOTAC RTX 5070 Twin Edge OC, 12 GB |
-| Main expansion | Broadcom PEX88096 PCIe Gen4 switch, in the PLX/PEX switch family |
-| Fifth GPU path | M.2_2 adapter → one OCuLink cable → AOOSTAR AG03 dock, negotiated PCIe Gen4 ×4 |
-| Power in this modified build | Host's internal 850 W supply; Cooler Master 2000 W for the main expansion; AG03's integrated 800 W PSU for the 5070 |
-
-Those power-supply ratings describe the installed supplies, not measured wall consumption. They also describe my modified machine, not every retail NEO-X1 Pro configuration.
-
-The five discrete cards add up to **124 GB of VRAM**, but each GPU owns its memory. I allocate workloads to those separate memory spaces; the switch does not turn them into one 124 GB GPU.
-
-## The Broadcom switch is what makes the expansion interesting
-
-The two R9700s and the two 3090s sit behind a **Broadcom PEX88096**, sharing one **PCIe Gen4 ×16 host uplink**. The RTX 5070 takes a separate **M.2-to-OCuLink Gen4 ×4 path** through the AG03 dock. My host connection uses one OCuLink cable; the dock's Thunderbolt ports are unused here. AOOSTAR specifies an integrated **800 W PSU**, so the 5070 has its own dock power supply. That rating describes capacity, not measured consumption. [AOOSTAR AG03 specifications](https://aoostar.com/products/aoostar-ag03-egpu-dock)
-
-```text
-GMKtec NEO-X1 Pro / Ryzen 9 9955HX3D
-│
-├── PCIe Gen4 ×16 shared uplink
-│   └── Broadcom PEX88096 switch
-│       ├── Radeon AI PRO R9700 · 32 GB
-│       ├── Radeon AI PRO R9700 · 32 GB
-│       ├── GeForce RTX 3090    · 24 GB
-│       └── GeForce RTX 3090    · 24 GB
-│
-└── M.2_2 → one OCuLink cable · PCIe Gen4 ×4
-    └── AOOSTAR AG03 · integrated 800 W PSU
-        └── ZOTAC RTX 5070 Twin Edge OC · 12 GB
-```
-
-That shared uplink is the detail to keep in mind. Four connected cards do not mean four independent ×16 links back to the CPU. When several cards load models or move large amounts of data at once, they compete for the same host bandwidth.
-
-I learnt this by measuring the links. In the 30 September campaign, a single R9700 reached **28.3 GB/s host-to-device and 27.7 GB/s device-to-host** through the switch. A 3090 reached **26.1 and 26.3 GB/s** respectively. Loading all four in the host-to-device direction produced about **28.3 GB/s aggregate**, not four times that figure.
-
-The previous PEX8724 arrangement had a Gen3 ×8 uplink and gave the tested card about **3.49 GB/s**. Moving to the PEX88096 therefore delivered roughly **8.1× the measured host-to-device bandwidth** on that comparison. That is a transfer result, not an 8.1× LLM speedup.
-
-One other trap: an endpoint can report a fast link to a bridge on the GPU itself. That does not describe the entire route back to the CPU. I checked the bridge chain and measured transfers rather than treating the biggest link number in a hardware report as the answer.
-
-## AMD and NVIDIA, working in the same lab
-
-I wanted to use both ecosystems. AMD's 32 GB cards give me useful room for language models and their context caches. The NVIDIA cards let me keep CUDA-based image and video workflows alongside them.
-
-My service layout is built around separate jobs:
-
-| GPU allocation | Workload | Serving stack |
-|---|---|---|
-| R9700 #1 | Main Qwen3.8-27B language model | WSL2, Docker, vLLM-radiance and DFlash2 |
-| R9700 #2 | Qwen3.6-35B-A3B vision model | Native Windows llama.cpp, Vulkan |
-| RTX 5070 | Intended Qwen-Image service | ComfyUI, CUDA |
-| RTX 3090 #1 and #2 | MiniMax-H3 video workers | Separate ComfyUI instances, CUDA |
-
-This table describes the intended service placement. My latest review caught an older launcher putting the image service on a 3090 that was also assigned video work. The endpoints were healthy, but the GPU placement was wrong. Checking which physical card owns a process is now part of the work still to tighten up.
-
-The collaboration happens at the application level: a language model can plan a job, a vision model can inspect an image, and image or video workers can produce the assets. I am not claiming a single model is tensor-parallel across AMD and NVIDIA.
-
-In the Windows transfer campaign, neither same-vendor GPU pair exposed usable direct peer access. Some copies were staged through system RAM. That finding helped steer me towards keeping models resident on individual cards and giving each card a useful job.
-
-## The biggest inference upgrade was software
-
-My earlier Qwen3.8-27B configuration used both R9700s with llama.cpp's ROCm backend and tensor splitting. It worked, but the next experiment changed the balance of the whole machine.
-
-Using [mike2153's Qwen3.8 DFlash setup](https://github.com/mike2153/mbea-qwen38-dflash), I moved the main model to one R9700 with:
-
-- **AMD Quark AWQ MXFP4 weights**, using the W4A8 kernel path.
-- **vLLM-radiance and RDNA4 kernels** inside Docker on WSL2.
-- A **DFlash2 FP8 drafter**, proposing seven speculative tokens.
-- **FP8 KV cache**, prefix caching, and one active sequence at a time.
-
-Speculative decoding lets a smaller drafter propose tokens for the main model to verify. How many proposals survive depends on the prompt and the generated text, so there is no single speed multiplier for every request.
-
-Here is what happened on my actual campaign prompts. These are medians of three runs from **10 October**, with prefix reuse defeated by a per-request nonce.
-
-| Measurement | Previous two-R9700 llama.cpp setup | One-R9700 DFlash setup |
+| | Two R9700s, llama.cpp | One R9700, vLLM with DFlash |
 |---|---:|---:|
-| Process an 8k-token prompt | 1,185 tokens/s | **3,344 tokens/s** |
-| Process a 32k-token prompt | 1,163 tokens/s | **3,036 tokens/s** |
-| Process a 115k-token prompt | 951 tokens/s | **2,283 tokens/s** |
-| 115k prompt processing time | 124 seconds | **51.6 seconds** |
-| Generate after an 8k prompt | 62 tokens/s | **107 tokens/s** |
-| Generate after a 32k prompt | 54 tokens/s | **98 tokens/s** |
-| Generate after a 115k prompt | 46 tokens/s | **74 tokens/s** |
+| Read a 115k-token prompt | 124 seconds | **51.6 seconds** |
+| Generate after an 8k-token prompt | 62 tokens/s | **107 tokens/s** |
+| Generate after a 115k-token prompt | 46 tokens/s | **74 tokens/s** |
 
-The generation rows measure 128 output tokens after each prompt. This compares complete configurations: the previous setup used Unsloth UD-Q4_K_XL weights, f16 KV and MTP; the new one uses MXFP4, FP8 KV and DFlash. The chat-template and request paths also differ. It demonstrates which setup worked better here, rather than isolating the effect of one kernel. [Download the recorded comparison values](/assets/neox1/inference-comparison.csv).
+These are medians of three runs from 10 October ([recorded values](/assets/neox1/inference-comparison.csv)). The change also freed a whole 32 GB card, which now runs the vision model.
 
-The result I care about most is the **115k-token prompt dropping from 124 seconds to 51.6 seconds while freeing an entire R9700**. That made room for the vision service. Faster responses and another useful model available at the same time is a much better outcome for this lab than simply occupying more GPUs.
+**AMD and NVIDIA work in the same machine.** The 32 GB Radeons hold the language models, with room for very long conversations: the main model serves a context of about 214,000 tokens on a single card. The NVIDIA cards run the CUDA-based image and video tools. Neither vendor's cards are asked to do the other's job.
 
-I also ran a small reasoning campaign: ten tasks, three repetitions each, with 27 graded outcomes. DFlash matched the base llama.cpp setup at **25/27**, while recorded generation time fell from **83.4 minutes to 33.0 minutes**. That comparison was against the earlier **single-card** llama.cpp run. One DFlash run degenerated into repeated characters and hit its token cap at temperature 1.0; it needs retesting at the shipped 0.7 default. These are useful local checks, not a broad model-quality certification.
+**It does several things at once.** A language model can plan a job, a vision model can check the result, and the image and video workers produce the assets, all at the same time on separate cards. I use it that way for an AI video pipeline. One experiment from that pipeline, [testing NVIDIA's Nemotron Bolt against my vision model](/2026/11/01/nemotron-bolt-vs-qwen36-vision-qa.html), already has its own post.
 
-## Making it something I can actually use every day
+**Old cards are worth keeping.** I paid £511 for my first RTX 3090 in June 2024. In August 2026 I paid £1,000 for a second one, brand new, on eBay. A card that launched in 2020 nearly doubled in price in two years, and I put that down to demand for VRAM from people running AI models. Both cards are earning their keep here.
 
-A fast response is useful. A server that is still there after I close a terminal is useful too.
+## How it got here
 
-The WSL setup needed a persistent session so the distro and Docker worker stayed alive. Windows and WSL can enumerate GPUs differently, so I also have to be deliberate about device selection. Model loading has to respect system RAM and commit usage, even when there is plenty of VRAM across the machine.
+None of this started as a five-GPU plan. It started on an old MSI GS75 gaming laptop, which hosted my first setup of Hermes Agent, the AI agent I still run on top of these models, on its built-in mobile RTX 2080. When I wanted more VRAM, I plugged in my RTX 3090 through an original Razer Core X eGPU enclosure. That 3090 had already had a career: I used it for password cracking in my cyber security day job. Now it runs AI models.
 
-The switch passed a **15-minute transfer soak moving 32.2 TB**, with no recorded WHEA events, PCIe replays or PCIe errors. A separate **15-minute four-GPU inference run completed 133 requests with no failures or dropouts**. Those are encouraging bounded tests; they are not evidence of weeks of unattended uptime.
+I bought the first Radeon AI PRO R9700 in August. My thinking was that as better local models arrived, cards with a lot of VRAM would only get more expensive. So far that has held: the same card now costs £200 to £300 more than I paid. A second one followed quickly. The NEO-X1 Pro itself was good value on its launch deal.
 
-On **16 October**, I updated the main server to **`mbea-qwen38-dflash:2026.10.1`**, at repository commit `353a6ba`. The normal serving start exposed **211,200 context tokens**, and all eight upstream API checks passed, including streaming and tool-call continuation. The previous benchmark profile exposed 214,720; available context is profiled at startup.
+From there, each step was a working machine before the next part arrived.
 
-The new package builds the patches and kernels during installation and adds a guarded shutdown that drains work before stopping the GPU process. I also adjusted my fleet controller to honour a refused stop. The benchmark table above predates this update: I have not yet measured its incremental performance gain.
+- **Late August:** the first R9700 runs in an eGPU dock on the laptop.
+- **Early September:** the NEO-X1 Pro arrives. One card goes in its slot, then the OCuLink experiments begin.
+- **Mid September:** two R9700s on a PCIe 3.0 switch, then the bigger PCIe 4.0 switch kit.
+- **30 September:** four cards on the switch. On **4 October** the RTX 5070 joins on its dock, making five.
+- **10 October:** the software change that moved the main model onto one card.
+- **Start of November:** memory goes from 64 GB to 96 GB.
 
-My next operational improvements are straightforward: verify GPU identity rather than trusting service labels, make startup sensitive to host memory pressure, and choose lighter reasoning settings for everyday requests. Long reasoning has its place, but I do not need it for every simple answer.
+{% include gallery.html id="neox1-build" images=page.neox1_gallery label="How the NEO-X1 Pro lab grew, from one card to four" %}
 
-## What this build says about the NEO-X1 Pro
+## The lab today
 
-The part that has impressed me is how far I could take the host. The GMKtec is still the centre of the machine: CPU, memory, storage, desktop and PCIe connectivity. Around it, I have been able to build a mixed-vendor AI lab and change how the hardware is used as the software improves.
+The GMKtec lies on its side on the lower level of a TecMojo 12U open rack, with its side panel off and the switch card plugged into the motherboard's PCIe slot. The shelf above carries the two RTX 3090s and the two Radeon AI PRO R9700s. The RTX 5070 sits beside the host on its dock, and the large external power supply is up beside the four-card shelf. A couple of small fans help move air around. This is very much a working homelab, cables and all.
 
-There are real trade-offs. The external GPUs and power supply take desk space. The shared link is finite. Sixty-four gigabytes of system RAM needs managing when several large services start together. And I still have work to do on placement checks and longer stability runs. Those are the details that make this a useful build log rather than just a photo of a lot of graphics cards.
+<link rel="stylesheet" href="/assets/neox1/article.css">
+<div class="neox1-photos">
+  <figure>
+    <a href="/assets/images/neox1/setup-overview.jpg" target="_blank" rel="noopener"><img src="/assets/images/neox1/setup-overview-900.jpg" width="900" height="1599" loading="lazy" decoding="async" alt="Full view of the open rack, with four GPUs above the dark grey GMKtec host, a fifth GPU beside it, and a monitor above the build."></a>
+    <figcaption><strong>01 / The whole build</strong>The NEO-X1 Pro anchors the lower level. The GPU expansion occupies the shelf above and the space beside it.</figcaption>
+  </figure>
+  <figure>
+    <a href="/assets/images/neox1/gpu-shelf-closeup.jpg" target="_blank" rel="noopener"><img src="/assets/images/neox1/gpu-shelf-closeup-900.jpg" width="900" height="1599" loading="lazy" decoding="async" alt="Close view of two black GeForce RTX cards and two silver Gigabyte Radeon cards, with power cables and an external power supply to the right."></a>
+    <figcaption><strong>02 / Two GPU ecosystems</strong>Black RTX 3090s on the left, silver R9700s on the right, with external power and additional airflow.</figcaption>
+  </figure>
+  <figure>
+    <a href="/assets/images/neox1/gpu-shelf-overhead.jpg" target="_blank" rel="noopener"><img src="/assets/images/neox1/gpu-shelf-overhead-900.jpg" width="900" height="1599" loading="lazy" decoding="async" alt="Overhead view showing four upright graphics cards arranged side by side across the upper rack shelf."></a>
+    <figcaption><strong>03 / The expansion shelf</strong>The overhead view makes the four-card arrangement clear.</figcaption>
+  </figure>
+</div>
 
-For GMKtec, I think there is a good enthusiast story here: a compact machine becoming the foundation of a much more ambitious project. I would love to collaborate on a follow-up covering repeatable builds, measured power and noise, and longer inference runs. The benchmark methodology and the rough edges would stay in the write-up.
+*Photos by me. Select a photo to open the full image.*
+
+## You do not need all of it
+
+The thing I would most like you to take from this build is that every stage of it was useful by itself. If I were starting again on a smaller budget, this is the order I would copy it in.
+
+1. **Start with the software.** Before buying a second card, find out what the best inference stack for your first card can do. Mine read long prompts more than twice as fast and generated about 1.7 times as fast, on half the cards.
+2. **Buy one card with plenty of VRAM.** A single 32 GB card runs my main model with a very long context. VRAM decides what you can load, and in my tests the software mattered more than a second card did.
+3. **Add a second card with a dock.** An eGPU dock avoids rebuilding the PC. Mine, the [AOOSTAR AG03](https://aoostar.com/products/aoostar-ag03-egpu-dock), has a built-in 800 W power supply, an OCuLink port and two Thunderbolt 5 ports, and links at up to PCIe 4.0 ×4. I used it from a laptop over Thunderbolt before I owned the GMKtec, and I use it over OCuLink now. AOOSTAR publishes a short list of hardware it does not work with, so check that against your card first.
+4. **Give each model its own card.** Two models on two cards have served me better than one model spread across two.
+5. **Use a PCIe switch if you want three or four cards.** It turns one slot into several fast ones. It also needs a large external power supply, somewhere to stand the cards, and patience with cabling.
+6. **Do not write off older cards.** A 2020 design with 24 GB is still doing useful work in this lab.
+
+## What it costs
+
+There are real trade-offs, and the follow-up posts will go into them.
+
+- **Space.** Four cards stand in a frame on an open rack, and the fifth sits on a dock beside the PC.
+- **Power.** The CPU is the small part of the bill. It is a laptop-class chip, and even GMKtec's fastest mode caps it at 160 W. The graphics cards are the large part: they run at their stock power limits, which for each RTX 3090 means up to 350 W. I could turn those limits down for better efficiency, and testing how much speed that costs is a future project. There are three power supplies in all, their ratings are not consumption figures, and I have not measured the lab at the wall yet.
+- **A shared link.** The four cards on the switch share one connection to the host.
+- **Memory.** Starting every service together on 64 GB left almost no free memory. The PC now has 96 GB, the most it supports.
+- **Reliability.** It was unstable at first. The cause turned out to be an AMD driver problem: the driver moved an idle model out of the cards' memory, and the next request killed the card. A later driver release fixed that, and the lab has become steadily more reliable since. As I write this it has run for more than a week without a restart. It is still a homelab. I have had both RTX 3090s drop off the PCIe bus once, which took a reboot to clear, and my formal stress tests of the switch were only 15 minutes long.
+- **Trusting what the system reports.** The link speed a card reports is not always the speed of the whole route back to the CPU. I measured transfers instead of trusting the report.
+
+## What is coming
+
+The rest of this series takes one piece at a time:
+
+1. **The host.** What the NEO-X1 Pro gives you to work with, and what its PCIe slots can really do.
+2. **The cards.** The R9700, the RTX 3090 and the RTX 5070: specifications, prices, and what each one is for.
+3. **Getting GPUs outside the box.** Docks, OCuLink, two PCIe switches, external power and a frame to hold it all.
+4. **Making the models fast.** Inference engines, how I tune and test, and the benchmarks.
+5. **Running it every day.** Starting five services in order, monitoring them, what has broken, and which configuration I would build again.
+
+For GMKtec, I think there is a good enthusiast story here: a compact machine becoming the foundation of a much more ambitious project. I would love to collaborate on a follow-up covering repeatable builds, measured power and noise, and longer inference runs.
 
 For now, I have a GMKtec at the centre of five GPUs, AMD and NVIDIA doing useful work in the same system, and a local language model that got substantially quicker through a change of software. That is a pretty good excuse for the state of my desk.
 
 ---
 
-*Build and measurements recorded September–October 2026. The 3D illustration is schematic. Product specifications: [GMKtec NEO-X1 Pro](https://www.gmktec.com/products/gmktec-neo-x1-pro-modt-gaming-pc-amd-ryzen-9-9955hx3d-nvidia-geforce-rtx-5070) and [AMD Ryzen 9 9955HX3D](https://www.amd.com/en/products/processors/laptop/ryzen/9000-series/amd-ryzen-9-9955hx3d.html). Inference software credit: [mbea-qwen38-dflash](https://github.com/mike2153/mbea-qwen38-dflash), its linked radiance/libr4d projects, [vLLM](https://github.com/vllm-project/vllm), [llama.cpp](https://github.com/ggml-org/llama.cpp) and [ComfyUI](https://github.com/Comfy-Org/ComfyUI). Interactive rendering uses [Three.js](https://threejs.org/).*
+*Build and measurements recorded August to November 2026. The 3D illustration is schematic. Product specifications: [GMKtec NEO-X1 Pro](https://www.gmktec.com/products/gmktec-neo-x1-pro-modt-gaming-pc-amd-ryzen-9-9955hx3d-nvidia-geforce-rtx-5070), [AMD Ryzen 9 9955HX3D](https://www.amd.com/en/products/processors/laptop/ryzen/9000-series/amd-ryzen-9-9955hx3d.html), [AOOSTAR AG03](https://aoostar.com/products/aoostar-ag03-egpu-dock) and [Cooler Master X Mighty Platinum 2000](https://www.coolermaster.com/en-global/products/x-mighty-2000.html). Inference software credit: [mbea-qwen38-dflash](https://github.com/mike2153/mbea-qwen38-dflash), its linked radiance/libr4d projects, [vLLM](https://github.com/vllm-project/vllm), [llama.cpp](https://github.com/ggml-org/llama.cpp) and [ComfyUI](https://github.com/Comfy-Org/ComfyUI). Interactive rendering uses [Three.js](https://threejs.org/).*

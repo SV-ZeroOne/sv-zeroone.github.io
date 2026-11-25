@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../lib/three-r180/OrbitControls.js';
 import { RoomEnvironment } from '../lib/three-r180/RoomEnvironment.js';
-import { host, gpu, egpuDock, rack, switchBoard, riserBoard, powerSupply, group, box, tube, materials } from './models.js';
+import { host, gpu, egpuDock, rack, switchBoard, riserBoard, powerSupply, clipFan, rearFan, gpuFrame, SHELF, group, box, tube, materials } from './models.js';
 import { parts } from './parts.js';
 
 const $ = id => document.getElementById(id);
@@ -41,39 +41,94 @@ function mount(id,object,position,offset=[0,0,0],rotation=0){
   const pivot=group(rig,id,position);pivot.add(object);pivot.rotation.y=rotation;pivot.userData.part=id;
   assemblies[id]=pivot;moving.push({pivot,start:pivot.position.clone(),offset:new THREE.Vector3(...offset),rotation});return pivot;
 }
+// Layout taken from the owner's rack photos. The lower shelf holds the PC on
+// its side (removed panel up) with the dock beside it; the upper shelf holds
+// the four-card frame with the power supply standing at the right rear.
+const LOWER_TOP=SHELF.lower+SHELF.thickness/2,UPPER_TOP=SHELF.upper+SHELF.thickness/2;
 const rackHost=host({openSide:true});rackHost.root.rotation.z=-Math.PI/2;
-mount('host',rackHost.root,[-1.72,1.69,.30],[0,0,1.1]);
+mount('host',rackHost.root,[-1.72,LOWER_TOP+.83,.55],[0,0,1.1]);
 const switchModel=switchBoard();
 const switchMount=group(rackHost.pcieSlot,'installed PEX88096');switchMount.userData.part='switch';switchMount.add(switchModel);assemblies.switch=switchMount;
 const protoAMD=gpu('amd'),protoNVIDIA=gpu('nvidia');
-['nv1','nv2','amd1','amd2'].forEach((id,i)=>{
-  const card=(i<2?protoNVIDIA:protoAMD).clone(true),x=[-1.92,-.78,.36,1.5][i];
-  mount(id,card,[x,6.77,.12],[(i-1.5)*1.3,.7+(i%2)*1.3,.15],-Math.PI/2);
-  const support=riserBoard();support.name='riser';support.position.y=-.73;assemblies[id].add(support);
+// Every card stands in a breakout board at the same height, on brass
+// standoffs over 20 mm rails, and the brackets line up at the rear.
+const BOARD_Y=UPPER_TOP+.2+.1+.015,BRACKET_Z=-.55;
+const cardSpecs=[
+  {id:'nv1',proto:protoNVIDIA,x:-2.05,L:2.999,H:1.269,edgeZ:-.517*.28,bracketY:-.085},
+  {id:'nv2',proto:protoNVIDIA,x:-.91,L:2.999,H:1.269,edgeZ:-.517*.28,bracketY:-.085},
+  {id:'amd1',proto:protoAMD,x:.23,L:2.67,H:1.11,edgeZ:-.40*.28,bracketY:-.005},
+  {id:'amd2',proto:protoAMD,x:1.37,L:2.67,H:1.11,edgeZ:-.40*.28,bracketY:-.005}];
+cardSpecs.forEach((spec,i)=>{
+  spec.drop=spec.H/2+.125;spec.y=BOARD_Y+spec.drop;spec.z=BRACKET_Z+spec.L/2;
+  mount(spec.id,spec.proto.clone(true),[spec.x,spec.y,spec.z],[(i-1.5)*1.3,.7+(i%2)*1.3,.15],-Math.PI/2);
+  // Slot centre under the card's edge connector: x -.275 to -.35, z -.12 to the PCB plane.
+  const support=riserBoard();support.name='riser';support.position.set(-.075,-spec.drop,spec.edgeZ+.12);assemblies[spec.id].add(support);
 });
-const dock=egpuDock();mount('nv3',dock,[1.78,.85,.10],[.8,.15,1.25],-Math.PI/2);
+const cardFrame=gpuFrame(cardSpecs.map(spec=>({x:spec.x,z:spec.z-.075,postZ:BRACKET_Z,postHeight:spec.y+spec.bracketY+.62-UPPER_TOP})),2.3,BRACKET_Z-.17);
+cardFrame.position.y=UPPER_TOP;rig.add(cardFrame);
+const dock=egpuDock();mount('nv3',dock,[1.78,LOWER_TOP,.35],[.8,.15,1.25],-Math.PI/2);
 // The switch is a child of the motherboard socket, seated when separation is zero.
-mount('power',powerSupply(),[3.12,5.98,-.9],[2.5,.1,-.2]);
-const powerBracket=group(rig,'PSU support',[3.1,5.93,-.9]);box(powerBracket,[1.5,.07,1.95],[0,0,0],materials.dark);
+// Power supply on its side panel at the right rear of the top shelf, fan
+// outwards, modular face to the front, with the clip-on fan on top of it.
+const psu=powerSupply();psu.rotation.z=-Math.PI/2;psu.position.set(-.43,.75,0);
+const psuStand=group(null,'standing power supply');psuStand.add(psu);
+const deskFan=clipFan();deskFan.position.set(0,1.5,.25);
+deskFan.getObjectByName('fan-yaw').rotation.y=-Math.PI/2-.3;deskFan.getObjectByName('fan-head').rotation.x=.6;psuStand.add(deskFan);
+mount('power',psuStand,[2.12,UPPER_TOP,-1.4],[1.6,.4,-.6]);
+const backFan=rearFan();backFan.position.set(-.34,UPPER_TOP,-1.6);rig.add(backFan);
 const cables=group(rig,'illustrative cable routes');
-const gpuIds=['nv1','nv2','amd1','amd2'],portPairs=[[0,1],[2,3],[4,5],[7,8]];
+const gpuIds=cardSpecs.map(spec=>spec.id),portPairs=[[0,1],[2,3],[4,5],[7,8]];
 const worldPosition=object=>object.getWorldPosition(new THREE.Vector3());
 const switchPort=index=>switchModel.getObjectByName(`downstream-${index}`).getObjectByName('cable-seat');
-for(let i=0;i<4;i++){
-  const x=[-1.92,-.78,.36,1.5][i];
-  for(let n=0;n<2;n++){
-    const start=worldPosition(assemblies[gpuIds[i]].getObjectByName(`riser-port-${n}`).getObjectByName('cable-seat'));
-    const end=worldPosition(switchPort(portPairs[i][n]));
-    tube(cables,[start.toArray(),[x+(n-.5)*.09,6.16,2.7],[x+(n-.5)*.09,5.2,2.7],[x*.6+(n-.5)*.09,3.5,2.6],[end.x,2.85,end.z+.16],end.toArray()],.027,materials.graphite);
-  }
-  const powerLeads=[];assemblies[gpuIds[i]].traverse(o=>{if(o.name==='power-lead')powerLeads.push(o);});
-  powerLeads.forEach((lead,n)=>{const start=worldPosition(lead);tube(cables,[start.toArray(),[x,7.8,start.z],[2.7,7.1,-.9],[3.0,6.5,-.2+n*.15]],.035);});
+rig.updateMatrixWorld(true);
+// SlimSAS plug: grey body and the pale-blue ribbon tail visible in the photos.
+// A seat's +Z is the way the cable leaves; its Y lies along the socket's width.
+const ribbon=new THREE.MeshStandardMaterial({color:0x74b6dc,roughness:.6,metalness:.1});
+const leaving=seat=>new THREE.Vector3(0,0,1).applyQuaternion(seat.getWorldQuaternion(new THREE.Quaternion()));
+function sasPlug(seat){
+  const plug=group(cables,'sas-plug');seat.getWorldPosition(plug.position);seat.getWorldQuaternion(plug.quaternion);
+  box(plug,[.05,.2,.09],[0,0,.045],materials.graphite,.008);box(plug,[.012,.18,.1],[0,0,.14],ribbon);
 }
+cardSpecs.forEach((spec,i)=>{
+  for(let n=0;n<2;n++){
+    const from=assemblies[spec.id].getObjectByName(`riser-port-${n}`).getObjectByName('cable-seat'),to=switchPort(portPairs[i][n]);
+    const start=worldPosition(from),end=worldPosition(to),lane=(n-.5)*.1;
+    sasPlug(from);sasPlug(to);
+    // Each end leaves its socket along the socket's own axis. On the breakout
+    // board that is along the board towards the rack front (the rear socket's
+    // cable passes over the front socket), then over the shelf edge and down.
+    // At the switch it runs along the card before turning up out of the PC.
+    const a=start.clone().addScaledVector(leaving(from),.22),b=end.clone().addScaledVector(leaving(to),.26);
+    tube(cables,[start.toArray(),a.toArray(),[a.x+lane*.6,a.y+(n?0.02:.12),a.z+(n?.3:.62)],[a.x+lane,UPPER_TOP+.36,2.38],[a.x+.04+lane,UPPER_TOP-.25,2.74],
+      [(a.x+b.x)/2-.25+lane,4.35,2.72],[b.x-.12+lane,3.6,b.z+.6],[b.x-.02,b.y+.32,b.z+.2],b.toArray(),end.toArray()],.03,materials.graphite);
+  }
+});
+// Ten power leads from the supply's modular face: two per RTX 3090, one per
+// R9700 and one per breakout board. Which socket feeds which is illustrative.
+let psuOut=0;
+cardSpecs.forEach(spec=>{
+  const leads=[];assemblies[spec.id].traverse(o=>{if(o.name==='power-lead')leads.push(o);});
+  leads.forEach(lead=>{
+    const start=worldPosition(lead),end=worldPosition(psu.getObjectByName(`psu-out-${psuOut}`)),k=psuOut++;
+    const low=start.y<UPPER_TOP+.6;
+    tube(cables,low
+      ?[start.toArray(),[start.x,start.y+.02,start.z+.14],[start.x+.12,UPPER_TOP+.42,2.36],[1.85,UPPER_TOP+.3+k*.01,2.3],[2.3,UPPER_TOP+.34,.5],[end.x,end.y,end.z+.3],end.toArray()]
+      :[start.toArray(),[start.x,start.y+.3,start.z],[start.x+.4,start.y+.3,start.z+.45],[1.85,UPPER_TOP+.8+k*.03,2.05],[2.25,UPPER_TOP+.55+k*.02,.55],[end.x,end.y,end.z+.3],end.toArray()],.03);
+  });
+});
 const hostOCuLink=rackHost.root.getObjectByName('host-oculink').getObjectByName('cable-seat');
 const dockOCuLink=dock.getObjectByName('dock-oculink').getObjectByName('cable-seat');
 const ocStart=worldPosition(hostOCuLink),ocEnd=worldPosition(dockOCuLink);
-const ocCable=tube(cables,[ocStart.toArray(),[ocStart.x,2.85,ocStart.z],[.7,2.92,.85],[1.09,2.8,.6],[1.10,1.45,ocEnd.z],ocEnd.toArray()],.032);
+// The plug lies along the motherboard beside the x16 slot, so the cable first
+// runs towards the PC's front below the switch's leads, then rises out of the
+// open GPU bay and crosses the bracket to the dock.
+const ocA=ocStart.clone().addScaledVector(leaving(hostOCuLink),.3);
+const ocCable=tube(cables,[ocStart.toArray(),ocA.toArray(),[ocA.x-.05,ocA.y+.03,.6],[ocA.x-.04,ocA.y+.06,1.3],[ocA.x+.02,ocA.y+.5,1.62],[-.95,LOWER_TOP+1.5,1.66],[-.45,LOWER_TOP+1.85,1.55],
+  [.55,LOWER_TOP+1.86,ocEnd.z+.6],[1.1,LOWER_TOP+1.5,ocEnd.z+.25],[1.1,ocEnd.y+.25,ocEnd.z+.03],[ocEnd.x-.1,ocEnd.y,ocEnd.z],ocEnd.toArray()],.032);
 ocCable.name='single OCuLink host cable';
+// The OCuLink plug and its boot, mated with the adapter's receptacle.
+const ocPlug=group(cables,'oculink-plug');hostOCuLink.getWorldPosition(ocPlug.position);hostOCuLink.getWorldQuaternion(ocPlug.quaternion);
+box(ocPlug,[.06,.17,.2],[0,0,.1],materials.black,.01);box(ocPlug,[.05,.12,.12],[0,0,.25],materials.rubber,.02);
 const studioHost=host();models.add(studioHost.root);
 const studioSwitch=switchBoard();studioSwitch.position.y=.16;models.add(studioSwitch);
 const studioAMD=protoAMD.clone(true),studioNVIDIA=protoNVIDIA.clone(true);
@@ -96,12 +151,12 @@ function updateLinks(){
   });
 }
 const viewInfo={
-  host:{title:'01 / GMKtec NEO-X1 Pro',dim:'350 × 165 × 265 mm · body',note:'Lime mesh · carry handles · dual-fan AIO',corner:0,part:'host',url:'https://www.gmktec.uk/products/gmktec-neo-x1-series-amd-ryzen%E2%84%A2-9-9955hx-9955hx3d-modt-gaming-pc?variant=47533365100715'},
+  host:{title:'01 / GMKtec NEO-X1 Pro',dim:'350 × 165 × 265 mm · body',note:'Side-mounted 240 mm radiator · five fans · 850 W SFX supply',corner:-1,part:'host',url:'https://www.gmktec.uk/products/gmktec-neo-x1-series-amd-ryzen%E2%84%A2-9-9955hx-9955hx3d-modt-gaming-pc?variant=47533365100715'},
   amd:{title:'02 / Gigabyte Radeon AI PRO R9700',dim:'267 × 111 × 40 mm · 32 GB',note:'AI TOP · dual-slot blower · 16-pin power',corner:0,part:'amd1',url:'https://www.gigabyte.com/uk/Graphics-Card/GV-R9700AI-TOP-32GD-rev-10'},
   nvidia:{title:'03 / ASUS TUF Gaming RTX 3090 OC',dim:'299.9 × 126.9 × 51.7 mm · 24 GB',note:'Three axial fans · 2.7 slots · dual 8-pin power',corner:0,part:'nv1',url:'https://www.asus.com/motherboards-components/graphics-cards/tuf-gaming/tuf-rtx3090-o24g-gaming/'},
-  switch:{title:'04 / PEX88096 PCIe expansion card',dim:'10 SFF-8654 connectors · active cooling',note:'Photo-derived proportions · plugs into the motherboard',corner:0,part:'switch',url:null},
+  switch:{title:'04 / PEX88096 PCIe switch card',dim:'10 SlimSAS (SFF-8654) connectors · active cooling',note:'Board RBE16A54C-V11A · plugs into the PC’s x16 slot',corner:0,part:'switch',url:null},
   dock:{title:'05 / ZOTAC Twin Edge OC + AOOSTAR AG03',dim:'5070: 241.5 × 120.1 × 40.6 mm · 12 GB',note:'AG03: integrated 800 W PSU · one OCuLink host connection',corner:0,part:'nv3',url:'https://www.zotac.com/product/graphics_card/zotac-gaming-geforce-rtx-5070-twin-edge-oc',secondaryUrl:'https://aoostar.com/products/aoostar-ag03-egpu-dock'},
-  rig:{title:'06 / The complete inference lab',dim:'12U · 520 × 512 × 604 mm rack',note:'Open-sided host · upright PCIe switch · separate AG03 dock',corner:0,part:'host',url:null}
+  rig:{title:'06 / The complete inference lab',dim:'12U · 520 × 512 × 604 mm rack',note:'PC on its side, panel off · four cards in a frame · supply on the top shelf',corner:0,part:'host',url:null}
 };
 let view='host',separation=0,destination=0,scheduled=0,visible=true,lastTime=0,autoFraming=false,turn=0,goalZoom=1;
 const goalCamera=new THREE.Vector3(),goalTarget=new THREE.Vector3();
@@ -238,4 +293,11 @@ renderer.domElement.addEventListener('webglcontextlost',e=>{
   document.querySelectorAll('button,select,input').forEach(c=>c.disabled=true);cancelAnimationFrame(scheduled);scheduled=0;visible=false;
 });
 document.querySelectorAll('button,select,input').forEach(c=>c.disabled=false);
-resize();setView('host');renderer.render(scene,camera);$('fallback').hidden=true;viewport.dataset.ready='true';
+// ?view=<id> opens on that view, so an article can link straight to one part.
+const query=new URLSearchParams(location.search),firstView=viewInfo[query.get('view')]?query.get('view'):'host';
+resize();setView(firstView);renderer.render(scene,camera);$('fallback').hidden=true;viewport.dataset.ready='true';
+// ?debug exposes the camera to scripted screenshots that need a detail framed
+// (tmp/neox1-blog/capture_views.py). It changes nothing a visitor sees.
+if(query.has('debug'))window.neox1={THREE,scene,camera,controls,assemblies,look(target,direction,zoom){
+  autoFraming=false;controls.target.set(...target);camera.position.set(...target).addScaledVector(new THREE.Vector3(...direction).normalize(),CAMERA_DISTANCE);
+  camera.zoom=zoom;camera.updateProjectionMatrix();controls.update();renderer.render(scene,camera);}};
