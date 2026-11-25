@@ -1,0 +1,8 @@
+.neox1-photos{margin:1.5rem 0 2.5rem;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.neox1-photos figure{margin:0;min-width:0}
+.neox1-photos a{display:block;border:1px solid #43513c;border-radius:6px;overflow:hidden}
+.neox1-photos img{display:block;width:100%;height:auto;aspect-ratio:2252/4000;object-fit:contain;background:#10161a}
+.neox1-photos a:hover,.neox1-photos a:focus-visible{outline:2px solid #b5e853;outline-offset:3px}
+.neox1-photos figcaption{font-size:12px;line-height:1.6;color:#b9c2b5;margin-top:10px}
+.neox1-photos figcaption strong{display:block;color:#b5e853;font-weight:normal;margin-bottom:4px}
+@media(max-width:650px){.neox1-photos{grid-template-columns:1fr;gap:24px}.neox1-photos img{max-height:650px}.neox1-photos figcaption{font-size:13px}}

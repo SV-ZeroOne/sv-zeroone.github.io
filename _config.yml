@@ -51,6 +51,9 @@ exclude:
   - README.md
   - CLAUDE.md
   - LICENSE
+  - NEOX1-DRAFT.md
+  - NEOX1-IMAGES.md
+  - Preview-Neox1.ps1
   - PREVIEW.md
   - Preview-Site.ps1
   # Photos staged next to a draft: with --drafts Jekyll reads every file under

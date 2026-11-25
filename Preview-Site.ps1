@@ -17,11 +17,16 @@
 
 .PARAMETER Page
   Site-relative path to open, e.g. "/k8-range/" or
-  "/2026/10/13/building-a-cyber-range-with-ludus-on-a-mini-pc.html".
-  Default: the Ludus draft post.
+  "/2026/11/05/building-a-cyber-range-with-ludus-on-a-mini-pc.html".
+  Default: the Ludus post.
 
 .PARAMETER NoDrafts
   Build without _drafts/ (what the public site shows).
+
+.PARAMETER Unpublished
+  Also render posts whose front matter says "published: false" (the NEO-X1 Pro
+  post is held back this way). Drafts mode does not cover them: it only adds
+  the _drafts/ folder.
 
 .PARAMETER SkipBuild
   Serve the existing _site/ without rebuilding.
@@ -37,12 +42,14 @@
   .\Preview-Site.ps1 -Page /k8-range/      # rebuild, open the 3D view full screen
   .\Preview-Site.ps1 -SkipBuild -Page /    # just open the home page
   .\Preview-Site.ps1 -Check                # rebuild + html-proofer
+  .\Preview-Site.ps1 -Unpublished -Page /2026/10/16/gmktec-neox1-pro-local-ai-lab.html   # the held-back NEO-X1 post
   .\Preview-Site.ps1 -Stop                 # stop the local server
 #>
 [CmdletBinding()]
 param(
-  [string]$Page = "/2026/10/13/building-a-cyber-range-with-ludus-on-a-mini-pc.html",
+  [string]$Page = "/2026/11/05/building-a-cyber-range-with-ludus-on-a-mini-pc.html",
   [switch]$NoDrafts,
+  [switch]$Unpublished,
   [switch]$SkipBuild,
   [switch]$Check,
   [switch]$Stop
@@ -85,9 +92,13 @@ if (-not $SkipBuild) {
   # 2. Build in the ruby:3.4 image. SECURITY_FEEDS=off skips the homepage feed
   #    fetch so the build works offline; CI fetches them for the real site.
   $drafts = if ($NoDrafts) { "" } else { "--drafts" }
-  $cmd = "bundle install --quiet && bundle exec jekyll build $drafts"
+  $unpubFlag = if ($Unpublished) { "--unpublished" } else { "" }
+  $cmd = "bundle install --quiet && bundle exec jekyll build $drafts $unpubFlag"
   if ($Check) { $cmd += " && bundle exec htmlproofer ./_site --disable-external --ignore-urls '/pagefind/'" }
-  Write-Host "Building site in Docker ($(if ($NoDrafts) {'published posts only'} else {'with drafts'}))..."
+  $parts = @("published posts")
+  if (-not $NoDrafts) { $parts += "drafts" }
+  if ($Unpublished) { $parts += "unpublished posts" }
+  Write-Host "Building site in Docker ($($parts -join ' + '))..."
   docker run --rm -v "${site}:/srv" -v k8-blog-gems:/usr/local/bundle -w /srv -e SECURITY_FEEDS=off ruby:3.4 bash -c $cmd
   if ($LASTEXITCODE -ne 0) { throw "Jekyll build failed (exit $LASTEXITCODE)." }
 }
@@ -105,5 +116,5 @@ if (-not (Get-ServerPid)) {
 $url = "$base$Page"
 Write-Host "Opening $url"
 Start-Process $url
-Write-Host "`nRebuild after edits:   .\Preview-Site.ps1            (server keeps running)"
+Write-Host "`nRebuild after edits:   run the same command again, then refresh (server keeps running)"
 Write-Host "Stop the server:       .\Preview-Site.ps1 -Stop"
