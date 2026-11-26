@@ -55,7 +55,7 @@ python -I -m http.server 4100 --bind 127.0.0.1 --directory _site
 - **Held-back posts.** A file in `_posts/` with `published: false` in its front
   matter (the NEO-X1 Pro post) is skipped even with drafts on. Add
   `-Unpublished`:
-  `.\Preview-Site.ps1 -Unpublished -Page /2026/10/16/gmktec-neox1-pro-local-ai-lab.html`.
+  `.\Preview-Site.ps1 -Unpublished -Page /2026/10/16/one-pcie-slot-five-gpus.html`.
   A later build without the switch removes the page from `_site/` again.
 - **Search does not work locally.** `/search/` needs the Pagefind index, which
   only the GitHub Actions build creates.

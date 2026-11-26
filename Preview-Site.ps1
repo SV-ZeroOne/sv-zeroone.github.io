@@ -42,7 +42,7 @@
   .\Preview-Site.ps1 -Page /k8-range/      # rebuild, open the 3D view full screen
   .\Preview-Site.ps1 -SkipBuild -Page /    # just open the home page
   .\Preview-Site.ps1 -Check                # rebuild + html-proofer
-  .\Preview-Site.ps1 -Unpublished -Page /2026/10/16/gmktec-neox1-pro-local-ai-lab.html   # the held-back NEO-X1 post
+  .\Preview-Site.ps1 -Unpublished -Page /2026/10/16/one-pcie-slot-five-gpus.html   # the held-back NEO-X1 post
   .\Preview-Site.ps1 -Stop                 # stop the local server
 #>
 [CmdletBinding()]

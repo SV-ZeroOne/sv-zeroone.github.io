@@ -6,3 +6,17 @@
 .neox1-photos figcaption{font-size:12px;line-height:1.6;color:#b9c2b5;margin-top:10px}
 .neox1-photos figcaption strong{display:block;color:#b5e853;font-weight:normal;margin-bottom:4px}
 @media(max-width:650px){.neox1-photos{grid-template-columns:1fr;gap:24px}.neox1-photos img{max-height:650px}.neox1-photos figcaption{font-size:13px}}
+.post-toc{margin:1.5rem 0 2rem;padding:14px 18px 10px;border:1px solid #43513c;border-left:3px solid #b5e853;border-radius:6px;background:rgba(16,22,26,.55)}
+.post-toc-title{margin:0 0 6px;color:#b5e853;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.post-toc ul{margin:0;padding-left:1.2em}
+.post-toc ul ul{margin:2px 0 4px;padding-left:1.3em;font-size:.92em}
+.post-toc li{margin:3px 0;line-height:1.5}
+.post-toc a{text-decoration:none}
+.post-toc a:hover,.post-toc a:focus-visible{text-decoration:underline}
+.neox1-figure{margin:1.5rem auto 2rem;max-width:560px}
+.neox1-figure a{display:block;border:1px solid #43513c;border-radius:6px;overflow:hidden;background:#fff}
+.neox1-figure img{display:block;width:100%;height:auto}
+.neox1-figure a:hover,.neox1-figure a:focus-visible{outline:2px solid #b5e853;outline-offset:3px}
+.neox1-figure figcaption{font-size:12px;line-height:1.6;color:#b9c2b5;margin-top:10px}
+.neox1-figure figcaption strong{display:block;color:#b5e853;font-weight:normal;margin-bottom:4px}
+@media(max-width:650px){.neox1-figure figcaption{font-size:13px}}

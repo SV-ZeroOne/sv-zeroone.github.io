@@ -108,6 +108,36 @@ switch (28.3 GB/s to an R9700, 26.1 GB/s to a 3090), and 32.2 TB moved in 15 min
 |---|---|---|---|---|---|
 | 30 | `two_sided_ai_beastt.jpg` (1442x2752, in the parent folder, not in `Selected`) → `30-two-sided-ai-beast.jpg` | A poster the owner made: a "TWO SIDED AI BEAST" banner with NVIDIA, NVIDIA RTX, Radeon Graphics and AMD Radeon logos, above a photo of the rack as it runs now. Top shelf: two RTX 3090s with lit logos and two R9700s, a square fan and a clip-on fan behind, the Cooler Master supply at the right with thick bundles of power leads. Below: the NEO-X1 Pro on its side with its power light on and SlimSAS cables dropping into it. | No GPS data. Wall stickers and magnets show at the right edge. The banner uses NVIDIA's and AMD's logos, which are their trademarks: fine as a description of what is in the build, but it should not read as endorsement. | **Use.** The owner chose it as the intro image. | Overview (header, left) |
 
+## 8. Supplier product photos of the switch kit (added 2026-11-26)
+
+Added by the owner straight into `assets/images/neox1/pcie-switch/`. These are the supplier's product
+photos from the Alibaba listing, not the owner's own, and the overview post credits them that way.
+None carries EXIF (JFIF headers only).
+
+| File | Size | What it shows | Note |
+|---|---|---|---|
+| `1_pcie-switch-front_1.jpg` | 1440x649 | Switch card front on white: heatsink and blower, ten ports A1/A2 to E1/E2, DIP switch, board code RBE16A54C-V10 | |
+| `2_pcie-switch-back_1.jpg` | 1440x649 | Card back with model label RTE88096-A54 | Label shows the supplier's sample serial number |
+| `3_pcie-switch-front-ports.jpg` | 1440x1165 | Annotated front: x16 edge, SFF8654-8i, PEX88096, ports 1# to 10# | |
+| `4_pcie-switch-front-dip-switch.jpg` | 1440x1285 | DIP switch and mode table (x16 / x8x8 / x4x4x4x4) | `lxyd.en.alibaba.com` watermark |
+| `5_pci-switch-kit.jpg` | 1258x1062 | Kit: SFF-8654 cables x10, dual SFF-8654 8i interface board x5, card x1 | Kit contents as sold; the owner's own kit not confirmed |
+
+All five are in the overview's switch gallery (`switch_gallery` in its front matter).
+
+Three more were added the same day, for the PCIe 3.0 card tried first (the CEACENT CNOL4PE08 /
+PEX8724). Also supplier product images, also no EXIF. They are in `pex8724_gallery`.
+
+| File | Size | What it shows |
+|---|---|---|
+| `7_pcie_switch_oculink.png` | 800x800 | The green CNOL4PE08 on white: heatsink, four OCuLink sockets |
+| `6_pcie_switch_oculink.png` | 730x581 | The same card annotated (bracket, gold finger, high-TG board, radiator, PLX8724 chip, SFF8611 ports) |
+| `8_pcie_switch_oculink_specs.jpg` | 980x997 | Supplier's spec table (it misprints the controller as "PXL 8724") |
+
+`9_m2_oculink_redriver.png` (1111x1051, no EXIF) is the seller's image of the M.2-to-OCuLink adapter
+that works (Amazon UK B0G2GBYQS5): both sides of the board with a redriver chip on each, plus a link
+diagram. It is a single figure (`.neox1-figure` in `assets/neox1/article.css`) under the redriver tip
+in "Choosing hardware".
+
 ## Corrections and open questions
 
 **What the pictures correct**
@@ -174,7 +204,7 @@ goes in which part is still a proposal. The part numbers in the tables refer to 
 
 | Part | Subject | Pictures |
 |---|---|---|
-| Overview | What the build is, why it is worth doing, what to copy. **Written** (`_posts/2026-10-16-gmktec-neox1-pro-local-ai-lab.md`). | Used: 30 and a crop of 28 side by side as the header, and 10, 9, 18, 20, 26 in the gallery, plus the three rack photos |
+| Overview | What the build is, why it is worth doing, what to copy. **Written** (`_posts/2026-10-16-one-pcie-slot-five-gpus.md`). | Used: 30 and a crop of 28 side by side as the header, and 10, 9, 18, 20, 26 in the gallery, plus the three rack photos |
 | 1 | The host: what the NEO-X1 Pro offers, and where the build started | 10, 11, 14, and 29 or an existing rack photo |
 | 2 | The cards: R9700, RTX 3090, RTX 5070 | 2, 3, 9, 12, optionally 1, 6, 8, 13 |
 | 3 | Getting GPUs outside the box: docks, OCuLink, PCIe switches, power and the frame | 5, 15, 18, 20, 21, 22, 23, 24, 26, 28, optionally 19, 25 |

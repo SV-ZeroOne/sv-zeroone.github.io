@@ -21,6 +21,37 @@ measurements, the complete DFlash table and the daily-use section) is in git at 
 Before publishing the overview: rename the file to its real publication date (the URL and the two
 preview scripts carry `2026/10/16`), and do not link to the parts until they exist.
 
+**Owner feedback applied 2026-11-26:**
+- Title and URL made generic: "One PCIe Slot, Five GPUs: Taking Local AI to the Next Level",
+  slug `one-pcie-slot-five-gpus` (file renamed; the preview scripts and `PREVIEW.md` follow it).
+- The disclosure now covers all hardware: bought by the owner, nothing sponsored by any component
+  maker "so far" (the owner's "yet").
+- New section "The PCIe switch: one slot, many GPUs". Its specification table and the five gallery
+  photos in `assets/images/neox1/pcie-switch/` come from the supplier's Alibaba listing (product
+  photos, credited as such; one carries the supplier's `lxyd.en.alibaba.com` watermark, and the back
+  view shows a serial label from the supplier's sample card, not the owner's). The supplier lists the
+  card under SFF-TA-1016 (MCIO), but the board is silkscreened SlimSAS / SFF-8654, so the post omits
+  that line. Measurements in the section are the 30 September campaign's; the no-P2P finding is from
+  `llm-inference-notes/pex88096-4gpu-windows-test-plan-2026-09-30.md`.
+- Subsection "The cheaper option I tried first": the CEACENT CNOL4PE08 (PEX8724, Gen3 x8 up, 4 x OCuLink
+  Gen3 x4 down), supplier link from the owner. Figures (3.49 GB/s per card, 6.99 GB/s concurrent,
+  2.5 TB in 360 s with zero WHEA, ~30 t/s decode) are from `llm-inference-notes/dual-r9700-instability-diagnostic-2026-09-14.md`
+  §3–4; the enclosure/switch blame being wrong is its §9. The listing says the card needs BIOS
+  x4x4x4x4 bifurcation; that is wrong for a card with a switch chip, so the post does not repeat it.
+- M.2-to-OCuLink redriver lesson (owner, 2026-11-26): the first adapter (printed M2-8612-RA, the one in
+  build photo 18) had no redriver and the card never enumerated, as the 3 September notes record. The
+  replacement that works is Amazon UK B0G2GBYQS5: M.2 2280 M-key to OCuLink SFF-8612 host adapter,
+  PCIe 4.0, PX410 linear redriver, cable not included (from the listing). Photo 18's caption was
+  corrected (it had said that adapter carries the fifth GPU), and a hardware tip was added.
+- **No promises of follow-up posts** (owner, 2026-11-26): "What is coming" and its five-part list were
+  removed, along with every "the follow-up posts / Part 4 will…" line. The post ends with "Final
+  thoughts", which says only that he *may* come back to parts of the build. The series plan in the table
+  above is internal; do not put part numbers or a roadmap back into the published text.
+- New section "Tips for getting more out of local AI", drawn from `llmwiki/concepts/local-llm-inference-architecture.md`,
+  `llm-inference-notes/r9700-prefill-campaign-2026-10-02.md`, `bench-results/20261015-nemotron-bolt/RESULTS.md`,
+  `llm-inference-notes/vision-5070-qwen35-9b-and-hermes-2026-10-01.md`, the pex88096 test plan, the
+  2026-10-16 inference review and the ComfyUI pipeline memory note (all in the parent workspace).
+
 What the overview states that the 16 October draft did not, and where each comes from:
 
 - Host figures (96 GB, 213,840-token context, two requests at once, the vision server's two slots):
@@ -74,7 +105,7 @@ placement, which is now measured and no longer "intended".
 
 ## Files
 
-- `_posts/2026-10-16-gmktec-neox1-pro-local-ai-lab.md`: article; `published: false` deliberately keeps it out of normal builds.
+- `_posts/2026-10-16-one-pcie-slot-five-gpus.md`: article; `published: false` deliberately keeps it out of normal builds.
 - `neox1-lab/index.html`: standalone interactive embed.
 - `assets/neox1/`: renderer, scoped CSS, static topology fallback and comparison CSV.
 - `assets/images/neox1-lab.png`: social image captured from the actual renderer.
@@ -93,7 +124,7 @@ With the repository's Ruby dependencies installed:
 SECURITY_FEEDS=off bundle exec jekyll serve --unpublished
 ```
 
-Article: `/2026/10/16/gmktec-neox1-pro-local-ai-lab.html`
+Article: `/2026/10/16/one-pcie-slot-five-gpus.html`
 
 Interactive model: `/neox1-lab/`
 
