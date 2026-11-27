@@ -52,6 +52,55 @@ preview scripts carry `2026/10/16`), and do not link to the parts until they exi
   `llm-inference-notes/vision-5070-qwen35-9b-and-hermes-2026-10-01.md`, the pex88096 test plan, the
   2026-10-16 inference review and the ComfyUI pipeline memory note (all in the parent workspace).
 
+**Fact-check against the workspace notes, 2026-11-27** (owner asked for a whole-post review). Every
+figure in the post was traced to a note in the parent workspace. Corrected:
+- The RTX 5070 joined on **1 October**, not 4 October (`pex88096-4gpu-windows-test-plan-2026-09-30.md`
+  Part 5e and the vision-5070 note are dated 10-01; 4 October is only the date of the five-GPU HWiNFO report).
+- CEACENT card: the 30 tokens/s was **one card, speculative decoding off** (diagnostic §4; test plan row
+  5B), not a model split across two. It is within 3% of the 30.79 t/s direct-slot figure, which the post now says.
+- "Nearly every mini PC has one full-length PCIe slot" was wrong: most have none.
+- "Peak committed memory 140 GB" was the **page file's** peak use (139.7 GiB, inference review 2026-10-16).
+- ComfyUI tip: 58 s was the 4.1 MP job, but the 8 s was a different, 768 x 768 job, not the same job at
+  the intended size (ComfyUI pipeline memory note). Reworded.
+- Reliability: "more than a week as I write this" was no longer true (the owner restarted on 25 November).
+  The System log gives a 12.4-day run, 13 to 25 November, ended by a user restart; that is the longest
+  since the driver fix (an 11.5-day run in October is second). The post now states that.
+- The "115k" prompt is 117,649 tokens. The post now says 118k, and `assets/neox1/inference-comparison.csv`
+  carries the real token counts (8,184 / 32,743 / 117,649) in place of the rounded labels.
+- Smaller: the `--load-mode none` saving was measured on llama.cpp servers on the RTX 3090s (they run
+  ComfyUI now); the two-slot flags are `-np 2 -kvu --no-cache-idle-slots`; the 640 px video answer had
+  "one small left/centre slip", so it is "stayed accurate", not "the same answer".
+
+Added for local-AI readers, all from the notes: quantisation, engine and context in the jobs table;
+streamed speeds from the 2026-11-14 bench (about 90 and 124 tokens/s); one line on what DFlash is and
+its trade-offs (MXFP4 checkpoint, one degenerate run in 30, 25/27 the same as llama.cpp,
+`bench-results/20261010-dflash-wsl/RESULTS.md`); that a model can be split across cards; the RTX 3090
+(936 GB/s) against R9700 (640 GB/s) bandwidth comparison and why speculative decoding beats the bandwidth
+ceiling; sensor power readings from `neox1-hardware-telemetry-2026-10-04.md` (about 15 W idle for an
+RTX 3090 or 5070, about 240 W for an R9700 generating).
+
+Switch prices (owner, 2026-11-27, from his Alibaba order records): the PEX88096 kit was ordered
+02 Sep 2026 (GMT-07:00), total **GBP 400.53 = USD 535.46** (order summary: item GBP 362.79, shipping
+GBP 37.75 discounted from 47.56, 1 USD = 0.748006 GBP), and it had **five** dual SFF-8654-8i interface boards
+(this settles the open question behind the gallery caption). The CEACENT CNOL4PE08 was ordered
+20 Aug 2026 (GMT-07:00), total **GBP 47.83 = USD 64.42** (order summary: item GBP 35.63, shipping 4.23,
+tax 7.98, 1 USD = 0.742350 GBP). The PEX88096 order summary has **no tax line**, and the owner
+confirmed (2026-11-27) that no import VAT or duty was charged on delivery, so GBP 400.53 was the full
+cost. The post says "the order came to" and deliberately does not mention import charges, which vary by
+reader and country.
+The post gives both order totals with their breakdowns and says "start of September"
+and "late August", because the order timestamps are in a US time zone. Current supplier prices
+for the PEX88096, also from the owner on 2026-11-27 and now in the post: GBP 261.88 for the card alone
+(RTE88096-A54), 365.86 for the kit with five boards and 423.63 for the kit with ten. The listing has a
+100-piece minimum; the owner enquired and was sold one, which the post says. The listing read the same
+day in USD agrees (340 / 475 / 550, option names "PCIe x16 Expansion Kit" and "PCIe x8 Expansion Kit",
+which is where the post's "x16 kit" and "x8 kit" labels come from; samples USD 350 to 560). The CEACENT
+listing showed USD 47.99; that current price is not in the post. The owner has no wall-power
+measurement, so the post still says the lab has not been measured at the wall.
+
+Not re-checked on 2026-11-27: the manufacturers' figures (GMKtec, AMD, AOOSTAR, Cooler Master), which
+were read from their product pages on 2026-11-21, and the owner's own prices and purchase history.
+
 What the overview states that the 16 October draft did not, and where each comes from:
 
 - Host figures (96 GB, 213,840-token context, two requests at once, the vision server's two slots):
@@ -136,7 +185,7 @@ The draft build also contains the article in feeds and indexes locally. Only a n
 - The positive product coverage is based on the owner's build. A short closing invitation proposes a future GMKtec collaboration; no claim of an existing partnership is made.
 - Hardware topology: `NEO-X1_PRO.HTM_PCIE_SWITCH_5_GPU.HTM`, live PCIe tree and the 30 September switch campaign in the parent workspace.
 - Transfer and soak figures: `llm-inference-notes/pex88096-4gpu-windows-test-plan-2026-09-30.md`.
-- DFlash comparison: `bench-results/20261010-dflash-wsl/RESULTS.md`. The downloadable CSV is a transcription of its published median table, not raw trials. Context lengths are rounded campaign labels.
+- DFlash comparison: `bench-results/20261010-dflash-wsl/RESULTS.md`. The downloadable CSV is a transcription of its published median table, not raw trials. Since 2026-11-27 its `prompt_tokens` column holds the real prompt lengths, not the rounded campaign labels.
 - Current runtime and validation: `llm-inference-notes/qwen38-runtime-update-2026-10-16.md`.
 - Service placement and limitations: `llm-inference-notes/neox1-inference-review-2026-10-16.md`.
 - External primary sources are linked in the post. Outdated claims about 48 CPU lanes or six physical expansion slots from earlier local notes were not repeated.

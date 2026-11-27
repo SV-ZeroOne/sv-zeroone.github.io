@@ -92,14 +92,16 @@ If you have read my [old hacking lab build](/2020/08/29/hacking-server-lab.html)
 
 This is what the cards do:
 
-| Job | Model | Where it runs |
+| Job | Model and engine | Card |
 |---|---|---|
-| Main language model | Qwen3.8-27B | One R9700 |
-| Vision, for images and video | Qwen3.6-35B-A3B | The other R9700 |
-| Image generation | Qwen-Image in ComfyUI | The RTX 5070 (the 3090s can do it too) |
-| Video generation | MiniMax-H3 in ComfyUI | The two RTX 3090s |
+| Main language model | Qwen3.8-27B, 4-bit (MXFP4), on vLLM with a DFlash drafter. 214k-token context | One R9700 |
+| Vision, for images and video | Qwen3.6-35B-A3B, Q4_K_XL, on llama.cpp (Vulkan). Two 131k-token slots | The other R9700 |
+| Image generation | Qwen-Image in ComfyUI | RTX 5070 (the 3090s can too) |
+| Video generation | MiniMax-H3 in ComfyUI | Both RTX 3090s |
 
-The five cards do not add up to one 124 GB GPU. Each card owns its memory, and I give each job a card of its own.
+In a streamed chat test on 14 November, the main model generated about 90 tokens/s and the vision model about 124.
+
+The five cards do not add up to one 124 GB GPU. Each card owns its memory, and I give each job a card of its own. A model can be split across cards, and until October my main model ran across both R9700s. With better software it is now faster on one.
 
 ## Pull the lab apart
 
@@ -119,15 +121,15 @@ Pick a part for a close-up, or open the **Complete rig** view, separate the asse
 
 **One power supply feeds the four switch cards.** A Cooler Master X Mighty Platinum 2000 drives ten power connections: two 8-pin plugs per RTX 3090, one 16-pin per R9700 and a 6-pin for each breakout board. If you copy this, its full 2000 W rating needs 200 to 240 V mains. On 115 V it is rated at 1600 W.
 
-**The biggest speed-up cost nothing in hardware.** Moving my main model from llama.cpp across both R9700s to [mike2153's Qwen3.8 DFlash setup](https://github.com/mike2153/mbea-qwen38-dflash) on vLLM made it faster on one card than it had been on two:
+**The biggest speed-up cost nothing in hardware.** I moved my main model from llama.cpp across both R9700s to [mike2153's Qwen3.8 DFlash setup](https://github.com/mike2153/mbea-qwen38-dflash). That is vLLM with kernels written for this generation of Radeon, plus DFlash, a small draft model that guesses several tokens ahead for the main model to check. It is faster on one card than llama.cpp was on two:
 
 | | Two R9700s, llama.cpp | One R9700, vLLM with DFlash |
 |---|---:|---:|
-| Read a 115k-token prompt | 124 seconds | **51.6 seconds** |
+| Read a 118k-token prompt | 124 seconds | **51.6 seconds** |
 | Generate after an 8k-token prompt | 62 tokens/s | **107 tokens/s** |
-| Generate after a 115k-token prompt | 46 tokens/s | **74 tokens/s** |
+| Generate after a 118k-token prompt | 46 tokens/s | **74 tokens/s** |
 
-These are medians of three runs from 10 October ([recorded values](/assets/neox1/inference-comparison.csv)). The change also freed a 32 GB card for the vision model.
+These are medians of three runs from 10 October ([recorded values](/assets/neox1/inference-comparison.csv)). The change also freed a 32 GB card for the vision model. There are trade-offs. It uses a different 4-bit build of the model, and in a 30-run reasoning test one run degenerated into a stream of repeated characters, although it scored the same as llama.cpp overall (25 of 27 answers correct).
 
 **AMD and NVIDIA share the work.** The 32 GB Radeons hold the language models, and the main one serves a context of about 214,000 tokens on a single card. The NVIDIA cards run the CUDA-based image and video tools. Because every job has its own card, they all run at once, which I use for an AI video pipeline. One experiment from it, [testing NVIDIA's Nemotron Bolt against my vision model](/2026/11/01/nemotron-bolt-vs-qwen36-vision-qa.html), has its own post.
 
@@ -144,7 +146,7 @@ From there, each step was a working machine before the next part arrived.
 - **Late August:** the first R9700 runs in an eGPU dock on the laptop.
 - **Early September:** the NEO-X1 Pro arrives. One card goes in its slot, then the OCuLink experiments begin.
 - **Mid September:** two R9700s on a PCIe 3.0 switch, then the bigger PCIe 4.0 switch kit.
-- **30 September:** four cards on the switch. On **4 October** the RTX 5070 joins on its dock, making five.
+- **30 September:** four cards on the switch. On **1 October** the RTX 5070 joins on its dock, making five.
 - **10 October:** the software change that moved the main model onto one card.
 - **Start of November:** memory goes from 64 GB to 96 GB.
 
@@ -152,7 +154,7 @@ From there, each step was a working machine before the next part arrived.
 
 ## The PCIe switch: one slot, many GPUs
 
-Most consumer PCs, and nearly every mini PC, have one full-length PCIe slot. That is the wall most people hit when they want a second or third graphics card. A Thunderbolt dock or an M.2-to-OCuLink adapter can add a card, but at ×4 at best, and the OCuLink route uses up an M.2 socket. Splitting the slot itself, which is called bifurcation, needs support in the BIOS and divides the slot's sixteen lanes between the cards.
+Most consumer PCs have one fast full-length PCIe slot, and most mini PCs have none. That is the wall most people hit when they want a second or third graphics card. A Thunderbolt dock or an M.2-to-OCuLink adapter can add a card, but at ×4 at best, and the OCuLink route uses up an M.2 socket. Splitting the slot itself, which is called bifurcation, needs support in the BIOS and divides the slot's sixteen lanes between the cards.
 
 A PCIe switch works differently. It behaves like a network switch for PCIe: one link goes up to the computer, and several full-width links come down to the devices. The chip on my card is a Broadcom **PEX88096**, which has 96 PCIe 4.0 lanes. Sixteen of them form the ×16 link to the PC. The other 80 come out as ten SFF-8654 (SlimSAS) ports, each eight lanes wide. A graphics card takes two ports, so the card can run up to five GPUs at full ×16, ten devices at ×8, or as many as twenty NVMe drives at ×4. The computer sees ordinary PCIe devices, so there are no special drivers.
 
@@ -166,7 +168,7 @@ A PCIe switch works differently. It behaves like a network switch for PCIe: one 
 | Size | 247 × 111.2 mm, full length |
 | Power | From the PCIe slot (12 V and 3.3 V) |
 
-I bought it as a kit [from this supplier on Alibaba](https://www.alibaba.com/product-detail/PEX88096-PCIe-4-0-X16-Expansion_1601814406633.html), and they were very responsive when I had questions. The kit comes with the switch card, ten SFF-8654 cables, and interface boards that each give a graphics card a normal ×16 slot fed by two cables. Each interface board also needs its own 6-pin power lead for the slot.
+I bought it as a kit [from this supplier on Alibaba](https://www.alibaba.com/product-detail/PEX88096-PCIe-4-0-X16-Expansion_1601814406633.html), and they were very responsive when I had questions. The listing shows a minimum order of 100, but I asked and they sold me one. I ordered it at the start of September, and the order came to £400.53 (USD 535.46): £362.79 for the kit and £37.75 for shipping. In late November 2026 the supplier's prices, before shipping, were £261.88 for the switch card alone, £365.86 for the ×16 kit with five interface boards, which is the one I bought, and £423.63 for the ×8 kit with ten. The kit comes with the switch card, ten SFF-8654 cables, and five interface boards that each give a graphics card a normal ×16 slot fed by two cables. Each interface board also needs its own 6-pin power lead for the slot.
 
 {% include gallery.html id="neox1-switch" images=page.switch_gallery label="The PEX88096 PCIe switch kit" %}
 
@@ -178,7 +180,7 @@ Each card behind the switch trained at PCIe 4.0 ×16. On 30 September a single R
 
 ### The cheaper option I tried first
 
-Before the PEX88096, I ran two R9700s from a much smaller switch card: the CEACENT CNOL4PE08, [from another Alibaba supplier](https://www.alibaba.com/product-detail/CEACENT-CNOL4PE08-Server-PCI-Express-3_1601511777867.html). It uses Broadcom's older PEX8724, a 24-lane PCIe 3.0 switch, on a short ×8 card with four OCuLink ports. It is sold for NVMe drives, but each port carries four PCIe lanes, which is exactly what an OCuLink eGPU enclosure expects. Because the card has its own switch chip, it does the splitting itself.
+Before the PEX88096, I ran two R9700s from a much smaller switch card: the CEACENT CNOL4PE08, [from another Alibaba supplier](https://www.alibaba.com/product-detail/CEACENT-CNOL4PE08-Server-PCI-Express-3_1601511777867.html). I ordered it in late August, and the order came to £47.83 (USD 64.42): £35.63 for the card, £4.23 for shipping and £7.98 in tax. It uses Broadcom's older PEX8724, a 24-lane PCIe 3.0 switch, on a short ×8 card with four OCuLink ports. It is sold for NVMe drives, but each port carries four PCIe lanes, which is exactly what an OCuLink eGPU enclosure expects. Because the card has its own switch chip, it does the splitting itself.
 
 | Specification | Supplier's figure |
 |---|---|
@@ -198,11 +200,11 @@ From 11 to 16 September it ran two R9700s, each in its own OCuLink eGPU enclosur
 
 - Each card moved 3.5 GB/s, about 89% of what a PCIe 3.0 ×4 link can carry.
 - With both cards flat out at once they moved 7 GB/s between them, so the ×8 link to the PC was not the bottleneck at two cards. A six-minute run moved 2.5 TB with no PCIe errors.
-- A language model split across the two cards generated a steady 30 tokens/s.
+- A language model on one of the cards generated a steady 30 tokens/s with speculative decoding off. That is within 3% of a card plugged straight into the PC's slot, so the slow link cost almost nothing once the model was loaded.
 
 The PC crashed repeatedly that week, and at first I blamed the cheap card and one of the enclosures. It was neither. The same crash happened with a card plugged straight into the PC's slot, and the cause was the AMD driver bug I describe under [What it costs](#what-it-costs). If something goes wrong, reproduce it without the cheap part before you blame the cheap part.
 
-I moved on for room to grow, not because the card failed. Four ports cap it at four cards, each at PCIe 3.0 ×4, and all four would share the ×8 link to the PC. The PEX88096 gives each card eight times the measured bandwidth and has ports to spare. If you only want two cards and keep each model on its own card, the cheaper card is a sensible place to start.
+I moved on for room to grow, not because the card failed. Four ports cap it at four cards, each at PCIe 3.0 ×4, and all four would share the ×8 link to the PC. The PEX88096 gives each card eight times the measured bandwidth and has ports to spare. If you only want two cards and keep each model on its own card, the cheaper card, at under £50 delivered, is a sensible place to start. Budget for an OCuLink enclosure with its own power supply for each graphics card as well.
 
 ### What a switch does not do
 
@@ -254,7 +256,7 @@ Most of the speed in this lab came from software and settings, not from extra ha
 
 ### Choosing hardware
 
-- **Memory bandwidth sets the speed limit.** To generate each token, the card reads the whole model (for a mixture-of-experts model, the active part) from its memory. So tokens per second is roughly memory bandwidth divided by model size. The RTX 5070 has 672 GB/s, and a 6.74 GB model on it measured 89 tokens/s against a ceiling of about 100. Do this sum before you buy a card.
+- **Memory bandwidth sets the speed limit.** To generate each token, the card reads the whole model (for a mixture-of-experts model, the active part) from its memory. So the ceiling on tokens per second is roughly memory bandwidth divided by model size. The RTX 5070 has 672 GB/s, and a 6.74 GB model on it measured 89 tokens/s against a ceiling of about 100. By this measure a 2020 RTX 3090 (936 GB/s) outruns a new R9700 (640 GB/s). What the R9700 adds is 32 GB of memory. Speculative decoding is the way past the ceiling, because the model checks several drafted tokens in one read. Do this sum before you buy a card.
 - **Buy an M.2-to-OCuLink adapter with a redriver.** An M.2 socket is the easiest way to get another card out of a small PC. But a PCIe 4.0 signal loses quality through the adapter board, the connector and the cable. A redriver is a small chip on the adapter that boosts and cleans up the signal before it goes down the cable. My first adapter had no redriver, and the card on the other end never appeared in Windows. [This one](https://www.amazon.co.uk/dp/B0G2GBYQS5), with PX410 redriver chips (pictured below), worked, and it has carried the RTX 5070 at PCIe 4.0 ×4 since October. Look for "redriver" (or "retimer", a stronger kind of signal repeater) in the listing, and buy the OCuLink cable separately.
 
 <figure class="neox1-figure">
@@ -268,22 +270,22 @@ Most of the speed in this lab came from software and settings, not from extra ha
 - **If a model spans two cards, test the split modes.** Layer split is the default. Row split no longer works on llama.cpp's Vulkan backend, and tensor split on Vulkan was 39% slower for me. ROCm with tensor split beat Vulkan with layer split: 65 against 52 tokens/s generating, and 1.65 to 1.9 times as fast reading prompts.
 - **Keep speculative drafts short.** Speculative decoding lets a small draft model guess a few tokens ahead for the big model to check. Drafting three or four tokens with Nemotron Bolt's drafter was 10 to 40% faster than no drafter. NVIDIA's default of seven was slower than no drafter, except on code. With llama.cpp's built-in draft head, drafting two tokens and three tokens came out within 1% of each other.
 - **Forum defaults are not universal.** A bigger micro-batch (`-ub 2048`) is often recommended, but on my R9700s it was 5 to 7% slower than 1024. Quantising the KV cache to `q8_0` saves memory, but in one setup it lowered draft acceptance and cut generation from 56 to 45 tokens/s. Change one setting at a time and measure each.
-- **On Windows, turn off memory-mapped loading.** In llama.cpp that is `--load-mode none` (`--no-mmap` on older builds). It saved about 12.3 GB of system RAM per RTX 3090 server, at the same speed. Windows still reserves memory for each server, so give it a large page file. Peak committed memory here reached 140 GB, which is part of why I went to 96 GB of RAM.
-- **Give the server a second slot if an agent uses it.** With one slot in llama.cpp, a small extra request pushed a 115,000-token conversation out of the cache, and the next turn re-read the whole prompt: 120 seconds. With two slots (`-np 2 -kvu`), the conversation stayed in the cache, and the next turn took 1.6 seconds.
+- **On Windows, turn off memory-mapped loading.** In llama.cpp that is `--load-mode none` (`--no-mmap` on older builds). It saved about 12.3 GB of system RAM for each llama.cpp server I ran on an RTX 3090, at the same speed. Windows still reserves memory for each server, so give it a large page file. Mine has peaked at about 140 GB in use, which is part of why I went to 96 GB of RAM.
+- **Give the server a second slot if an agent uses it.** With one slot in llama.cpp, a small extra request pushed a 118,000-token conversation out of the cache, and the next turn re-read the whole prompt: 120 seconds. With two slots (`-np 2 -kvu --no-cache-idle-slots`), the conversation stayed in the cache, and the next turn took 1.6 seconds.
 
 ### Vision and image models
 
-- **Shrink inputs before you send them.** A 10-second video scaled down to 640 pixels before sending went from 5,519 tokens to 2,519, and from 3.5 seconds to 1.5, with the same answer. For reading exact text or tables, use a low temperature, around 0.1. My table-reading errors at 0.7 turned out to be sampling noise.
-- **In ComfyUI, check the real output size before blaming VRAM.** A Qwen-Image text-encoder node left at resolution 0 sized every image from a 2688 × 1536 reference picture. The jobs were 4.1 megapixels and took 58 seconds instead of 8.
+- **Shrink inputs before you send them.** A 10-second video scaled down to 640 pixels before sending went from 5,519 tokens to 2,519, and from 3.5 seconds to 1.5, and the answer stayed accurate. For reading exact text or tables, use a low temperature, around 0.1. My table-reading errors at 0.7 turned out to be sampling noise.
+- **In ComfyUI, check the real output size before blaming VRAM.** A Qwen-Image text-encoder node left at resolution 0 sized every image from its 2688 × 1536 reference picture, not the 1344 × 768 I had set. Those jobs ran at 4.1 megapixels, four times the intended size, and took 58 seconds each. A 768 × 768 job in the same queue took 8.
 
 ## What it costs
 
 There are real trade-offs.
 
 - **Space.** Four cards stand in a frame on an open rack, and the fifth sits on a dock beside the PC.
-- **Power.** The CPU is the small part of the bill. It is a laptop-class chip, and even GMKtec's fastest mode caps it at 160 W. The graphics cards are the large part: they run at their stock power limits, which for each RTX 3090 means up to 350 W. Lowering them would save power at some cost in speed. There are three power supplies, their ratings are not consumption figures, and I have not measured the lab at the wall.
+- **Power.** The CPU is the small part of the bill. It is a laptop-class chip, and even GMKtec's fastest mode caps it at 160 W. The graphics cards are the large part: they run at their stock power limits, which for each RTX 3090 means up to 350 W. Lowering them would save power at some cost in speed. By the cards' own sensors, an idle RTX 3090 or RTX 5070 draws about 15 W, and an R9700 in the middle of generating draws about 240 W. There are three power supplies, their ratings are not consumption figures, and I have not measured the lab at the wall.
 - **Memory.** Starting every service together on 64 GB left almost no free memory. The PC now has 96 GB, the most it supports.
-- **Reliability.** It was unstable at first. The cause turned out to be an AMD driver problem: the driver moved an idle model out of the cards' memory, and the next request killed the card. A later driver release fixed that, and the lab has become steadily more reliable since. As I write this it has run for more than a week without a restart. It is still a homelab. I have had both RTX 3090s drop off the PCIe bus once, which took a reboot to clear, and my formal stress tests of the switch were only 15 minutes long.
+- **Reliability.** It was unstable at first. The cause turned out to be an AMD driver problem: the driver moved an idle model out of the cards' memory, and the next request killed the card. A later driver release fixed that, and the lab has become steadily more reliable since. Its longest run so far is twelve days, ended by a restart I chose to do. It is still a homelab. I have had both RTX 3090s drop off the PCIe bus once, which took a reboot to clear, and my formal stress tests of the switch were only 15 minutes long.
 - **Trusting what the system reports.** The link speed a card reports is not always the speed of the whole route back to the CPU. I measured transfers instead of trusting the report.
 
 ## Final thoughts
